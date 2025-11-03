@@ -1,0 +1,22 @@
+name: ♻️ Refactor
+description: 코드 구조 개선, 성능 최적화, 유지보수성 향상 등을 위한 요청
+title: "[REFACTOR] "
+labels: ["refactor"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: 리팩토링 필요 배경
+      description: 리팩토링이 필요한 이유와 현재 상황을 설명해주세요.
+      placeholder: 예) 코드 중복이 많아 유지보수성이 떨어짐, 성능 저하 발생
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: 리팩토링 범위
+      description: 어떤 부분을 리팩토링하려고 하는지 구체적으로 작성해주세요.
+      placeholder: 예) user_service.py 내 데이터 처리 로직
+    validations:
+      required: true
