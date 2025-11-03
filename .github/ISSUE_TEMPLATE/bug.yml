@@ -1,0 +1,12 @@
+name: 🐛 Bug
+description: 발견한 버그에 대해 알려주세요.
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 문제 설명
+      description: 발생한 문제를 최대한 구체적으로 적어주세요.
+    validations:
+      required: true
