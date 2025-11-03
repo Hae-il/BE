@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum AuthErrorCode implements ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+    INVALID_CREDENTIALS(HttpStatus.BAD_REQUEST, "잘못된 계정 정보입니다."),
     ;
 
     private final HttpStatus httpStatus;

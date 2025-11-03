@@ -1,6 +1,8 @@
 package com.haeil.be.auth.controller;
 
+import com.haeil.be.auth.dto.request.LoginRequest;
 import com.haeil.be.auth.dto.request.SignupRequest;
+import com.haeil.be.auth.dto.response.LoginResponse;
 import com.haeil.be.auth.service.AuthService;
 import com.haeil.be.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,5 +30,12 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Object>> signUp(@Valid @RequestBody SignupRequest request){
         authService.signup(request.name(), request.email(), request.password(), request.role());
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.EMPTY_RESPONSE);
+    }
+
+    @Operation(summary = "기본 로그인", description = "이메일과 비밀번호를 통해 로그인을 진행합니다.")
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<Object>> login(@Valid @RequestBody LoginRequest request){
+        LoginResponse loginResponse = authService.login(request.email(), request.password());
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.from(loginResponse));
     }
 }
