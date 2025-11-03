@@ -38,7 +38,7 @@ public class SwaggerConfig {
                 .info(
                         new Info()
                                 .title("Hae:il REST API")
-                                .description("Heroine Backend Team")
+                                .description("Hae:il Backend Team")
                                 .contact(
                                         new Contact().name("Hae:il BE Github").url("https://github.com/Hae-il/BE"))
                                 .version("1.0.0"))
