@@ -2,6 +2,8 @@ package com.haeil.be.global.exception.handler;
 
 import com.haeil.be.auth.exception.AuthException;
 import com.haeil.be.client.exception.ClientException;
+import com.haeil.be.consultation.domain.Consultation;
+import com.haeil.be.consultation.exception.ConsultationException;
 import com.haeil.be.global.exception.errorcode.ErrorCode;
 import com.haeil.be.global.exception.errorcode.GlobalErrorCode;
 import com.haeil.be.global.exception.response.ErrorResponse;
@@ -50,7 +52,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ClientException.class)
     public ResponseEntity<Object> handleClientException(
-            final UserException e, HttpServletRequest request) {
+            final ClientException e, HttpServletRequest request) {
+        logInfo(e.getErrorCode(), e, request);
+        return handleExceptionInternal(e.getErrorCode());
+    }
+
+    @ExceptionHandler(ConsultationException.class)
+    public ResponseEntity<Object> handleConsultationException(
+            final ConsultationException e, HttpServletRequest request) {
         logInfo(e.getErrorCode(), e, request);
         return handleExceptionInternal(e.getErrorCode());
     }
