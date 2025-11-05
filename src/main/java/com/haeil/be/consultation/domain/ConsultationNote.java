@@ -15,4 +15,16 @@ public class ConsultationNote extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name="summary")
+    private String summary;
+
+    @Column(name="legal_opinion")
+    private String legalOpinion;
+
+    @Column(name="plan")
+    private String plan;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="consultation_id", unique = true)
+    private Consultation consultation;
 }
