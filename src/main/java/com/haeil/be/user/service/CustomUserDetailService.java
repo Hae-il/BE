@@ -1,5 +1,7 @@
 package com.haeil.be.user.service;
 
+import static com.haeil.be.user.exception.errorcode.UserErrorCode.USER_NOT_FOUND;
+
 import com.haeil.be.user.domain.User;
 import com.haeil.be.user.exception.UserException;
 import com.haeil.be.user.repository.UserRepository;
@@ -9,8 +11,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import static com.haeil.be.user.exception.errorcode.UserErrorCode.USER_NOT_FOUND;
-
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
@@ -19,7 +19,9 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
-        User user = userRepository.findUserById(Long.parseLong(id))
+        User user =
+                userRepository
+                        .findUserById(Long.parseLong(id))
                         .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
         return new CustomUserDetails(user.getId(), user.getName(), user.getRole().name());

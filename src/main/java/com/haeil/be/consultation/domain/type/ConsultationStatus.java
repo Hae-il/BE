@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum ConsultationStatus {
-
     PENDING("예약대기"),
     REJECTED("예약거절"),
     APPROVED("예약승인"),

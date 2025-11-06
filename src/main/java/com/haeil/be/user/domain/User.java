@@ -5,14 +5,13 @@ import com.haeil.be.consultation.domain.Consultation;
 import com.haeil.be.global.entity.BaseEntity;
 import com.haeil.be.user.domain.type.Role;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Table(name="users")
+@Table(name = "users")
 @Entity
 @Getter
 @NoArgsConstructor
@@ -22,16 +21,16 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="name")
+    @Column(name = "name")
     private String name;
 
-    @Column(name="email")
+    @Column(name = "email")
     private String email;
 
-    @Column(name="password")
+    @Column(name = "password")
     private String password;
 
-    @Column(name="role")
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
 

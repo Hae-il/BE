@@ -1,6 +1,5 @@
 package com.haeil.be.global.config;
 
-
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -40,7 +39,9 @@ public class SwaggerConfig {
                                 .title("Hae:il REST API")
                                 .description("Hae:il Backend Team")
                                 .contact(
-                                        new Contact().name("Hae:il BE Github").url("https://github.com/Hae-il/BE"))
+                                        new Contact()
+                                                .name("Hae:il BE Github")
+                                                .url("https://github.com/Hae-il/BE"))
                                 .version("1.0.0"))
                 .addSecurityItem(securityRequirement);
     }

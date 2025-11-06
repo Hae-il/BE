@@ -7,5 +7,5 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class ClientException extends RuntimeException {
-  private final ErrorCode errorCode;
+    private final ErrorCode errorCode;
 }

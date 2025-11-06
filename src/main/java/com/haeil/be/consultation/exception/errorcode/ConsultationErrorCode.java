@@ -13,4 +13,3 @@ public enum ConsultationErrorCode implements ErrorCode {
     private final HttpStatus httpStatus;
     private final String message;
 }
-

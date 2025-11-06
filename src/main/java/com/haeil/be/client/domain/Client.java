@@ -3,13 +3,12 @@ package com.haeil.be.client.domain;
 import com.haeil.be.consultation.domain.Consultation;
 import com.haeil.be.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Table(name="client")
+@Table(name = "client")
 @Entity
 @Getter
 @NoArgsConstructor
@@ -19,16 +18,16 @@ public class Client extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="name")
+    @Column(name = "name")
     private String name;
 
-    @Column(name="email")
+    @Column(name = "email")
     private String email;
 
-    @Column(name="phone")
+    @Column(name = "phone")
     private String phone;
 
-    @Column(name="address")
+    @Column(name = "address")
     private String address;
 
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)

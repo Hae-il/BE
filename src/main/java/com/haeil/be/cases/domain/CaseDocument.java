@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Table(name="case_document")
+@Table(name = "case_document")
 @Entity
 @Getter
 @NoArgsConstructor
@@ -17,10 +17,10 @@ public class CaseDocument extends BaseEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="document_type")
+    @Column(name = "document_type")
     private DocumentType documentType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="case_id")
+    @JoinColumn(name = "case_id")
     private Cases cases;
 }
