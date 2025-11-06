@@ -4,14 +4,13 @@ import com.haeil.be.cases.domain.type.CaseStatus;
 import com.haeil.be.global.entity.BaseEntity;
 import com.haeil.be.user.domain.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Table(name="cases")
+@Table(name = "cases")
 @Entity
 @Getter
 @NoArgsConstructor
@@ -49,9 +48,17 @@ public class Cases extends BaseEntity {
     @JoinColumn(name = "attorney_id")
     private User attorney;
 
-    @OneToMany(mappedBy = "cases", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "cases",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<CaseDocument> caseDocumentList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "cases", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "cases",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<CaseEvent> caseEventList = new ArrayList<>();
 }

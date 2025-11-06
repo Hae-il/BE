@@ -3,7 +3,6 @@ package com.haeil.be.global.exception.handler;
 import com.haeil.be.auth.exception.AuthException;
 import com.haeil.be.cases.exception.CasesException;
 import com.haeil.be.client.exception.ClientException;
-import com.haeil.be.consultation.domain.Consultation;
 import com.haeil.be.consultation.exception.ConsultationException;
 import com.haeil.be.global.exception.errorcode.ErrorCode;
 import com.haeil.be.global.exception.errorcode.GlobalErrorCode;
@@ -11,6 +10,7 @@ import com.haeil.be.global.exception.response.ErrorResponse;
 import com.haeil.be.user.exception.UserException;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {

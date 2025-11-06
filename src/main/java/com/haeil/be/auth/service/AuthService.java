@@ -1,5 +1,8 @@
 package com.haeil.be.auth.service;
 
+import static com.haeil.be.auth.exception.errorcode.AuthErrorCode.INVALID_CREDENTIALS;
+import static com.haeil.be.user.exception.errorcode.UserErrorCode.USER_ALREADY_EXISTS;
+import static com.haeil.be.user.exception.errorcode.UserErrorCode.USER_NOT_FOUND;
 
 import com.haeil.be.auth.dto.response.LoginResponse;
 import com.haeil.be.auth.exception.AuthException;
@@ -13,10 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.haeil.be.auth.exception.errorcode.AuthErrorCode.INVALID_CREDENTIALS;
-import static com.haeil.be.user.exception.errorcode.UserErrorCode.USER_ALREADY_EXISTS;
-import static com.haeil.be.user.exception.errorcode.UserErrorCode.USER_NOT_FOUND;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -27,7 +26,7 @@ public class AuthService {
 
     @Transactional
     public void signup(String name, String email, String password, Role role) {
-        if (userRepository.existsByEmail(email)){
+        if (userRepository.existsByEmail(email)) {
             throw new UserException(USER_ALREADY_EXISTS);
         }
 
@@ -41,9 +40,12 @@ public class AuthService {
     }
 
     public LoginResponse login(String email, String password) {
-        User user = userRepository.findByEmail(email).orElseThrow(()-> new UserException(USER_NOT_FOUND));
+        User user =
+                userRepository
+                        .findByEmail(email)
+                        .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
-        if (!passwordEncoder.matches(password, user.getPassword())){
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new AuthException(INVALID_CREDENTIALS);
         }
 

@@ -1,8 +1,7 @@
 package com.haeil.be.global.response;
 
-import lombok.Builder;
-
 import java.util.Collections;
+import lombok.Builder;
 
 @Builder
 public record ApiResponse<T>(Boolean isSuccess, String code, String message, T results) {
