@@ -34,20 +34,36 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "resident_number", unique = true)
+    private String residentNumber;
+
+    @Column(name = "license_number")
+    private String licenseNumber;
+
     @OneToMany(mappedBy = "attorney", fetch = FetchType.LAZY)
     private List<Cases> casesList = new ArrayList<>();
 
     @OneToMany(mappedBy = "counselor", fetch = FetchType.LAZY)
     private List<Consultation> consultationList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "requestedAttorney", fetch = FetchType.LAZY)
-    private List<Consultation> consultationRequestList = new ArrayList<>();
-
     @Builder
-    public User(String name, String email, String password, Role role) {
+    public User(
+            String name,
+            String email,
+            String password,
+            Role role,
+            String phone,
+            String residentNumber,
+            String licenseNumber) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.phone = phone;
+        this.residentNumber = residentNumber;
+        this.licenseNumber = licenseNumber;
     }
 }

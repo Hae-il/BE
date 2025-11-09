@@ -6,8 +6,6 @@ import com.haeil.be.global.entity.BaseEntity;
 import com.haeil.be.user.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -42,12 +40,9 @@ public class ConsultationRequest extends BaseEntity {
     private ConsultationRequestStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_lawyer_id")
-    private User assignedLawyer;
+    @JoinColumn(name = "consult_lawyer_id")
+    private User consultLawyer;
 
     @Column(name = "reject_reason", columnDefinition = "TEXT")
     private String rejectReason;
-
-    @OneToMany(mappedBy = "consultationRequest", fetch = FetchType.LAZY)
-    private List<Consultation> consultations = new ArrayList<>();
 }
