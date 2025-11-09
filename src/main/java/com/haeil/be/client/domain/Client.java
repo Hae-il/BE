@@ -30,6 +30,18 @@ public class Client extends BaseEntity {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "resident_number", unique = true)
+    private String residentNumber;
+
+    @Column(name = "birth_date")
+    private java.time.LocalDate birthDate;
+
+    @Column(name = "gender")
+    private String gender;
+
+    @Column(name = "job_title")
+    private String jobTitle;
+
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     private List<Consultation> consultations = new ArrayList<>();
 }

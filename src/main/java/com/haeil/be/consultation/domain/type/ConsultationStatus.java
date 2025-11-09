@@ -4,13 +4,11 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum ConsultationStatus {
-    PENDING("예약대기"),
-    REJECTED("예약거절"),
-    APPROVED("예약승인"),
-
-    WAITING("상담대기"),
-    IN_PROGRESS("상담진행중"),
-    COMPLETED("상담종료");
+    CONSULTATION_WAITING("상담 대기"),
+    CONSULTATION_IN_PROGRESS("상담 진행"),
+    CONTRACT_PENDING("수임 대기"),
+    CONTRACT_IN_PROGRESS("수임 진행"),
+    COMPLETED("완료");
 
     private final String label;
 

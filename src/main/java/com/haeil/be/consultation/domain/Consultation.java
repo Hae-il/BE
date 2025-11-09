@@ -5,7 +5,9 @@ import com.haeil.be.consultation.domain.type.ConsultationStatus;
 import com.haeil.be.global.entity.BaseEntity;
 import com.haeil.be.user.domain.User;
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,32 +21,28 @@ public class Consultation extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "requested_time")
-    private LocalDate requestedTime;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "consult_req_id", nullable = false)
+    private ConsultationRequest consultationRequest;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requested_attorney_id")
-    private User requestedAttorney;
-
-    @Column(name = "attachment")
-    private String attachment;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private ConsultationStatus status;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "counselor_id")
-    private User counselor;
+    @JoinColumn(name = "consult_lawyer_id", nullable = false)
+    private User consultLawyer;
 
-    @OneToOne(
-            mappedBy = "consultation",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    private ConsultationNote consultationNote;
+    @Column(name = "consultation_date")
+    private LocalDateTime consultationDate;
+
+    @Column(name = "location")
+    private String location;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ConsultationStatus status;
+
+    @OneToMany(mappedBy = "consultation", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ConsultationNote> consultationNotes = new ArrayList<>();
 }
