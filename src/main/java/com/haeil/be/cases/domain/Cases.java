@@ -1,6 +1,7 @@
 package com.haeil.be.cases.domain;
 
 import com.haeil.be.cases.domain.type.CaseStatus;
+import com.haeil.be.cases.domain.type.CaseType;
 import com.haeil.be.global.entity.BaseEntity;
 import com.haeil.be.user.domain.User;
 import jakarta.persistence.*;
@@ -29,8 +30,9 @@ public class Cases extends BaseEntity {
     @Column(name = "case_status")
     private CaseStatus caseStatus;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "case_type")
-    private String caseType;
+    private CaseType caseType;
 
     @Column(name = "opponent_name")
     private String opponentName;

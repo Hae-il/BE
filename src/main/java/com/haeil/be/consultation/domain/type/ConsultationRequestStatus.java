@@ -3,10 +3,10 @@ package com.haeil.be.consultation.domain.type;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum ConsultationStatus {
-    WAITING("상담 대기"),
-    IN_PROGRESS("상담 진행"),
-    COMPLETED("상담 종료");
+public enum ConsultationRequestStatus {
+    PENDING("예약 대기"),
+    REJECTED("예약 거절"),
+    APPROVED("예약 승인");
 
     private final String label;
 

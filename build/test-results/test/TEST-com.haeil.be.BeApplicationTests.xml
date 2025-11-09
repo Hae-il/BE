@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.haeil.be.BeApplicationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-11-06T07:57:10.202Z" hostname="JooYoung.local" time="0.631">
+  <properties/>
+  <testcase name="contextLoads()" classname="com.haeil.be.BeApplicationTests" time="0.631"/>
+  <system-out><![CDATA[16:57:00.548 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.haeil.be.BeApplicationTests]: BeApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+16:57:00.850 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.haeil.be.BeApplication for test class com.haeil.be.BeApplicationTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+2025-11-06T16:57:01.927+09:00  INFO 24166 --- [haeil] [    Test worker] com.haeil.be.BeApplicationTests          : Starting BeApplicationTests using Java 17.0.9 with PID 24166 (started by jy_23 in /Users/jy_23/lawfirmGW)
+2025-11-06T16:57:01.929+09:00  INFO 24166 --- [haeil] [    Test worker] com.haeil.be.BeApplicationTests          : The following 1 profile is active: "local"
+2025-11-06T16:57:04.329+09:00  INFO 24166 --- [haeil] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-11-06T16:57:04.456+09:00  INFO 24166 --- [haeil] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 115 ms. Found 5 JPA repository interfaces.
+2025-11-06T16:57:05.913+09:00  INFO 24166 --- [haeil] [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-11-06T16:57:06.010+09:00  INFO 24166 --- [haeil] [    Test worker] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.33.Final
+2025-11-06T16:57:06.051+09:00  INFO 24166 --- [haeil] [    Test worker] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-11-06T16:57:06.501+09:00  INFO 24166 --- [haeil] [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-11-06T16:57:06.567+09:00  INFO 24166 --- [haeil] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-11-06T16:57:07.127+09:00  INFO 24166 --- [haeil] [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2ac3d530
+2025-11-06T16:57:07.129+09:00  INFO 24166 --- [haeil] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-11-06T16:57:07.253+09:00  INFO 24166 --- [haeil] [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.0.44
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-11-06T16:57:08.901+09:00  INFO 24166 --- [haeil] [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-11-06T16:57:09.101+09:00  INFO 24166 --- [haeil] [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-11-06T16:57:09.555+09:00  WARN 24166 --- [haeil] [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-11-06T16:57:09.747+09:00  INFO 24166 --- [haeil] [    Test worker] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailService
+2025-11-06T16:57:10.187+09:00  INFO 24166 --- [haeil] [    Test worker] com.haeil.be.BeApplicationTests          : Started BeApplicationTests in 8.922 seconds (process running for 11.499)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
