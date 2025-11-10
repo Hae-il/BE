@@ -58,9 +58,6 @@ public class Cases extends BaseEntity {
     @JoinColumn(name = "attorney_id")
     private User attorney;
 
-    @Column(name = "consultation_id")
-    private Long consultationId;
-
     @OneToMany(
             mappedBy = "cases",
             fetch = FetchType.LAZY,
@@ -94,7 +91,7 @@ public class Cases extends BaseEntity {
         this.opponentName = opponentName;
         this.opponentPhone = opponentPhone;
         this.opponentInsurance = opponentInsurance;
-        this.occuredDate = occuredDate;
+        this.occurredDate = occuredDate;
         this.attorney = attorney;
         this.consultationId = consultationId;
     }
