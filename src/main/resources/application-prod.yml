@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${RDS_DB_URL}
+    username: ${RDS_DB_USERNAME}
+    password: ${RDS_DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: false
+
+server:
+  port: ${SERVER_PORT}
+
+logging:
+  file:
+    name: app.log
+  level:
+    root: info
