@@ -3,6 +3,7 @@ package com.haeil.be.consultation.service;
 import com.haeil.be.client.domain.Client;
 import com.haeil.be.client.repository.ClientRepository;
 import com.haeil.be.consultation.domain.Consultation;
+import com.haeil.be.consultation.domain.ConsultationFile;
 import com.haeil.be.consultation.domain.ConsultationNote;
 import com.haeil.be.consultation.domain.ConsultationRequest;
 import com.haeil.be.consultation.domain.type.ConsultationRequestStatus;
@@ -17,16 +18,21 @@ import com.haeil.be.consultation.dto.response.ConsultationRequestResponse;
 import com.haeil.be.consultation.dto.response.ConsultationResponse;
 import com.haeil.be.consultation.exception.ConsultationException;
 import com.haeil.be.consultation.exception.errorcode.ConsultationErrorCode;
+import com.haeil.be.consultation.repository.ConsultationFileRepository;
 import com.haeil.be.consultation.repository.ConsultationNoteRepository;
 import com.haeil.be.consultation.repository.ConsultationRepository;
 import com.haeil.be.consultation.repository.ConsultationRequestRepository;
+import com.haeil.be.file.domain.FileEntity;
+import com.haeil.be.file.service.FileService;
 import com.haeil.be.user.domain.User;
 import com.haeil.be.user.repository.UserRepository;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +44,8 @@ public class ConsultationService {
     private final ConsultationNoteRepository consultationNoteRepository;
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
+    private final FileService fileService;
+    private final ConsultationFileRepository consultationFileRepository;
 
     @Transactional
     public ConsultationRequestResponse createConsultationRequest(
@@ -320,5 +328,29 @@ public class ConsultationService {
                 .createdAt(consultationNote.getCreatedDate())
                 .updatedAt(consultationNote.getModifiedDate())
                 .build();
+    }
+
+    // File Management Methods
+    @Transactional
+    public String uploadConsultationFile(
+            Long consultationId, MultipartFile file, String description) throws IOException {
+        Consultation consultation = findConsultationById(consultationId);
+
+        FileEntity uploadedFile = fileService.uploadFile(file);
+
+        ConsultationFile consultationFile =
+                ConsultationFile.builder()
+                        .consultation(consultation)
+                        .file(uploadedFile)
+                        .description(description)
+                        .build();
+
+        consultationFileRepository.save(consultationFile);
+
+        return uploadedFile.getOriginalFilename() + " 업로드 완료";
+    }
+
+    public List<ConsultationFile> getConsultationFiles(Long consultationId) {
+        return consultationFileRepository.findByConsultationId(consultationId);
     }
 }

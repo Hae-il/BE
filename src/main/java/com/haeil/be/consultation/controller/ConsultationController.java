@@ -1,5 +1,6 @@
 package com.haeil.be.consultation.controller;
 
+import com.haeil.be.consultation.domain.ConsultationFile;
 import com.haeil.be.consultation.dto.request.CreateConsultationDto;
 import com.haeil.be.consultation.dto.request.CreateConsultationNoteDto;
 import com.haeil.be.consultation.dto.request.CreateConsultationRequestDto;
@@ -14,6 +15,7 @@ import com.haeil.be.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,8 +25,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Consultation", description = "상담 관련 API")
 @RequestMapping("/api/v1/consultations")
@@ -131,5 +135,25 @@ public class ConsultationController {
                 consultationService.updateConsultationNote(
                         consultationId, noteId, request, authorId);
         return ApiResponse.from(response);
+    }
+
+    @Operation(summary = "상담 파일 업로드", description = "상담에 관련된 파일을 업로드합니다.")
+    @PostMapping("/{consultationId}/files")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<Object> uploadConsultationFile(
+            @PathVariable Long consultationId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "description", required = false) String description)
+            throws IOException {
+        String response =
+                consultationService.uploadConsultationFile(consultationId, file, description);
+        return ApiResponse.from(response);
+    }
+
+    @Operation(summary = "상담 파일 목록 조회", description = "상담에 업로드된 파일 목록을 조회합니다.")
+    @GetMapping("/{consultationId}/files")
+    public ApiResponse<Object> getConsultationFiles(@PathVariable Long consultationId) {
+        List<ConsultationFile> files = consultationService.getConsultationFiles(consultationId);
+        return ApiResponse.from(files);
     }
 }
