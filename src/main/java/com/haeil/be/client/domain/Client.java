@@ -1,5 +1,6 @@
 package com.haeil.be.client.domain;
 
+import com.haeil.be.client.domain.type.Gender;
 import com.haeil.be.consultation.domain.Consultation;
 import com.haeil.be.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -36,8 +37,9 @@ public class Client extends BaseEntity {
     @Column(name = "birth_date")
     private java.time.LocalDate birthDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "gender")
-    private String gender;
+    private Gender gender;
 
     @Column(name = "job_title")
     private String jobTitle;
