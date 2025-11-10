@@ -68,16 +68,6 @@ public class Consultation extends BaseEntity {
     }
 
     public void completeConsultation() {
-        validateStatusTransition(ConsultationStatus.CONTRACT_PENDING);
-        this.status = ConsultationStatus.CONTRACT_PENDING;
-    }
-
-    public void startContract() {
-        validateStatusTransition(ConsultationStatus.CONTRACT_IN_PROGRESS);
-        this.status = ConsultationStatus.CONTRACT_IN_PROGRESS;
-    }
-
-    public void completeContract() {
         validateStatusTransition(ConsultationStatus.COMPLETED);
         this.status = ConsultationStatus.COMPLETED;
     }
@@ -92,9 +82,7 @@ public class Consultation extends BaseEntity {
     private boolean isValidTransition(ConsultationStatus newStatus) {
         return switch (this.status) {
             case CONSULTATION_WAITING -> newStatus == ConsultationStatus.CONSULTATION_IN_PROGRESS;
-            case CONSULTATION_IN_PROGRESS -> newStatus == ConsultationStatus.CONTRACT_PENDING;
-            case CONTRACT_PENDING -> newStatus == ConsultationStatus.CONTRACT_IN_PROGRESS;
-            case CONTRACT_IN_PROGRESS -> newStatus == ConsultationStatus.COMPLETED;
+            case CONSULTATION_IN_PROGRESS -> newStatus == ConsultationStatus.COMPLETED;
             case COMPLETED -> false;
         };
     }

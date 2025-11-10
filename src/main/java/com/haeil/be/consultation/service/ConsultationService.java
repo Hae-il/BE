@@ -1,5 +1,6 @@
 package com.haeil.be.consultation.service;
 
+import com.haeil.be.cases.service.CasesService;
 import com.haeil.be.client.domain.Client;
 import com.haeil.be.client.repository.ClientRepository;
 import com.haeil.be.consultation.domain.Consultation;
@@ -46,6 +47,7 @@ public class ConsultationService {
     private final UserRepository userRepository;
     private final FileService fileService;
     private final ConsultationFileRepository consultationFileRepository;
+    private final CasesService casesService;
 
     @Transactional
     public ConsultationRequestResponse createConsultationRequest(
@@ -175,9 +177,10 @@ public class ConsultationService {
 
         switch (request.getStatus()) {
             case CONSULTATION_IN_PROGRESS -> consultation.startConsultation();
-            case CONTRACT_PENDING -> consultation.completeConsultation();
-            case CONTRACT_IN_PROGRESS -> consultation.startContract();
-            case COMPLETED -> consultation.completeContract();
+            case COMPLETED -> {
+                consultation.completeConsultation();
+                casesService.createCaseFromConsultation(consultation);
+            }
             default ->
                     throw new ConsultationException(
                             ConsultationErrorCode.INVALID_STATUS_TRANSITION);

@@ -6,9 +6,7 @@ import lombok.RequiredArgsConstructor;
 public enum ConsultationStatus {
     CONSULTATION_WAITING("상담 대기"),
     CONSULTATION_IN_PROGRESS("상담 진행"),
-    CONTRACT_PENDING("수임 대기"),
-    CONTRACT_IN_PROGRESS("수임 진행"),
-    COMPLETED("완료");
+    COMPLETED("상담 완료");
 
     private final String label;
 

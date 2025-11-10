@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -50,6 +51,9 @@ public class Cases extends BaseEntity {
     @JoinColumn(name = "attorney_id")
     private User attorney;
 
+    @Column(name = "consultation_id")
+    private Long consultationId;
+
     @OneToMany(
             mappedBy = "cases",
             fetch = FetchType.LAZY,
@@ -63,4 +67,28 @@ public class Cases extends BaseEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<CaseEvent> caseEventList = new ArrayList<>();
+
+    @Builder
+    public Cases(
+            String title,
+            String content,
+            CaseStatus caseStatus,
+            CaseType caseType,
+            String opponentName,
+            String opponentPhone,
+            String opponentInsurance,
+            LocalDateTime occuredDate,
+            User attorney,
+            Long consultationId) {
+        this.title = title;
+        this.content = content;
+        this.caseStatus = caseStatus;
+        this.caseType = caseType;
+        this.opponentName = opponentName;
+        this.opponentPhone = opponentPhone;
+        this.opponentInsurance = opponentInsurance;
+        this.occuredDate = occuredDate;
+        this.attorney = attorney;
+        this.consultationId = consultationId;
+    }
 }
