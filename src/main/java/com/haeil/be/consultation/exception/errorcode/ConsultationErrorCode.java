@@ -8,7 +8,14 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ConsultationErrorCode implements ErrorCode {
-    ;
+    CONSULTATION_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "상담 예약을 찾을 수 없습니다."),
+    CONSULTATION_NOT_FOUND(HttpStatus.NOT_FOUND, "상담을 찾을 수 없습니다."),
+    CONSULTATION_NOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "상담 노트를 찾을 수 없습니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
+    CLIENT_NOT_FOUND(HttpStatus.NOT_FOUND, "의뢰인을 찾을 수 없습니다."),
+    ASSIGNED_LAWYER_REQUIRED(HttpStatus.BAD_REQUEST, "승인 시 담당 변호사 지정이 필요합니다."),
+    INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "잘못된 상태 전환입니다."),
+    CONSULTATION_NOT_IN_PROGRESS(HttpStatus.BAD_REQUEST, "진행 중인 상담이 아닙니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
