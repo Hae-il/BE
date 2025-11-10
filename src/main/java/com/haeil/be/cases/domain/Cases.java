@@ -55,7 +55,7 @@ public class Cases extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attorney_id")
-    private User attorney;
+    private User attorneyId;
 
     @OneToMany(
             mappedBy = "cases",
