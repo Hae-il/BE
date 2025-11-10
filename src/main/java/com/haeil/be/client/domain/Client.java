@@ -6,6 +6,7 @@ import com.haeil.be.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -46,4 +47,47 @@ public class Client extends BaseEntity {
 
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     private List<Consultation> consultations = new ArrayList<>();
+
+    @Builder
+    public Client(
+            String name,
+            String email,
+            String phone,
+            String address,
+            String residentNumber,
+            java.time.LocalDate birthDate,
+            Gender gender,
+            String jobTitle) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.address = address;
+        this.residentNumber = residentNumber;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.jobTitle = jobTitle;
+    }
+
+    public static Client fromRequest(
+            String name,
+            String email,
+            String phone,
+            String address,
+            String residentNumber,
+            java.time.LocalDate birthDate,
+            String genderStr,
+            String jobTitle) {
+        Gender gender = genderStr != null ? Gender.valueOf(genderStr.toUpperCase()) : null;
+
+        return Client.builder()
+                .name(name)
+                .email(email)
+                .phone(phone)
+                .address(address)
+                .residentNumber(residentNumber)
+                .birthDate(birthDate)
+                .gender(gender)
+                .jobTitle(jobTitle)
+                .build();
+    }
 }

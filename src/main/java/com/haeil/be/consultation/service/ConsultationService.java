@@ -1,12 +1,24 @@
 package com.haeil.be.consultation.service;
 
+import com.haeil.be.client.domain.Client;
+import com.haeil.be.client.repository.ClientRepository;
+import com.haeil.be.consultation.domain.Consultation;
+import com.haeil.be.consultation.domain.ConsultationNote;
 import com.haeil.be.consultation.domain.ConsultationRequest;
 import com.haeil.be.consultation.domain.type.ConsultationRequestStatus;
+import com.haeil.be.consultation.dto.request.CreateConsultationDto;
+import com.haeil.be.consultation.dto.request.CreateConsultationNoteDto;
 import com.haeil.be.consultation.dto.request.CreateConsultationRequestDto;
+import com.haeil.be.consultation.dto.request.UpdateConsultationNoteDto;
 import com.haeil.be.consultation.dto.request.UpdateConsultationRequestStatusDto;
+import com.haeil.be.consultation.dto.request.UpdateConsultationStatusDto;
+import com.haeil.be.consultation.dto.response.ConsultationNoteResponse;
 import com.haeil.be.consultation.dto.response.ConsultationRequestResponse;
+import com.haeil.be.consultation.dto.response.ConsultationResponse;
 import com.haeil.be.consultation.exception.ConsultationException;
 import com.haeil.be.consultation.exception.errorcode.ConsultationErrorCode;
+import com.haeil.be.consultation.repository.ConsultationNoteRepository;
+import com.haeil.be.consultation.repository.ConsultationRepository;
 import com.haeil.be.consultation.repository.ConsultationRequestRepository;
 import com.haeil.be.user.domain.User;
 import com.haeil.be.user.repository.UserRepository;
@@ -22,6 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConsultationService {
 
     private final ConsultationRequestRepository consultationRequestRepository;
+    private final ConsultationRepository consultationRepository;
+    private final ConsultationNoteRepository consultationNoteRepository;
+    private final ClientRepository clientRepository;
     private final UserRepository userRepository;
 
     @Transactional
@@ -104,6 +119,206 @@ public class ConsultationService {
                 .rejectReason(consultationRequest.getRejectReason())
                 .createdAt(consultationRequest.getCreatedDate())
                 .updatedAt(consultationRequest.getModifiedDate())
+                .build();
+    }
+
+    // Consultation Management Methods
+    @Transactional
+    public ConsultationResponse createConsultation(CreateConsultationDto request) {
+        ConsultationRequest consultationRequest =
+                findConsultationRequestById(request.getConsultationRequestId());
+
+        if (!consultationRequest.isApproved()) {
+            throw new ConsultationException(
+                    ConsultationErrorCode.CONSULTATION_REQUEST_NOT_APPROVED);
+        }
+
+        Client client = findOrCreateClient(request.getClientInfo());
+        User consultLawyer = consultationRequest.getConsultLawyer();
+
+        Consultation consultation =
+                Consultation.builder()
+                        .consultationRequest(consultationRequest)
+                        .client(client)
+                        .consultLawyer(consultLawyer)
+                        .consultationDate(request.getConsultationDate())
+                        .location(request.getLocation())
+                        .build();
+
+        Consultation saved = consultationRepository.save(consultation);
+        return mapToConsultationResponse(saved);
+    }
+
+    public List<ConsultationResponse> getConsultations() {
+        return consultationRepository.findAll().stream()
+                .map(this::mapToConsultationResponse)
+                .collect(Collectors.toList());
+    }
+
+    public ConsultationResponse getConsultation(Long id) {
+        Consultation consultation = findConsultationById(id);
+        return mapToConsultationResponse(consultation);
+    }
+
+    @Transactional
+    public ConsultationResponse updateConsultationStatus(
+            Long id, UpdateConsultationStatusDto request) {
+        Consultation consultation = findConsultationById(id);
+
+        switch (request.getStatus()) {
+            case CONSULTATION_IN_PROGRESS -> consultation.startConsultation();
+            case CONTRACT_PENDING -> consultation.completeConsultation();
+            case CONTRACT_IN_PROGRESS -> consultation.startContract();
+            case COMPLETED -> consultation.completeContract();
+            default ->
+                    throw new ConsultationException(
+                            ConsultationErrorCode.INVALID_STATUS_TRANSITION);
+        }
+
+        return mapToConsultationResponse(consultation);
+    }
+
+    private Client findOrCreateClient(CreateConsultationDto.ClientInfoDto clientInfo) {
+        if (clientInfo.getResidentNumber() != null) {
+            return clientRepository
+                    .findByResidentNumber(clientInfo.getResidentNumber())
+                    .orElseGet(() -> createNewClient(clientInfo));
+        }
+        return createNewClient(clientInfo);
+    }
+
+    private Client createNewClient(CreateConsultationDto.ClientInfoDto clientInfo) {
+        Client client =
+                Client.fromRequest(
+                        clientInfo.getName(),
+                        clientInfo.getEmail(),
+                        clientInfo.getPhone(),
+                        clientInfo.getAddress(),
+                        clientInfo.getResidentNumber(),
+                        clientInfo.getBirthDate(),
+                        clientInfo.getGender(),
+                        clientInfo.getJobTitle());
+        return clientRepository.save(client);
+    }
+
+    private Consultation findConsultationById(Long id) {
+        return consultationRepository
+                .findById(id)
+                .orElseThrow(
+                        () ->
+                                new ConsultationException(
+                                        ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+    }
+
+    private ConsultationResponse mapToConsultationResponse(Consultation consultation) {
+        return ConsultationResponse.builder()
+                .id(consultation.getId())
+                .consultationRequestId(consultation.getConsultationRequest().getId())
+                .clientId(consultation.getClient().getId())
+                .clientName(consultation.getClient().getName())
+                .consultLawyerId(consultation.getConsultLawyer().getId())
+                .consultLawyerName(consultation.getConsultLawyer().getName())
+                .consultationDate(consultation.getConsultationDate())
+                .location(consultation.getLocation())
+                .status(consultation.getStatus())
+                .createdAt(consultation.getCreatedDate())
+                .updatedAt(consultation.getModifiedDate())
+                .build();
+    }
+
+    // ConsultationNote Management Methods
+    @Transactional
+    public ConsultationNoteResponse createConsultationNote(
+            Long consultationId, CreateConsultationNoteDto request, Long authorId) {
+        Consultation consultation = findConsultationById(consultationId);
+
+        if (!consultation.canWriteNote()) {
+            throw new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_IN_PROGRESS);
+        }
+
+        User author = findUserById(authorId);
+
+        ConsultationNote consultationNote =
+                ConsultationNote.builder()
+                        .consultation(consultation)
+                        .author(author)
+                        .factSummary(request.getFactSummary())
+                        .evidenceSummary(request.getEvidenceSummary())
+                        .legalIssue(request.getLegalIssue())
+                        .relatedLaws(request.getRelatedLaws())
+                        .clientGoal(request.getClientGoal())
+                        .lawyerOpinion(request.getLawyerOpinion())
+                        .riskAssessment(request.getRiskAssessment())
+                        .nextAction(request.getNextAction())
+                        .build();
+
+        ConsultationNote saved = consultationNoteRepository.save(consultationNote);
+        return mapToConsultationNoteResponse(saved);
+    }
+
+    public List<ConsultationNoteResponse> getConsultationNotes(Long consultationId) {
+        return consultationNoteRepository
+                .findByConsultationIdOrderByCreatedDateDesc(consultationId)
+                .stream()
+                .map(this::mapToConsultationNoteResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public ConsultationNoteResponse updateConsultationNote(
+            Long consultationId, Long noteId, UpdateConsultationNoteDto request, Long authorId) {
+        ConsultationNote consultationNote = findConsultationNoteById(noteId);
+
+        // 작성자 본인만 수정 가능
+        User author = findUserById(authorId);
+        if (!consultationNote.isAuthor(author)) {
+            throw new ConsultationException(ConsultationErrorCode.UNAUTHORIZED_NOTE_ACCESS);
+        }
+
+        // 상담이 진행 중일 때만 수정 가능
+        if (!consultationNote.getConsultation().canWriteNote()) {
+            throw new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_IN_PROGRESS);
+        }
+
+        consultationNote.update(
+                request.getFactSummary(),
+                request.getEvidenceSummary(),
+                request.getLegalIssue(),
+                request.getRelatedLaws(),
+                request.getClientGoal(),
+                request.getLawyerOpinion(),
+                request.getRiskAssessment(),
+                request.getNextAction());
+
+        return mapToConsultationNoteResponse(consultationNote);
+    }
+
+    private ConsultationNote findConsultationNoteById(Long id) {
+        return consultationNoteRepository
+                .findById(id)
+                .orElseThrow(
+                        () ->
+                                new ConsultationException(
+                                        ConsultationErrorCode.CONSULTATION_NOTE_NOT_FOUND));
+    }
+
+    private ConsultationNoteResponse mapToConsultationNoteResponse(
+            ConsultationNote consultationNote) {
+        return ConsultationNoteResponse.builder()
+                .id(consultationNote.getId())
+                .consultationId(consultationNote.getConsultation().getId())
+                .authorId(consultationNote.getAuthor().getId())
+                .authorName(consultationNote.getAuthor().getName())
+                .factSummary(consultationNote.getFactSummary())
+                .evidenceSummary(consultationNote.getEvidenceSummary())
+                .legalIssue(consultationNote.getLegalIssue())
+                .relatedLaws(consultationNote.getRelatedLaws())
+                .clientGoal(consultationNote.getClientGoal())
+                .lawyerOpinion(consultationNote.getLawyerOpinion())
+                .riskAssessment(consultationNote.getRiskAssessment())
+                .nextAction(consultationNote.getNextAction())
+                .createdAt(consultationNote.getCreatedDate())
+                .updatedAt(consultationNote.getModifiedDate())
                 .build();
     }
 }

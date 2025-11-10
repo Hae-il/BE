@@ -15,7 +15,9 @@ public enum ConsultationErrorCode implements ErrorCode {
     CLIENT_NOT_FOUND(HttpStatus.NOT_FOUND, "의뢰인을 찾을 수 없습니다."),
     ASSIGNED_LAWYER_REQUIRED(HttpStatus.BAD_REQUEST, "승인 시 담당 변호사 지정이 필요합니다."),
     INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "잘못된 상태 전환입니다."),
-    CONSULTATION_NOT_IN_PROGRESS(HttpStatus.BAD_REQUEST, "진행 중인 상담이 아닙니다.");
+    CONSULTATION_NOT_IN_PROGRESS(HttpStatus.BAD_REQUEST, "진행 중인 상담이 아닙니다."),
+    CONSULTATION_REQUEST_NOT_APPROVED(HttpStatus.BAD_REQUEST, "승인된 상담 예약이 아닙니다."),
+    UNAUTHORIZED_NOTE_ACCESS(HttpStatus.FORBIDDEN, "상담 노트 수정 권한이 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

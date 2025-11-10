@@ -1,8 +1,14 @@
 package com.haeil.be.consultation.controller;
 
+import com.haeil.be.consultation.dto.request.CreateConsultationDto;
+import com.haeil.be.consultation.dto.request.CreateConsultationNoteDto;
 import com.haeil.be.consultation.dto.request.CreateConsultationRequestDto;
+import com.haeil.be.consultation.dto.request.UpdateConsultationNoteDto;
 import com.haeil.be.consultation.dto.request.UpdateConsultationRequestStatusDto;
+import com.haeil.be.consultation.dto.request.UpdateConsultationStatusDto;
+import com.haeil.be.consultation.dto.response.ConsultationNoteResponse;
 import com.haeil.be.consultation.dto.response.ConsultationRequestResponse;
+import com.haeil.be.consultation.dto.response.ConsultationResponse;
 import com.haeil.be.consultation.service.ConsultationService;
 import com.haeil.be.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,6 +64,72 @@ public class ConsultationController {
             @PathVariable Long id, @Valid @RequestBody UpdateConsultationRequestStatusDto request) {
         ConsultationRequestResponse response =
                 consultationService.updateConsultationRequestStatus(id, request);
+        return ApiResponse.from(response);
+    }
+
+    // Consultation Management Endpoints
+    @Operation(summary = "상담 시작", description = "승인된 예약을 기반으로 상담을 시작합니다.")
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<Object> createConsultation(
+            @Valid @RequestBody CreateConsultationDto request) {
+        ConsultationResponse response = consultationService.createConsultation(request);
+        return ApiResponse.from(response);
+    }
+
+    @Operation(summary = "상담 목록 조회", description = "상담 목록을 조회합니다.")
+    @GetMapping
+    public ApiResponse<Object> getConsultations() {
+        List<ConsultationResponse> responses = consultationService.getConsultations();
+        return ApiResponse.from(responses);
+    }
+
+    @Operation(summary = "상담 상세 조회", description = "상담 상세 정보를 조회합니다.")
+    @GetMapping("/{id}")
+    public ApiResponse<Object> getConsultation(@PathVariable Long id) {
+        ConsultationResponse response = consultationService.getConsultation(id);
+        return ApiResponse.from(response);
+    }
+
+    @Operation(summary = "상담 상태 변경", description = "상담 진행 상태를 변경합니다.")
+    @PatchMapping("/{id}")
+    public ApiResponse<Object> updateConsultationStatus(
+            @PathVariable Long id, @Valid @RequestBody UpdateConsultationStatusDto request) {
+        ConsultationResponse response = consultationService.updateConsultationStatus(id, request);
+        return ApiResponse.from(response);
+    }
+
+    // ConsultationNote Management Endpoints
+    @Operation(summary = "상담 노트 작성", description = "상담 진행 중에 노트를 작성합니다.")
+    @PostMapping("/{id}/notes")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<Object> createConsultationNote(
+            @PathVariable Long id, @Valid @RequestBody CreateConsultationNoteDto request) {
+        // TODO: 실제 인증된 사용자 ID를 가져와야 함 (현재는 임시로 1L 사용)
+        Long authorId = 1L;
+        ConsultationNoteResponse response =
+                consultationService.createConsultationNote(id, request, authorId);
+        return ApiResponse.from(response);
+    }
+
+    @Operation(summary = "상담 노트 조회", description = "특정 상담의 모든 노트를 조회합니다.")
+    @GetMapping("/{id}/notes")
+    public ApiResponse<Object> getConsultationNotes(@PathVariable Long id) {
+        List<ConsultationNoteResponse> responses = consultationService.getConsultationNotes(id);
+        return ApiResponse.from(responses);
+    }
+
+    @Operation(summary = "상담 노트 수정", description = "작성자 본인만 상담 노트를 수정할 수 있습니다.")
+    @PatchMapping("/{consultationId}/notes/{noteId}")
+    public ApiResponse<Object> updateConsultationNote(
+            @PathVariable Long consultationId,
+            @PathVariable Long noteId,
+            @Valid @RequestBody UpdateConsultationNoteDto request) {
+        // TODO: 실제 인증된 사용자 ID를 가져와야 함 (현재는 임시로 1L 사용)
+        Long authorId = 1L;
+        ConsultationNoteResponse response =
+                consultationService.updateConsultationNote(
+                        consultationId, noteId, request, authorId);
         return ApiResponse.from(response);
     }
 }
