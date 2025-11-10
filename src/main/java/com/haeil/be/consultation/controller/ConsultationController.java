@@ -109,10 +109,7 @@ public class ConsultationController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<Object> createConsultationNote(
             @PathVariable Long id, @Valid @RequestBody CreateConsultationNoteDto request) {
-        // TODO: 실제 인증된 사용자 ID를 가져와야 함 (현재는 임시로 1L 사용)
-        Long authorId = 1L;
-        ConsultationNoteResponse response =
-                consultationService.createConsultationNote(id, request, authorId);
+        ConsultationNoteResponse response = consultationService.createConsultationNote(id, request);
         return ApiResponse.from(response);
     }
 
@@ -123,17 +120,14 @@ public class ConsultationController {
         return ApiResponse.from(responses);
     }
 
-    @Operation(summary = "상담 노트 수정", description = "작성자 본인만 상담 노트를 수정할 수 있습니다.")
+    @Operation(summary = "상담 노트 수정", description = "담당 변호사만 상담 노트를 수정할 수 있습니다.")
     @PatchMapping("/{consultationId}/notes/{noteId}")
     public ApiResponse<Object> updateConsultationNote(
             @PathVariable Long consultationId,
             @PathVariable Long noteId,
             @Valid @RequestBody UpdateConsultationNoteDto request) {
-        // TODO: 실제 인증된 사용자 ID를 가져와야 함 (현재는 임시로 1L 사용)
-        Long authorId = 1L;
         ConsultationNoteResponse response =
-                consultationService.updateConsultationNote(
-                        consultationId, noteId, request, authorId);
+                consultationService.updateConsultationNote(consultationId, noteId, request);
         return ApiResponse.from(response);
     }
 

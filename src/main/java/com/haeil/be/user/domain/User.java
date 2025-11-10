@@ -44,10 +44,10 @@ public class User extends BaseEntity {
     private String licenseNumber;
 
     @OneToMany(mappedBy = "attorney", fetch = FetchType.LAZY)
-    private List<Cases> casesList = new ArrayList<>();
+    private final List<Cases> casesList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "counselor", fetch = FetchType.LAZY)
-    private List<Consultation> consultationList = new ArrayList<>();
+    @OneToMany(mappedBy = "consultLawyer", fetch = FetchType.LAZY)
+    private final List<Consultation> consultationList = new ArrayList<>();
 
     @Builder
     public User(

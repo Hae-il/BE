@@ -30,7 +30,7 @@ public class CasesService {
                         .caseStatus(CaseStatus.UNSIGNED)
                         .caseType(consultation.getConsultationRequest().getCaseType())
                         .attorney(consultation.getConsultLawyer())
-                        .consultationId(consultation.getId())
+                        .consultation(consultation)
                         .build();
 
         return casesRepository.save(newCase);

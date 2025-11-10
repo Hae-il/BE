@@ -240,19 +240,17 @@ public class ConsultationService {
     // ConsultationNote Management Methods
     @Transactional
     public ConsultationNoteResponse createConsultationNote(
-            Long consultationId, CreateConsultationNoteDto request, Long authorId) {
+            Long consultationId, CreateConsultationNoteDto request) {
         Consultation consultation = findConsultationById(consultationId);
 
         if (!consultation.canWriteNote()) {
             throw new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_IN_PROGRESS);
         }
 
-        User author = findUserById(authorId);
-
         ConsultationNote consultationNote =
                 ConsultationNote.builder()
                         .consultation(consultation)
-                        .author(author)
+                        .author(consultation.getConsultLawyer())
                         .factSummary(request.getFactSummary())
                         .evidenceSummary(request.getEvidenceSummary())
                         .legalIssue(request.getLegalIssue())
@@ -277,13 +275,12 @@ public class ConsultationService {
 
     @Transactional
     public ConsultationNoteResponse updateConsultationNote(
-            Long consultationId, Long noteId, UpdateConsultationNoteDto request, Long authorId) {
+            Long consultationId, Long noteId, UpdateConsultationNoteDto request) {
         ConsultationNote consultationNote = findConsultationNoteById(noteId);
 
-        // 작성자 본인만 수정 가능
-        User author = findUserById(authorId);
-        if (!consultationNote.isAuthor(author)) {
-            throw new ConsultationException(ConsultationErrorCode.UNAUTHORIZED_NOTE_ACCESS);
+        // 해당 상담의 노트인지 확인
+        if (!consultationNote.getConsultation().getId().equals(consultationId)) {
+            throw new ConsultationException(ConsultationErrorCode.CONSULTATION_NOTE_NOT_FOUND);
         }
 
         // 상담이 진행 중일 때만 수정 가능
