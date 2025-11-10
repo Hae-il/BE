@@ -1,6 +1,12 @@
 package com.haeil.be.consultation.repository;
 
 import com.haeil.be.consultation.domain.ConsultationNote;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ConsultationNoteRepository extends JpaRepository<ConsultationNote, Long> {}
+public interface ConsultationNoteRepository extends JpaRepository<ConsultationNote, Long> {
+
+    List<ConsultationNote> findByConsultationIdOrderByCreatedDateDesc(Long consultationId);
+
+    List<ConsultationNote> findByAuthorId(Long authorId);
+}
