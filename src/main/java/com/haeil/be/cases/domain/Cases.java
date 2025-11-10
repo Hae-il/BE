@@ -22,12 +22,16 @@ public class Cases extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "case_number", unique = true)
+    private String caseNumber;
+
     @Column(name = "title")
     private String title;
 
     @Column(name = "content")
     private String content;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "case_status")
     private CaseStatus caseStatus;
 
@@ -44,8 +48,11 @@ public class Cases extends BaseEntity {
     @Column(name = "opponent_insurance")
     private String opponentInsurance;
 
-    @Column(name = "occured_date")
-    private LocalDateTime occuredDate;
+    @Column(name = "occurred_date")
+    private LocalDateTime occurredDate;
+
+    @Column(name = "consultation_id")
+    private Long consultationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attorney_id")

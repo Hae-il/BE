@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: ${RDS_DB_URL}
+    username: ${RDS_DB_USERNAME}
+    password: ${RDS_DB_PASSWORD}
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: false
+
+server:
+  port: ${SERVER_PORT}
+
+logging:
+  file:
+    name: app.log
+  level:
+    root: info
