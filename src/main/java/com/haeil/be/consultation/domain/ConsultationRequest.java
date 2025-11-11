@@ -40,8 +40,8 @@ public class ConsultationRequest extends BaseEntity {
     private ConsultationRequestStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consult_lawyer_id")
-    private User consultLawyer;
+    @JoinColumn(name = "counselor_id")
+    private User counselor;
 
     @Column(name = "reject_reason", columnDefinition = "TEXT")
     private String rejectReason;

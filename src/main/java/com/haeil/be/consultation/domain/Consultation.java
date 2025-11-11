@@ -30,8 +30,8 @@ public class Consultation extends BaseEntity {
     private Client client;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consult_lawyer_id", nullable = false)
-    private User consultLawyer;
+    @JoinColumn(name = "counselor_id", nullable = false)
+    private User counselor;
 
     @Column(name = "consultation_date")
     private LocalDateTime consultationDate;
