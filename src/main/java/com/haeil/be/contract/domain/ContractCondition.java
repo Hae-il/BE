@@ -1,4 +1,28 @@
 package com.haeil.be.contract.domain;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+
+@Entity
+@Table(name="contract_condition")
+@Getter
+@NoArgsConstructor
 public class ContractCondition {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "condition_detail")
+    private String conditionDetail;
+
+    @Column(name = "amount")
+    private BigDecimal amount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="contract_id")
+    private FixedFeeContract fixedFeeContract;
 }
