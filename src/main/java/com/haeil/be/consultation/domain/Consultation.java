@@ -31,7 +31,7 @@ public class Consultation extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "consult_lawyer_id", nullable = false)
-    private User consultLawyer;
+    private User counselor;
 
     @Column(name = "consultation_date")
     private LocalDateTime consultationDate;
