@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 public record UnassignedCaseResponse(
         Long caseId,
+        String clientName,
         String title,
         CaseType caseType,
         CaseStatus caseStatus,
@@ -15,6 +16,7 @@ public record UnassignedCaseResponse(
     public static UnassignedCaseResponse from(Cases cases) {
         return new UnassignedCaseResponse(
                 cases.getId(),
+                cases.getConsultation().getClient().getName(),
                 cases.getTitle(),
                 cases.getCaseType(),
                 cases.getCaseStatus(),
