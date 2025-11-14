@@ -1,20 +1,19 @@
 package com.haeil.be.contract.dto.response;
 
+import static com.haeil.be.contract.exception.errorcode.ContractErrorCode.INVALID_FEE_TYPE;
+
 import com.haeil.be.contract.domain.Contract;
 import com.haeil.be.contract.domain.FixedFeeContract;
 import com.haeil.be.contract.domain.PercentageFeeContract;
 import com.haeil.be.contract.domain.type.ContractStatus;
 import com.haeil.be.contract.domain.type.FeeType;
 import com.haeil.be.contract.exception.ContractException;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.haeil.be.contract.exception.errorcode.ContractErrorCode.INVALID_FEE_TYPE;
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
 @Builder
@@ -41,31 +40,29 @@ public class ContractDetailResponse {
 
     public static ContractDetailResponse from(Contract contract) {
 
-        ContractDetailResponseBuilder builder = ContractDetailResponse.builder()
-                .contractId(contract.getId())
-                .caseId(contract.getCases().getId())
-                .caseNumber(contract.getCases().getCaseNumber())
-                // .clientName(contract.getCases().getClient().getName())
-                .attorneyName(contract.getCases().getAttorney().getName())
-                .dueDate(contract.getDueDate())
-                .status(contract.getStatus())
-                .expenseInfoResponse(ExpenseInfoResponse.from(contract.getExpenseInfo()));
+        ContractDetailResponseBuilder builder =
+                ContractDetailResponse.builder()
+                        .contractId(contract.getId())
+                        .caseId(contract.getCases().getId())
+                        .caseNumber(contract.getCases().getCaseNumber())
+                        // .clientName(contract.getCases().getClient().getName())
+                        .attorneyName(contract.getCases().getAttorney().getName())
+                        .dueDate(contract.getDueDate())
+                        .status(contract.getStatus())
+                        .expenseInfoResponse(ExpenseInfoResponse.from(contract.getExpenseInfo()));
 
         if (contract instanceof FixedFeeContract fixedContract) {
 
-            List<ContractConditionResponse> conditions = fixedContract.getContractConditionList().stream()
-                    .map(ContractConditionResponse::from)
-                    .collect(Collectors.toList());
+            List<ContractConditionResponse> conditions =
+                    fixedContract.getContractConditionList().stream()
+                            .map(ContractConditionResponse::from)
+                            .collect(Collectors.toList());
 
-            return builder
-                    .feeType(FeeType.FIXED)
-                    .fixedConditionList(conditions)
-                    .build();
+            return builder.feeType(FeeType.FIXED).fixedConditionList(conditions).build();
 
         } else if (contract instanceof PercentageFeeContract percContract) {
 
-            return builder
-                    .feeType(FeeType.PERCENTAGE)
+            return builder.feeType(FeeType.PERCENTAGE)
                     .targetAmount(percContract.getTargetAmount())
                     .feePercentage(percContract.getFeePercentage())
                     .build();

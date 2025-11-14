@@ -6,14 +6,13 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @DiscriminatorValue("FIXED")
@@ -25,13 +24,13 @@ public class FixedFeeContract extends Contract {
     private List<ContractCondition> contractConditionList = new ArrayList<>();
 
     @Builder
-    public FixedFeeContract(LocalDate dueDate, ContractStatus status, Cases cases, ExpenseInfo expenseInfo) {
+    public FixedFeeContract(
+            LocalDate dueDate, ContractStatus status, Cases cases, ExpenseInfo expenseInfo) {
         super(dueDate, status, cases, expenseInfo);
     }
 
-    public void addContractCondition(String conditionDetail, BigDecimal amount){
+    public void addContractCondition(String conditionDetail, BigDecimal amount) {
         ContractCondition contractCondition = new ContractCondition(conditionDetail, amount, this);
         this.contractConditionList.add(contractCondition);
     }
-
 }

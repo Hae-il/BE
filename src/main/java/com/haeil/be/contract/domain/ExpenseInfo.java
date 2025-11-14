@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ExpenseInfo {
 
-    @Column(name="expense_handling")
+    @Column(name = "expense_handling")
     @Enumerated(EnumType.STRING)
     private ExpenseHandling expenseHandling;
 
-    @Column(name="expense_detail")
+    @Column(name = "expense_detail")
     private String expenseDetail;
 
     public ExpenseInfo(ExpenseHandling expenseHandling, String expenseDetail) {

@@ -6,6 +6,6 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class ContractException extends RuntimeException{
+public class ContractException extends RuntimeException {
     private final ErrorCode errorCode;
 }

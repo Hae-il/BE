@@ -1,13 +1,12 @@
 package com.haeil.be.contract.domain;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Entity
-@Table(name="contract_condition")
+@Table(name = "contract_condition")
 @Getter
 @NoArgsConstructor
 public class ContractCondition {
@@ -23,10 +22,11 @@ public class ContractCondition {
     private BigDecimal amount;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="contract_id")
+    @JoinColumn(name = "contract_id")
     private FixedFeeContract fixedFeeContract;
 
-    public ContractCondition(String conditionDetail, BigDecimal amount, FixedFeeContract fixedFeeContract) {
+    public ContractCondition(
+            String conditionDetail, BigDecimal amount, FixedFeeContract fixedFeeContract) {
         this.conditionDetail = conditionDetail;
         this.amount = amount;
         this.fixedFeeContract = fixedFeeContract;
