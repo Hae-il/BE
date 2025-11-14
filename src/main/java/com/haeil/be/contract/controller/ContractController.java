@@ -1,6 +1,8 @@
 package com.haeil.be.contract.controller;
 
+import com.haeil.be.cases.service.CasesService;
 import com.haeil.be.contract.dto.request.ContractCreateRequest;
+import com.haeil.be.cases.dto.response.CaseInfoResponse;
 import com.haeil.be.contract.dto.response.ContractItemResponse;
 import com.haeil.be.contract.dto.response.ContractResponse;
 import com.haeil.be.contract.service.ContractService;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class ContractController {
 
     private final ContractService contractService;
+    private final CasesService casesService;
 
     @Operation(summary = "수임 계약 생성 API", description = "수임 계약을 생성합니다.")
     @PostMapping()
@@ -39,5 +42,12 @@ public class ContractController {
         Pageable pageable = PageRequest.of(page, size);
         Page<ContractItemResponse> contractItemResponses = contractService.getContractList(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.from(contractItemResponses));
+    }
+
+    @Operation(summary = "수임 계약서 작성 시 기본 정보 조회 API", description = "caseId를 입력하여 해당 사건의 기본 정보를 가져옵니다.")
+    @GetMapping("/{caseId}")
+    public ResponseEntity<ApiResponse<Object>> getCaseInfo(@PathVariable Long caseId){
+        CaseInfoResponse response = casesService.getCaseInfo(caseId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.from(response));
     }
 }
