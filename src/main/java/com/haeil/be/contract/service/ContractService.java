@@ -12,10 +12,13 @@ import com.haeil.be.contract.domain.type.FeeType;
 import com.haeil.be.contract.dto.request.ContractConditionRequest;
 import com.haeil.be.contract.dto.request.ContractCreateRequest;
 import com.haeil.be.contract.dto.request.ExpenseInfoRequest;
+import com.haeil.be.contract.dto.response.ContractItemResponse;
 import com.haeil.be.contract.dto.response.ContractResponse;
 import com.haeil.be.contract.exception.ContractException;
 import com.haeil.be.contract.repository.ContractRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,5 +99,11 @@ public class ContractService {
                 request.targetAmount(),
                 request.feePercentage()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContractItemResponse> getContractList(Pageable pageable){
+        Page<Contract> contractPage = contractRepository.findAll(pageable);
+        return contractPage.map(ContractItemResponse::from);
     }
 }
