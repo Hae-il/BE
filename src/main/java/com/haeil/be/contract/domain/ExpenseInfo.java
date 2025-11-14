@@ -19,4 +19,9 @@ public class ExpenseInfo {
 
     @Column(name="expense_detail")
     private String expenseDetail;
+
+    public ExpenseInfo(ExpenseHandling expenseHandling, String expenseDetail) {
+        this.expenseHandling = expenseHandling;
+        this.expenseDetail = expenseDetail;
+    }
 }

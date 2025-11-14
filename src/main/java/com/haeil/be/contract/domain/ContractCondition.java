@@ -25,4 +25,10 @@ public class ContractCondition {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="contract_id")
     private FixedFeeContract fixedFeeContract;
+
+    public ContractCondition(String conditionDetail, BigDecimal amount, FixedFeeContract fixedFeeContract) {
+        this.conditionDetail = conditionDetail;
+        this.amount = amount;
+        this.fixedFeeContract = fixedFeeContract;
+    }
 }

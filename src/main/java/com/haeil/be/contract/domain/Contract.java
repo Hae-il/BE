@@ -34,4 +34,11 @@ public abstract class Contract extends BaseEntity {
 
     @Embedded
     private ExpenseInfo expenseInfo;
+
+    public Contract(LocalDate dueDate, ContractStatus status, Cases cases, ExpenseInfo expenseInfo) {
+        this.dueDate = dueDate;
+        this.status = status;
+        this.cases = cases;
+        this.expenseInfo = expenseInfo;
+    }
 }
