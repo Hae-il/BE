@@ -102,6 +102,10 @@ public class Cases extends BaseEntity {
         this.attorney = attorney;
     }
 
+    public void removeAttorney() {
+        this.attorney = null;
+    }
+
     public void updateStatus(CaseStatus caseStatus) {
         this.caseStatus = caseStatus;
     }
