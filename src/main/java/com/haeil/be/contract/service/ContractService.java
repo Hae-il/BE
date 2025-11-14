@@ -13,7 +13,7 @@ import com.haeil.be.contract.dto.request.ContractConditionRequest;
 import com.haeil.be.contract.dto.request.ContractCreateRequest;
 import com.haeil.be.contract.dto.request.ExpenseInfoRequest;
 import com.haeil.be.contract.dto.response.ContractItemResponse;
-import com.haeil.be.contract.dto.response.ContractResponse;
+import com.haeil.be.contract.dto.response.ContractDetailResponse;
 import com.haeil.be.contract.exception.ContractException;
 import com.haeil.be.contract.repository.ContractRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.haeil.be.cases.exception.errorcode.CasesErrorCode.CASES_NOT_FOUND;
-import static com.haeil.be.contract.exception.errorcode.ContractErrorCode.CONDITION_SHOULD_NOT_BE_NULL;
-import static com.haeil.be.contract.exception.errorcode.ContractErrorCode.INVALID_FEE_TYPE;
+import static com.haeil.be.contract.exception.errorcode.ContractErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +35,7 @@ public class ContractService {
     private final ContractRepository contractRepository;
 
     @Transactional
-    public ContractResponse createContract(ContractCreateRequest request){
+    public ContractDetailResponse createContract(ContractCreateRequest request){
         Cases cases = findCasesOrThrow(request.caseId());
         ExpenseInfo expenseInfo = createExpenseInfo(request.expenseInfoRequest());
         Contract newContract;
@@ -51,7 +50,19 @@ public class ContractService {
         }
 
         Contract savedContract = contractRepository.save(newContract);
-        return ContractResponse.from(savedContract);
+        return ContractDetailResponse.from(savedContract);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ContractItemResponse> getContractList(Pageable pageable){
+        Page<Contract> contractPage = contractRepository.findAll(pageable);
+        return contractPage.map(ContractItemResponse::from);
+    }
+
+    @Transactional(readOnly = true)
+    public ContractDetailResponse getContractDetail(Long contractId){
+        Contract contract = findContractOrThrow(contractId);
+        return ContractDetailResponse.from(contract);
     }
 
     private Cases findCasesOrThrow(Long caseId){
@@ -60,6 +71,10 @@ public class ContractService {
 
     private ExpenseInfo createExpenseInfo(ExpenseInfoRequest request){
         return new ExpenseInfo(request.expenseHandling(), request.expenseDetail());
+    }
+
+    private Contract findContractOrThrow(Long contractId){
+        return contractRepository.findById(contractId).orElseThrow(()-> new ContractException(CONTRACT_NOT_FOUND));
     }
 
     // 정액 계약 생성 로직
@@ -99,11 +114,5 @@ public class ContractService {
                 request.targetAmount(),
                 request.feePercentage()
         );
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ContractItemResponse> getContractList(Pageable pageable){
-        Page<Contract> contractPage = contractRepository.findAll(pageable);
-        return contractPage.map(ContractItemResponse::from);
     }
 }
