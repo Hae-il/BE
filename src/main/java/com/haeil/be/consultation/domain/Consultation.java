@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,22 +23,19 @@ public class Consultation extends BaseEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consult_req_id", nullable = false)
-    private ConsultationRequest consultationRequest;
+    @JoinColumn(name = "reservation_id", nullable = false)
+    private ConsultationReservation consultationReservation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consult_lawyer_id", nullable = false)
+    @JoinColumn(name = "counselor_id", nullable = false)
     private User counselor;
 
     @Column(name = "consultation_date")
     private LocalDateTime consultationDate;
-
-    @Column(name = "location")
-    private String location;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -45,4 +43,40 @@ public class Consultation extends BaseEntity {
 
     @OneToMany(mappedBy = "consultation", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ConsultationNote> consultationNotes = new ArrayList<>();
+
+    @Builder
+    public Consultation(
+            ConsultationReservation consultationReservation,
+            Client client,
+            User counselor,
+            LocalDateTime consultationDate) {
+        this.consultationReservation = consultationReservation;
+        this.client = client;
+        this.counselor = counselor;
+        this.consultationDate = consultationDate;
+        this.status = ConsultationStatus.IN_PROGRESS;
+    }
+
+    public void startConsultation() {
+        this.status = ConsultationStatus.IN_PROGRESS;
+    }
+
+    public void completeConsultation() {
+        if (this.status != ConsultationStatus.IN_PROGRESS) {
+            throw new IllegalStateException("진행 중인 상담만 완료할 수 있습니다.");
+        }
+        this.status = ConsultationStatus.COMPLETED;
+    }
+
+    public boolean isInProgress() {
+        return this.status == ConsultationStatus.IN_PROGRESS;
+    }
+
+    public boolean isCompleted() {
+        return this.status == ConsultationStatus.COMPLETED;
+    }
+
+    public User getCounselor() {
+        return this.counselor;
+    }
 }
