@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ClientService {
-    
+
     private final ClientRepository clientRepository;
-    
+
     @Transactional
     public Client getClient(CreateClientRequest request) {
         if (request.getResidentNumber() != null) {
@@ -23,20 +23,21 @@ public class ClientService {
         }
         return createNewClient(request);
     }
-    
+
     @Transactional
     public Client createNewClient(CreateClientRequest request) {
-        Client client = Client.builder()
-                .name(request.getName())
-                .email(request.getEmail())
-                .phone(request.getPhone())
-                .address(request.getAddress())
-                .residentNumber(request.getResidentNumber())
-                .birthDate(request.getBirthDate())
-                .gender(request.getGender())
-                .jobTitle(request.getJobTitle())
-                .build();
-        
+        Client client =
+                Client.builder()
+                        .name(request.getName())
+                        .email(request.getEmail())
+                        .phone(request.getPhone())
+                        .address(request.getAddress())
+                        .residentNumber(request.getResidentNumber())
+                        .birthDate(request.getBirthDate())
+                        .gender(request.getGender())
+                        .jobTitle(request.getJobTitle())
+                        .build();
+
         return clientRepository.save(client);
     }
 }

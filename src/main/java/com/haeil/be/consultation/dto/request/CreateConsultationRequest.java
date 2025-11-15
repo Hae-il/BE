@@ -1,15 +1,10 @@
 package com.haeil.be.consultation.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.haeil.be.client.domain.Client;
 import com.haeil.be.client.dto.request.CreateClientRequest;
-import com.haeil.be.consultation.domain.Consultation;
-import com.haeil.be.consultation.domain.ConsultationReservation;
-import com.haeil.be.user.domain.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;

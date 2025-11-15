@@ -1,15 +1,13 @@
 package com.haeil.be.client.dto.request;
 
 import com.haeil.be.client.domain.type.Gender;
-import com.haeil.be.global.validation.ValidEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor

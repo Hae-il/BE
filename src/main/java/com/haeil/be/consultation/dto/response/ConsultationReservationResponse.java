@@ -24,7 +24,8 @@ public class ConsultationReservationResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static ConsultationReservationResponse from(ConsultationReservation consultationReservation) {
+    public static ConsultationReservationResponse from(
+            ConsultationReservation consultationReservation) {
         return ConsultationReservationResponse.builder()
                 .id(consultationReservation.getId())
                 .name(consultationReservation.getName())

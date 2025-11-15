@@ -80,7 +80,8 @@ public class ConsultationReservation extends BaseEntity {
 
     private void validateStatusTransition() {
         if (!this.isPending()) {
-            throw new ConsultationException(ConsultationErrorCode.INVALID_CONSULTATION_RESERVATION_STATUS_TRANSITION);
+            throw new ConsultationException(
+                    ConsultationErrorCode.INVALID_CONSULTATION_RESERVATION_STATUS_TRANSITION);
         }
     }
 
