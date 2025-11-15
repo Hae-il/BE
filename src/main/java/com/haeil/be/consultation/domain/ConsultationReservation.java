@@ -2,6 +2,8 @@ package com.haeil.be.consultation.domain;
 
 import com.haeil.be.cases.domain.type.CaseType;
 import com.haeil.be.consultation.domain.type.ConsultationRequestStatus;
+import com.haeil.be.consultation.exception.ConsultationException;
+import com.haeil.be.consultation.exception.errorcode.ConsultationErrorCode;
 import com.haeil.be.global.entity.BaseEntity;
 import com.haeil.be.user.domain.User;
 import jakarta.persistence.*;
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class ConsultationRequest extends BaseEntity {
+public class ConsultationReservation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,59 +28,59 @@ public class ConsultationRequest extends BaseEntity {
     @Column(name = "phone", nullable = false)
     private String phone;
 
-    @Column(name = "preferred_datetime")
-    private LocalDateTime preferredDatetime;
+    @Column(name = "requested_date")
+    private LocalDateTime requestedDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "case_type", nullable = false)
     private CaseType caseType;
 
-    @Column(name = "brief_description", columnDefinition = "TEXT")
-    private String briefDescription;
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ConsultationRequestStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consult_lawyer_id")
-    private User consultLawyer;
+    @JoinColumn(name = "counselor_id")
+    private User counselor;
 
     @Column(name = "reject_reason", columnDefinition = "TEXT")
     private String rejectReason;
 
     @Builder
-    public ConsultationRequest(
+    public ConsultationReservation(
             String name,
             String phone,
-            LocalDateTime preferredDatetime,
+            LocalDateTime requestedDate,
             CaseType caseType,
-            String briefDescription) {
+            String description) {
         this.name = name;
         this.phone = phone;
-        this.preferredDatetime = preferredDatetime;
+        this.requestedDate = requestedDate;
         this.caseType = caseType;
-        this.briefDescription = briefDescription;
+        this.description = description;
         this.status = ConsultationRequestStatus.PENDING;
     }
 
-    public void approve(User assignedLawyer) {
-        validateStatusTransition(ConsultationRequestStatus.APPROVED);
+    public void approve(User lawyer) {
+        validateStatusTransition();
         this.status = ConsultationRequestStatus.APPROVED;
-        this.consultLawyer = assignedLawyer;
+        this.counselor = lawyer;
         this.rejectReason = null;
     }
 
     public void reject(String rejectReason) {
-        validateStatusTransition(ConsultationRequestStatus.REJECTED);
+        validateStatusTransition();
         this.status = ConsultationRequestStatus.REJECTED;
         this.rejectReason = rejectReason;
-        this.consultLawyer = null;
+        this.counselor = null;
     }
 
-    private void validateStatusTransition(ConsultationRequestStatus newStatus) {
-        if (this.status != ConsultationRequestStatus.PENDING) {
-            throw new IllegalStateException("예약 상태는 PENDING 상태에서만 변경할 수 있습니다.");
+    private void validateStatusTransition() {
+        if (!this.isPending()) {
+            throw new ConsultationException(ConsultationErrorCode.INVALID_CONSULTATION_RESERVATION_STATUS_TRANSITION);
         }
     }
 
@@ -92,5 +94,17 @@ public class ConsultationRequest extends BaseEntity {
 
     public boolean isRejected() {
         return this.status == ConsultationRequestStatus.REJECTED;
+    }
+
+    public LocalDateTime getRequestedDate() {
+        return this.requestedDate;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public User getCounselor() {
+        return this.counselor;
     }
 }

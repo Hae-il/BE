@@ -23,22 +23,19 @@ public class Consultation extends BaseEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consult_req_id", nullable = false)
-    private ConsultationRequest consultationRequest;
+    @JoinColumn(name = "reservation_id", nullable = false)
+    private ConsultationReservation consultationReservation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consult_lawyer_id", nullable = false)
+    @JoinColumn(name = "counselor_id", nullable = false)
     private User counselor;
 
     @Column(name = "consultation_date")
     private LocalDateTime consultationDate;
-
-    @Column(name = "location")
-    private String location;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -49,53 +46,37 @@ public class Consultation extends BaseEntity {
 
     @Builder
     public Consultation(
-            ConsultationRequest consultationRequest,
+            ConsultationReservation consultationReservation,
             Client client,
-            User consultLawyer,
-            LocalDateTime consultationDate,
-            String location) {
-        this.consultationRequest = consultationRequest;
+            User counselor,
+            LocalDateTime consultationDate) {
+        this.consultationReservation = consultationReservation;
         this.client = client;
-        this.consultLawyer = consultLawyer;
+        this.counselor = counselor;
         this.consultationDate = consultationDate;
-        this.location = location;
-        this.status = ConsultationStatus.CONSULTATION_WAITING;
+        this.status = ConsultationStatus.IN_PROGRESS;
     }
 
     public void startConsultation() {
-        validateStatusTransition(ConsultationStatus.CONSULTATION_IN_PROGRESS);
-        this.status = ConsultationStatus.CONSULTATION_IN_PROGRESS;
+        this.status = ConsultationStatus.IN_PROGRESS;
     }
 
     public void completeConsultation() {
-        validateStatusTransition(ConsultationStatus.COMPLETED);
+        if (this.status != ConsultationStatus.IN_PROGRESS) {
+            throw new IllegalStateException("진행 중인 상담만 완료할 수 있습니다.");
+        }
         this.status = ConsultationStatus.COMPLETED;
     }
 
-    private void validateStatusTransition(ConsultationStatus newStatus) {
-        if (!isValidTransition(newStatus)) {
-            throw new IllegalStateException(
-                    String.format("상담 상태를 %s에서 %s로 변경할 수 없습니다.", this.status, newStatus));
-        }
-    }
-
-    private boolean isValidTransition(ConsultationStatus newStatus) {
-        return switch (this.status) {
-            case CONSULTATION_WAITING -> newStatus == ConsultationStatus.CONSULTATION_IN_PROGRESS;
-            case CONSULTATION_IN_PROGRESS -> newStatus == ConsultationStatus.COMPLETED;
-            case COMPLETED -> false;
-        };
-    }
-
     public boolean isInProgress() {
-        return this.status == ConsultationStatus.CONSULTATION_IN_PROGRESS;
+        return this.status == ConsultationStatus.IN_PROGRESS;
     }
 
     public boolean isCompleted() {
         return this.status == ConsultationStatus.COMPLETED;
     }
 
-    public boolean canWriteNote() {
-        return this.status == ConsultationStatus.CONSULTATION_IN_PROGRESS;
+    public User getCounselor() {
+        return this.counselor;
     }
 }

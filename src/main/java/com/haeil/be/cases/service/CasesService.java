@@ -19,17 +19,17 @@ public class CasesService {
         Cases newCase =
                 Cases.builder()
                         .title(
-                                consultation.getConsultationRequest().getName()
+                                consultation.getConsultationReservation().getName()
                                         + " - "
                                         + consultation
-                                                .getConsultationRequest()
+                                                .getConsultationReservation()
                                                 .getCaseType()
                                                 .getLabel()
                                         + " 사건")
-                        .content(consultation.getConsultationRequest().getBriefDescription())
+                        .content(consultation.getConsultationReservation().getDescription())
                         .caseStatus(CaseStatus.UNSIGNED)
-                        .caseType(consultation.getConsultationRequest().getCaseType())
-                        .attorney(consultation.getConsultLawyer())
+                        .caseType(consultation.getConsultationReservation().getCaseType())
+                        .attorney(consultation.getCounselor())
                         .consultation(consultation)
                         .build();
 

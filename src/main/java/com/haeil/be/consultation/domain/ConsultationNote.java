@@ -91,8 +91,4 @@ public class ConsultationNote extends BaseEntity {
         if (riskAssessment != null) this.riskAssessment = riskAssessment;
         if (nextAction != null) this.nextAction = nextAction;
     }
-
-    public boolean isAuthor(User user) {
-        return this.author.getId().equals(user.getId());
-    }
 }

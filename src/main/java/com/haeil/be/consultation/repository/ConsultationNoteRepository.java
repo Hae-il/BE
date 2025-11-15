@@ -7,6 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ConsultationNoteRepository extends JpaRepository<ConsultationNote, Long> {
 
     List<ConsultationNote> findByConsultationIdOrderByCreatedDateDesc(Long consultationId);
-
-    List<ConsultationNote> findByAuthorId(Long authorId);
 }

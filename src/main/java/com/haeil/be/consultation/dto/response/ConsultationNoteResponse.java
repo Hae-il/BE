@@ -1,5 +1,6 @@
 package com.haeil.be.consultation.dto.response;
 
+import com.haeil.be.consultation.domain.ConsultationNote;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,4 +23,23 @@ public class ConsultationNoteResponse {
     private String nextAction;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public static ConsultationNoteResponse from(ConsultationNote consultationNote) {
+        return ConsultationNoteResponse.builder()
+                .id(consultationNote.getId())
+                .consultationId(consultationNote.getConsultation().getId())
+                .authorId(consultationNote.getAuthor().getId())
+                .authorName(consultationNote.getAuthor().getName())
+                .factSummary(consultationNote.getFactSummary())
+                .evidenceSummary(consultationNote.getEvidenceSummary())
+                .legalIssue(consultationNote.getLegalIssue())
+                .relatedLaws(consultationNote.getRelatedLaws())
+                .clientGoal(consultationNote.getClientGoal())
+                .lawyerOpinion(consultationNote.getLawyerOpinion())
+                .riskAssessment(consultationNote.getRiskAssessment())
+                .nextAction(consultationNote.getNextAction())
+                .createdAt(consultationNote.getCreatedDate())
+                .updatedAt(consultationNote.getModifiedDate())
+                .build();
+    }
 }

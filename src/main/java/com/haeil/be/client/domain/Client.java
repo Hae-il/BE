@@ -68,26 +68,4 @@ public class Client extends BaseEntity {
         this.jobTitle = jobTitle;
     }
 
-    public static Client fromRequest(
-            String name,
-            String email,
-            String phone,
-            String address,
-            String residentNumber,
-            java.time.LocalDate birthDate,
-            String genderStr,
-            String jobTitle) {
-        Gender gender = genderStr != null ? Gender.valueOf(genderStr.toUpperCase()) : null;
-
-        return Client.builder()
-                .name(name)
-                .email(email)
-                .phone(phone)
-                .address(address)
-                .residentNumber(residentNumber)
-                .birthDate(birthDate)
-                .gender(gender)
-                .jobTitle(jobTitle)
-                .build();
-    }
 }

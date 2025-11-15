@@ -2,32 +2,31 @@ package com.haeil.be.consultation.service;
 
 import com.haeil.be.cases.service.CasesService;
 import com.haeil.be.client.domain.Client;
-import com.haeil.be.client.repository.ClientRepository;
+import com.haeil.be.client.service.ClientService;
 import com.haeil.be.consultation.domain.Consultation;
 import com.haeil.be.consultation.domain.ConsultationFile;
 import com.haeil.be.consultation.domain.ConsultationNote;
-import com.haeil.be.consultation.domain.ConsultationRequest;
-import com.haeil.be.consultation.domain.type.ConsultationRequestStatus;
-import com.haeil.be.consultation.dto.request.CreateConsultationDto;
-import com.haeil.be.consultation.dto.request.CreateConsultationNoteDto;
-import com.haeil.be.consultation.dto.request.CreateConsultationRequestDto;
-import com.haeil.be.consultation.dto.request.UpdateConsultationNoteDto;
-import com.haeil.be.consultation.dto.request.UpdateConsultationRequestStatusDto;
-import com.haeil.be.consultation.dto.request.UpdateConsultationStatusDto;
+import com.haeil.be.consultation.domain.ConsultationReservation;
+import com.haeil.be.consultation.dto.request.ApproveConsultationReservation;
+import com.haeil.be.consultation.dto.request.ConsultationNoteRequest;
+import com.haeil.be.consultation.dto.request.CreateConsultationRequest;
+import com.haeil.be.consultation.dto.request.CreateConsultationReservationRequest;
+import com.haeil.be.consultation.dto.request.RejectConsultationReservation;
 import com.haeil.be.consultation.dto.response.ConsultationNoteResponse;
-import com.haeil.be.consultation.dto.response.ConsultationRequestResponse;
+import com.haeil.be.consultation.dto.response.ConsultationReservationResponse;
 import com.haeil.be.consultation.dto.response.ConsultationResponse;
 import com.haeil.be.consultation.exception.ConsultationException;
 import com.haeil.be.consultation.exception.errorcode.ConsultationErrorCode;
 import com.haeil.be.consultation.repository.ConsultationFileRepository;
 import com.haeil.be.consultation.repository.ConsultationNoteRepository;
 import com.haeil.be.consultation.repository.ConsultationRepository;
-import com.haeil.be.consultation.repository.ConsultationRequestRepository;
+import com.haeil.be.consultation.repository.ConsultationReservationRepository;
 import com.haeil.be.file.domain.FileEntity;
 import com.haeil.be.file.service.FileService;
 import com.haeil.be.user.domain.User;
-import com.haeil.be.user.repository.UserRepository;
+import com.haeil.be.user.service.UserService;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -40,251 +39,163 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional(readOnly = true)
 public class ConsultationService {
 
-    private final ConsultationRequestRepository consultationRequestRepository;
+    private final ConsultationReservationRepository consultationReservationRepository;
     private final ConsultationRepository consultationRepository;
     private final ConsultationNoteRepository consultationNoteRepository;
-    private final ClientRepository clientRepository;
-    private final UserRepository userRepository;
+    private final ClientService clientService;
+    private final UserService userService;
     private final FileService fileService;
     private final ConsultationFileRepository consultationFileRepository;
     private final CasesService casesService;
 
+    // Consultation Reservation Management Methods
     @Transactional
-    public ConsultationRequestResponse createConsultationRequest(
-            CreateConsultationRequestDto request) {
-        ConsultationRequest consultationRequest =
-                ConsultationRequest.builder()
-                        .name(request.getName())
-                        .phone(request.getPhone())
-                        .preferredDatetime(request.getPreferredDatetime())
-                        .caseType(request.getCaseType())
-                        .briefDescription(request.getBriefDescription())
-                        .build();
+    public ConsultationReservationResponse createConsultationReservation(
+            CreateConsultationReservationRequest request) {
+        ConsultationReservation consultationReservation = request.toEntity();
 
-        ConsultationRequest saved = consultationRequestRepository.save(consultationRequest);
-        return mapToResponse(saved);
+        ConsultationReservation saved = consultationReservationRepository.save(consultationReservation);
+        return ConsultationReservationResponse.from(saved);
     }
 
-    public List<ConsultationRequestResponse> getConsultationRequests() {
-        return consultationRequestRepository.findAll().stream()
-                .map(this::mapToResponse)
+    public List<ConsultationReservationResponse> getConsultationReservations() {
+        return consultationReservationRepository.findAll().stream()
+                .map(ConsultationReservationResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public ConsultationRequestResponse getConsultationRequest(Long id) {
-        ConsultationRequest consultationRequest = findConsultationRequestById(id);
-        return mapToResponse(consultationRequest);
+    public ConsultationReservationResponse getConsultationRequest(Long id) {
+        ConsultationReservation consultationReservation = consultationReservationRepository
+                .findById(id)
+                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_FOUND));
+        return ConsultationReservationResponse.from(consultationReservation);
+    }
+
+
+    @Transactional
+    public ConsultationReservationResponse approveConsultationReservation(
+            Long id, ApproveConsultationReservation request) {
+        ConsultationReservation consultationReservation = consultationReservationRepository
+                .findById(id)
+                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_FOUND));
+
+        User counselor = userService.getUser(request.getLawyerId());
+        consultationReservation.approve(counselor);
+
+        return ConsultationReservationResponse.from(consultationReservation);
     }
 
     @Transactional
-    public ConsultationRequestResponse updateConsultationRequestStatus(
-            Long id, UpdateConsultationRequestStatusDto request) {
-        ConsultationRequest consultationRequest = findConsultationRequestById(id);
-
-        if (request.getStatus() == ConsultationRequestStatus.APPROVED) {
-            if (request.getAssignedLawyerId() == null) {
-                throw new ConsultationException(ConsultationErrorCode.ASSIGNED_LAWYER_REQUIRED);
-            }
-            User assignedLawyer = findUserById(request.getAssignedLawyerId());
-            consultationRequest.approve(assignedLawyer);
-        } else if (request.getStatus() == ConsultationRequestStatus.REJECTED) {
-            consultationRequest.reject(request.getRejectReason());
-        }
-
-        return mapToResponse(consultationRequest);
-    }
-
-    private ConsultationRequest findConsultationRequestById(Long id) {
-        return consultationRequestRepository
+    public ConsultationReservationResponse rejectConsultationReservation(
+            Long id, RejectConsultationReservation request) {
+        ConsultationReservation consultationReservation = consultationReservationRepository
                 .findById(id)
-                .orElseThrow(
-                        () ->
-                                new ConsultationException(
-                                        ConsultationErrorCode.CONSULTATION_REQUEST_NOT_FOUND));
-    }
+                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_FOUND));
 
-    private User findUserById(Long id) {
-        return userRepository
-                .findById(id)
-                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.USER_NOT_FOUND));
-    }
+        consultationReservation.reject(request.getRejectionReason());
 
-    private ConsultationRequestResponse mapToResponse(ConsultationRequest consultationRequest) {
-        return ConsultationRequestResponse.builder()
-                .id(consultationRequest.getId())
-                .name(consultationRequest.getName())
-                .phone(consultationRequest.getPhone())
-                .preferredDatetime(consultationRequest.getPreferredDatetime())
-                .caseType(consultationRequest.getCaseType())
-                .briefDescription(consultationRequest.getBriefDescription())
-                .status(consultationRequest.getStatus())
-                .assignedLawyerId(
-                        consultationRequest.getConsultLawyer() != null
-                                ? consultationRequest.getConsultLawyer().getId()
-                                : null)
-                .assignedLawyerName(
-                        consultationRequest.getConsultLawyer() != null
-                                ? consultationRequest.getConsultLawyer().getName()
-                                : null)
-                .rejectReason(consultationRequest.getRejectReason())
-                .createdAt(consultationRequest.getCreatedDate())
-                .updatedAt(consultationRequest.getModifiedDate())
-                .build();
+        return ConsultationReservationResponse.from(consultationReservation);
     }
 
     // Consultation Management Methods
     @Transactional
-    public ConsultationResponse createConsultation(CreateConsultationDto request) {
-        ConsultationRequest consultationRequest =
-                findConsultationRequestById(request.getConsultationRequestId());
+    public ConsultationResponse createConsultation(CreateConsultationRequest request) {
+        ConsultationReservation reservation = consultationReservationRepository
+                .findById(request.getReservationId())
+                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_FOUND));
 
-        if (!consultationRequest.isApproved()) {
-            throw new ConsultationException(
-                    ConsultationErrorCode.CONSULTATION_REQUEST_NOT_APPROVED);
+        if (!reservation.isApproved()) {
+            throw new ConsultationException(ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_APPROVED);
         }
 
-        Client client = findOrCreateClient(request.getClientInfo());
-        User consultLawyer = consultationRequest.getConsultLawyer();
+        Client client = clientService.getClient(request.getClient());
+        User counselor = userService.getUser(request.getCounselorId());
 
-        Consultation consultation =
-                Consultation.builder()
-                        .consultationRequest(consultationRequest)
-                        .client(client)
-                        .consultLawyer(consultLawyer)
-                        .consultationDate(request.getConsultationDate())
-                        .location(request.getLocation())
-                        .build();
+        Consultation consultation = Consultation.builder()
+                .consultationReservation(reservation)
+                .client(client)
+                .counselor(counselor)
+                .consultationDate(request.getConsultationDate())
+                .build();
 
         Consultation saved = consultationRepository.save(consultation);
-        return mapToConsultationResponse(saved);
+        return ConsultationResponse.from(saved);
     }
 
     public List<ConsultationResponse> getConsultations() {
         return consultationRepository.findAll().stream()
-                .map(this::mapToConsultationResponse)
+                .map(ConsultationResponse::from)
                 .collect(Collectors.toList());
     }
 
     public ConsultationResponse getConsultation(Long id) {
-        Consultation consultation = findConsultationById(id);
-        return mapToConsultationResponse(consultation);
+        Consultation consultation = consultationRepository
+                .findById(id)
+                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+        return ConsultationResponse.from(consultation);
+    }
+
+
+    @Transactional
+    public ConsultationResponse startConsultation(Long id) {
+        Consultation consultation = consultationRepository
+                .findById(id)
+                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+
+        consultation.startConsultation();
+        return ConsultationResponse.from(consultation);
     }
 
     @Transactional
-    public ConsultationResponse updateConsultationStatus(
-            Long id, UpdateConsultationStatusDto request) {
-        Consultation consultation = findConsultationById(id);
-
-        switch (request.getStatus()) {
-            case CONSULTATION_IN_PROGRESS -> consultation.startConsultation();
-            case COMPLETED -> {
-                consultation.completeConsultation();
-                casesService.createCaseFromConsultation(consultation);
-            }
-            default ->
-                    throw new ConsultationException(
-                            ConsultationErrorCode.INVALID_STATUS_TRANSITION);
-        }
-
-        return mapToConsultationResponse(consultation);
-    }
-
-    private Client findOrCreateClient(CreateConsultationDto.ClientInfoDto clientInfo) {
-        if (clientInfo.getResidentNumber() != null) {
-            return clientRepository
-                    .findByResidentNumber(clientInfo.getResidentNumber())
-                    .orElseGet(() -> createNewClient(clientInfo));
-        }
-        return createNewClient(clientInfo);
-    }
-
-    private Client createNewClient(CreateConsultationDto.ClientInfoDto clientInfo) {
-        Client client =
-                Client.fromRequest(
-                        clientInfo.getName(),
-                        clientInfo.getEmail(),
-                        clientInfo.getPhone(),
-                        clientInfo.getAddress(),
-                        clientInfo.getResidentNumber(),
-                        clientInfo.getBirthDate(),
-                        clientInfo.getGender(),
-                        clientInfo.getJobTitle());
-        return clientRepository.save(client);
-    }
-
-    private Consultation findConsultationById(Long id) {
-        return consultationRepository
+    public ConsultationResponse completeConsultation(Long id) {
+        Consultation consultation = consultationRepository
                 .findById(id)
-                .orElseThrow(
-                        () ->
-                                new ConsultationException(
-                                        ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+
+        consultation.completeConsultation();
+        casesService.createCaseFromConsultation(consultation);
+
+        return ConsultationResponse.from(consultation);
     }
 
-    private ConsultationResponse mapToConsultationResponse(Consultation consultation) {
-        return ConsultationResponse.builder()
-                .id(consultation.getId())
-                .consultationRequestId(consultation.getConsultationRequest().getId())
-                .clientId(consultation.getClient().getId())
-                .clientName(consultation.getClient().getName())
-                .consultLawyerId(consultation.getConsultLawyer().getId())
-                .consultLawyerName(consultation.getConsultLawyer().getName())
-                .consultationDate(consultation.getConsultationDate())
-                .location(consultation.getLocation())
-                .status(consultation.getStatus())
-                .createdAt(consultation.getCreatedDate())
-                .updatedAt(consultation.getModifiedDate())
-                .build();
-    }
-
-    // ConsultationNote Management Methods
+    // Consultation Note Management Methods
     @Transactional
     public ConsultationNoteResponse createConsultationNote(
-            Long consultationId, CreateConsultationNoteDto request) {
-        Consultation consultation = findConsultationById(consultationId);
+            Long consultationId, ConsultationNoteRequest request) {
+        Consultation consultation = consultationRepository
+                .findById(consultationId)
+                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_FOUND));
 
-        if (!consultation.canWriteNote()) {
+        if (!consultation.isInProgress()) {
             throw new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_IN_PROGRESS);
         }
 
-        ConsultationNote consultationNote =
-                ConsultationNote.builder()
-                        .consultation(consultation)
-                        .author(consultation.getConsultLawyer())
-                        .factSummary(request.getFactSummary())
-                        .evidenceSummary(request.getEvidenceSummary())
-                        .legalIssue(request.getLegalIssue())
-                        .relatedLaws(request.getRelatedLaws())
-                        .clientGoal(request.getClientGoal())
-                        .lawyerOpinion(request.getLawyerOpinion())
-                        .riskAssessment(request.getRiskAssessment())
-                        .nextAction(request.getNextAction())
-                        .build();
+        ConsultationNote consultationNote = request.toEntity(consultation, consultation.getCounselor());
 
         ConsultationNote saved = consultationNoteRepository.save(consultationNote);
-        return mapToConsultationNoteResponse(saved);
+        return ConsultationNoteResponse.from(saved);
     }
 
     public List<ConsultationNoteResponse> getConsultationNotes(Long consultationId) {
         return consultationNoteRepository
                 .findByConsultationIdOrderByCreatedDateDesc(consultationId)
                 .stream()
-                .map(this::mapToConsultationNoteResponse)
+                .map(ConsultationNoteResponse::from)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public ConsultationNoteResponse updateConsultationNote(
-            Long consultationId, Long noteId, UpdateConsultationNoteDto request) {
-        ConsultationNote consultationNote = findConsultationNoteById(noteId);
+            Long consultationId, Long noteId, ConsultationNoteRequest request) {
+        ConsultationNote consultationNote = consultationNoteRepository
+                .findById(noteId)
+                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOTE_NOT_FOUND));
 
-        // 해당 상담의 노트인지 확인
         if (!consultationNote.getConsultation().getId().equals(consultationId)) {
             throw new ConsultationException(ConsultationErrorCode.CONSULTATION_NOTE_NOT_FOUND);
         }
 
-        // 상담이 진행 중일 때만 수정 가능
-        if (!consultationNote.getConsultation().canWriteNote()) {
+        if (!consultationNote.getConsultation().isInProgress()) {
             throw new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_IN_PROGRESS);
         }
 
@@ -298,43 +209,16 @@ public class ConsultationService {
                 request.getRiskAssessment(),
                 request.getNextAction());
 
-        return mapToConsultationNoteResponse(consultationNote);
-    }
-
-    private ConsultationNote findConsultationNoteById(Long id) {
-        return consultationNoteRepository
-                .findById(id)
-                .orElseThrow(
-                        () ->
-                                new ConsultationException(
-                                        ConsultationErrorCode.CONSULTATION_NOTE_NOT_FOUND));
-    }
-
-    private ConsultationNoteResponse mapToConsultationNoteResponse(
-            ConsultationNote consultationNote) {
-        return ConsultationNoteResponse.builder()
-                .id(consultationNote.getId())
-                .consultationId(consultationNote.getConsultation().getId())
-                .authorId(consultationNote.getAuthor().getId())
-                .authorName(consultationNote.getAuthor().getName())
-                .factSummary(consultationNote.getFactSummary())
-                .evidenceSummary(consultationNote.getEvidenceSummary())
-                .legalIssue(consultationNote.getLegalIssue())
-                .relatedLaws(consultationNote.getRelatedLaws())
-                .clientGoal(consultationNote.getClientGoal())
-                .lawyerOpinion(consultationNote.getLawyerOpinion())
-                .riskAssessment(consultationNote.getRiskAssessment())
-                .nextAction(consultationNote.getNextAction())
-                .createdAt(consultationNote.getCreatedDate())
-                .updatedAt(consultationNote.getModifiedDate())
-                .build();
+        return ConsultationNoteResponse.from(consultationNote);
     }
 
     // File Management Methods
     @Transactional
     public String uploadConsultationFile(
             Long consultationId, MultipartFile file, String description) throws IOException {
-        Consultation consultation = findConsultationById(consultationId);
+        Consultation consultation = consultationRepository
+                .findById(consultationId)
+                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_FOUND));
 
         FileEntity uploadedFile = fileService.uploadFile(file);
 
@@ -353,4 +237,5 @@ public class ConsultationService {
     public List<ConsultationFile> getConsultationFiles(Long consultationId) {
         return consultationFileRepository.findByConsultationId(consultationId);
     }
+
 }

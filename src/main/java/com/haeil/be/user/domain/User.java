@@ -46,7 +46,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "attorney", fetch = FetchType.LAZY)
     private final List<Cases> casesList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "consultLawyer", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "counselor", fetch = FetchType.LAZY)
     private final List<Consultation> consultationList = new ArrayList<>();
 
     @Builder
