@@ -65,7 +65,7 @@ public class CasesService {
                 .orElseThrow(() -> new CasesException(CasesErrorCode.CASE_NOT_FOUND));
 
         if (foundCase.getCaseStatus() != CaseStatus.UNASSIGNED) {
-            throw new CasesException(CasesErrorCode.NOT_UNASSIGNED_CASE);
+            throw new CasesException(CasesErrorCode.ALREADY_ASSIGNED_CASE);
         }
 
         return UnassignedCaseDetailResponse.from(foundCase);
@@ -132,7 +132,7 @@ public class CasesService {
             throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
         }
 
-        if (request.approved()) {
+        if (request.isApproved()) {
             // 승인 시 진행중 사건목록으로 사건이동
             foundCase.updateStatus(CaseStatus.IN_PROGRESS);
         } else {
