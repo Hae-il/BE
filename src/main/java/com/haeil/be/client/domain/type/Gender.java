@@ -1,10 +1,11 @@
-package com.haeil.be.contract.domain.type;
+package com.haeil.be.client.domain.type;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum ContractRequestStatus {
-    REQUESTED("수임요청");
+public enum Gender {
+    MALE("남성"),
+    FEMALE("여성");
 
     private final String label;
 

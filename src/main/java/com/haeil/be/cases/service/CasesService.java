@@ -2,6 +2,8 @@ package com.haeil.be.cases.service;
 
 import com.haeil.be.cases.domain.Cases;
 import com.haeil.be.cases.domain.type.CaseStatus;
+import com.haeil.be.cases.repository.CasesRepository;
+import com.haeil.be.consultation.domain.Consultation;
 import com.haeil.be.cases.dto.request.AssignAttorneyRequest;
 import com.haeil.be.cases.dto.request.DecisionRequest;
 import com.haeil.be.cases.dto.response.OngoingCaseDetailResponse;
@@ -12,20 +14,41 @@ import com.haeil.be.cases.dto.response.UnassignedCaseDetailResponse;
 import com.haeil.be.cases.dto.response.UnassignedCaseResponse;
 import com.haeil.be.cases.exception.CasesException;
 import com.haeil.be.cases.exception.errorcode.CasesErrorCode;
-import com.haeil.be.cases.repository.CasesRepository;
 import com.haeil.be.user.domain.User;
 import com.haeil.be.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class CasesService {
 
     private final CasesRepository casesRepository;
+
+    @Transactional
+    public Cases createCaseFromConsultation(Consultation consultation) {
+        Cases newCase =
+                Cases.builder()
+                        .title(
+                                consultation.getConsultationReservation().getName()
+                                        + " - "
+                                        + consultation
+                                                .getConsultationReservation()
+                                                .getCaseType()
+                                                .getLabel()
+                                        + " 사건")
+                        .content(consultation.getConsultationReservation().getDescription())
+                        .caseStatus(CaseStatus.UNASSIGNED)
+                        .caseType(consultation.getConsultationReservation().getCaseType())
+                        .attorney(consultation.getCounselor())
+                        .consultation(consultation)
+                        .build();
+
+        return casesRepository.save(newCase);
+    }
+
     private final UserRepository userRepository;
 
     //미배정 사건 목록조회
@@ -118,7 +141,7 @@ public class CasesService {
             foundCase.updateStatus(CaseStatus.UNASSIGNED);
         }
     }
-    
+
     //진행중인 사건 목록조회
     public List<OngoingCaseResponse> getOngoingCases(Long userId) {
         User attorney = userRepository.findById(userId)

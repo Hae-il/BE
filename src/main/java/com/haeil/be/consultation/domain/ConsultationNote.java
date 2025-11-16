@@ -3,6 +3,7 @@ package com.haeil.be.consultation.domain;
 import com.haeil.be.global.entity.BaseEntity;
 import com.haeil.be.user.domain.User;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -47,4 +48,47 @@ public class ConsultationNote extends BaseEntity {
 
     @Column(name = "next_action", columnDefinition = "TEXT")
     private String nextAction;
+
+    @Builder
+    public ConsultationNote(
+            Consultation consultation,
+            User author,
+            String factSummary,
+            String evidenceSummary,
+            String legalIssue,
+            String relatedLaws,
+            String clientGoal,
+            String lawyerOpinion,
+            String riskAssessment,
+            String nextAction) {
+        this.consultation = consultation;
+        this.author = author;
+        this.factSummary = factSummary;
+        this.evidenceSummary = evidenceSummary;
+        this.legalIssue = legalIssue;
+        this.relatedLaws = relatedLaws;
+        this.clientGoal = clientGoal;
+        this.lawyerOpinion = lawyerOpinion;
+        this.riskAssessment = riskAssessment;
+        this.nextAction = nextAction;
+    }
+
+    public void update(
+            String factSummary,
+            String evidenceSummary,
+            String legalIssue,
+            String relatedLaws,
+            String clientGoal,
+            String lawyerOpinion,
+            String riskAssessment,
+            String nextAction) {
+        if (factSummary != null) this.factSummary = factSummary;
+        if (evidenceSummary != null) this.evidenceSummary = evidenceSummary;
+        if (legalIssue != null) this.legalIssue = legalIssue;
+        if (relatedLaws != null) this.relatedLaws = relatedLaws;
+        if (clientGoal != null) this.clientGoal = clientGoal;
+        if (lawyerOpinion != null) this.lawyerOpinion = lawyerOpinion;
+        if (riskAssessment != null) this.riskAssessment = riskAssessment;
+        if (nextAction != null) this.nextAction = nextAction;
+    }
 }

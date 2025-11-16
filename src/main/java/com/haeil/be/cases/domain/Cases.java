@@ -86,17 +86,17 @@ public class Cases extends BaseEntity {
             LocalDateTime occurredDate,
             User attorney,
             Consultation consultation) {
-            this.title = title;
-            this.content = content;
-            this.caseStatus = caseStatus;
-            this.caseType = caseType;
-            this.opponentName = opponentName;
-            this.opponentPhone = opponentPhone;
-            this.opponentInsurance = opponentInsurance;
-            this.occurredDate = occurredDate;
-            this.attorney = attorney;
-            this.consultation = consultation;
-        }
+        this.title = title;
+        this.content = content;
+        this.caseStatus = caseStatus;
+        this.caseType = caseType;
+        this.opponentName = opponentName;
+        this.opponentPhone = opponentPhone;
+        this.opponentInsurance = opponentInsurance;
+        this.occurredDate = occurredDate;
+        this.attorney = attorney;
+        this.consultation = consultation;
+    }
 
     public void assignAttorney(User attorney) {
         this.attorney = attorney;

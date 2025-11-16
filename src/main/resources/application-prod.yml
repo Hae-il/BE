@@ -10,6 +10,10 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
     show-sql: false
 
+swagger:
+  server:
+    url: ${SWAGGER_URL}
+
 server:
   port: ${SERVER_PORT}
 
