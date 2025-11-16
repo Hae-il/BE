@@ -50,7 +50,8 @@ public class ConsultationController {
     @Operation(summary = "상담 예약 목록 조회", description = "상담 예약 목록을 조회합니다.")
     @GetMapping("/reservations")
     public ApiResponse<Object> getConsultationReservations() {
-        List<ConsultationReservationResponse> responses = consultationService.getConsultationReservations();
+        List<ConsultationReservationResponse> responses =
+                consultationService.getConsultationReservations();
         return ApiResponse.from(responses);
     }
 
@@ -60,7 +61,6 @@ public class ConsultationController {
         ConsultationReservationResponse response = consultationService.getConsultationRequest(id);
         return ApiResponse.from(response);
     }
-
 
     @Operation(summary = "상담 예약 승인", description = "상담 예약을 승인하고 담당 변호사를 배정합니다.")
     @PatchMapping("/reservations/{id}/approve")
@@ -152,8 +152,7 @@ public class ConsultationController {
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "description", required = false) String description)
             throws IOException {
-        String response =
-                consultationService.uploadConsultationFile(id, file, description);
+        String response = consultationService.uploadConsultationFile(id, file, description);
         return ApiResponse.from(response);
     }
 

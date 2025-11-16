@@ -67,5 +67,4 @@ public class Client extends BaseEntity {
         this.gender = gender;
         this.jobTitle = jobTitle;
     }
-
 }

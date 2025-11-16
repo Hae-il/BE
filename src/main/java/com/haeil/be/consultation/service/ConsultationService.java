@@ -26,7 +26,6 @@ import com.haeil.be.file.service.FileService;
 import com.haeil.be.user.domain.User;
 import com.haeil.be.user.service.UserService;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +53,8 @@ public class ConsultationService {
             CreateConsultationReservationRequest request) {
         ConsultationReservation consultationReservation = request.toEntity();
 
-        ConsultationReservation saved = consultationReservationRepository.save(consultationReservation);
+        ConsultationReservation saved =
+                consultationReservationRepository.save(consultationReservation);
         return ConsultationReservationResponse.from(saved);
     }
 
@@ -65,19 +65,28 @@ public class ConsultationService {
     }
 
     public ConsultationReservationResponse getConsultationRequest(Long id) {
-        ConsultationReservation consultationReservation = consultationReservationRepository
-                .findById(id)
-                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_FOUND));
+        ConsultationReservation consultationReservation =
+                consultationReservationRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new ConsultationException(
+                                                ConsultationErrorCode
+                                                        .CONSULTATION_RESERVATION_NOT_FOUND));
         return ConsultationReservationResponse.from(consultationReservation);
     }
-
 
     @Transactional
     public ConsultationReservationResponse approveConsultationReservation(
             Long id, ApproveConsultationReservation request) {
-        ConsultationReservation consultationReservation = consultationReservationRepository
-                .findById(id)
-                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_FOUND));
+        ConsultationReservation consultationReservation =
+                consultationReservationRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new ConsultationException(
+                                                ConsultationErrorCode
+                                                        .CONSULTATION_RESERVATION_NOT_FOUND));
 
         User counselor = userService.getUser(request.getLawyerId());
         consultationReservation.approve(counselor);
@@ -88,9 +97,14 @@ public class ConsultationService {
     @Transactional
     public ConsultationReservationResponse rejectConsultationReservation(
             Long id, RejectConsultationReservation request) {
-        ConsultationReservation consultationReservation = consultationReservationRepository
-                .findById(id)
-                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_FOUND));
+        ConsultationReservation consultationReservation =
+                consultationReservationRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new ConsultationException(
+                                                ConsultationErrorCode
+                                                        .CONSULTATION_RESERVATION_NOT_FOUND));
 
         consultationReservation.reject(request.getRejectionReason());
 
@@ -100,23 +114,30 @@ public class ConsultationService {
     // Consultation Management Methods
     @Transactional
     public ConsultationResponse createConsultation(CreateConsultationRequest request) {
-        ConsultationReservation reservation = consultationReservationRepository
-                .findById(request.getReservationId())
-                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_FOUND));
+        ConsultationReservation reservation =
+                consultationReservationRepository
+                        .findById(request.getReservationId())
+                        .orElseThrow(
+                                () ->
+                                        new ConsultationException(
+                                                ConsultationErrorCode
+                                                        .CONSULTATION_RESERVATION_NOT_FOUND));
 
         if (!reservation.isApproved()) {
-            throw new ConsultationException(ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_APPROVED);
+            throw new ConsultationException(
+                    ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_APPROVED);
         }
 
         Client client = clientService.getClient(request.getClient());
         User counselor = userService.getUser(request.getCounselorId());
 
-        Consultation consultation = Consultation.builder()
-                .consultationReservation(reservation)
-                .client(client)
-                .counselor(counselor)
-                .consultationDate(request.getConsultationDate())
-                .build();
+        Consultation consultation =
+                Consultation.builder()
+                        .consultationReservation(reservation)
+                        .client(client)
+                        .counselor(counselor)
+                        .consultationDate(request.getConsultationDate())
+                        .build();
 
         Consultation saved = consultationRepository.save(consultation);
         return ConsultationResponse.from(saved);
@@ -129,18 +150,25 @@ public class ConsultationService {
     }
 
     public ConsultationResponse getConsultation(Long id) {
-        Consultation consultation = consultationRepository
-                .findById(id)
-                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+        Consultation consultation =
+                consultationRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new ConsultationException(
+                                                ConsultationErrorCode.CONSULTATION_NOT_FOUND));
         return ConsultationResponse.from(consultation);
     }
 
-
     @Transactional
     public ConsultationResponse startConsultation(Long id) {
-        Consultation consultation = consultationRepository
-                .findById(id)
-                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+        Consultation consultation =
+                consultationRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new ConsultationException(
+                                                ConsultationErrorCode.CONSULTATION_NOT_FOUND));
 
         consultation.startConsultation();
         return ConsultationResponse.from(consultation);
@@ -148,9 +176,13 @@ public class ConsultationService {
 
     @Transactional
     public ConsultationResponse completeConsultation(Long id) {
-        Consultation consultation = consultationRepository
-                .findById(id)
-                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+        Consultation consultation =
+                consultationRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new ConsultationException(
+                                                ConsultationErrorCode.CONSULTATION_NOT_FOUND));
 
         consultation.completeConsultation();
         casesService.createCaseFromConsultation(consultation);
@@ -162,15 +194,20 @@ public class ConsultationService {
     @Transactional
     public ConsultationNoteResponse createConsultationNote(
             Long consultationId, ConsultationNoteRequest request) {
-        Consultation consultation = consultationRepository
-                .findById(consultationId)
-                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+        Consultation consultation =
+                consultationRepository
+                        .findById(consultationId)
+                        .orElseThrow(
+                                () ->
+                                        new ConsultationException(
+                                                ConsultationErrorCode.CONSULTATION_NOT_FOUND));
 
         if (!consultation.isInProgress()) {
             throw new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_IN_PROGRESS);
         }
 
-        ConsultationNote consultationNote = request.toEntity(consultation, consultation.getCounselor());
+        ConsultationNote consultationNote =
+                request.toEntity(consultation, consultation.getCounselor());
 
         ConsultationNote saved = consultationNoteRepository.save(consultationNote);
         return ConsultationNoteResponse.from(saved);
@@ -187,9 +224,13 @@ public class ConsultationService {
     @Transactional
     public ConsultationNoteResponse updateConsultationNote(
             Long consultationId, Long noteId, ConsultationNoteRequest request) {
-        ConsultationNote consultationNote = consultationNoteRepository
-                .findById(noteId)
-                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOTE_NOT_FOUND));
+        ConsultationNote consultationNote =
+                consultationNoteRepository
+                        .findById(noteId)
+                        .orElseThrow(
+                                () ->
+                                        new ConsultationException(
+                                                ConsultationErrorCode.CONSULTATION_NOTE_NOT_FOUND));
 
         if (!consultationNote.getConsultation().getId().equals(consultationId)) {
             throw new ConsultationException(ConsultationErrorCode.CONSULTATION_NOTE_NOT_FOUND);
@@ -216,9 +257,13 @@ public class ConsultationService {
     @Transactional
     public String uploadConsultationFile(
             Long consultationId, MultipartFile file, String description) throws IOException {
-        Consultation consultation = consultationRepository
-                .findById(consultationId)
-                .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+        Consultation consultation =
+                consultationRepository
+                        .findById(consultationId)
+                        .orElseThrow(
+                                () ->
+                                        new ConsultationException(
+                                                ConsultationErrorCode.CONSULTATION_NOT_FOUND));
 
         FileEntity uploadedFile = fileService.uploadFile(file);
 
@@ -237,5 +282,4 @@ public class ConsultationService {
     public List<ConsultationFile> getConsultationFiles(Long consultationId) {
         return consultationFileRepository.findByConsultationId(consultationId);
     }
-
 }
