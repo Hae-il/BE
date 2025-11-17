@@ -2,6 +2,7 @@ package com.haeil.be.cases.domain;
 
 import com.haeil.be.cases.domain.type.CaseStatus;
 import com.haeil.be.cases.domain.type.CaseType;
+import com.haeil.be.client.domain.Client;
 import com.haeil.be.consultation.domain.Consultation;
 import com.haeil.be.global.entity.BaseEntity;
 import com.haeil.be.user.domain.User;
@@ -57,6 +58,10 @@ public class Cases extends BaseEntity {
     private Consultation consultation;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    private Client client;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attorney_id")
     private User attorney;
 
@@ -85,7 +90,8 @@ public class Cases extends BaseEntity {
             String opponentInsurance,
             LocalDateTime occurredDate,
             User attorney,
-            Consultation consultation) {
+            Consultation consultation,
+            Client client) {
         this.title = title;
         this.content = content;
         this.caseStatus = caseStatus;
@@ -96,5 +102,18 @@ public class Cases extends BaseEntity {
         this.occurredDate = occurredDate;
         this.attorney = attorney;
         this.consultation = consultation;
+        this.client = client;
+    }
+
+    public void assignAttorney(User attorney) {
+        this.attorney = attorney;
+    }
+
+    public void removeAttorney() {
+        this.attorney = null;
+    }
+
+    public void updateStatus(CaseStatus caseStatus) {
+        this.caseStatus = caseStatus;
     }
 }
