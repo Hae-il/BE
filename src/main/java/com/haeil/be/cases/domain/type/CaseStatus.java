@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum CaseStatus {
-    UNSIGNED("미배정"),
+    UNASSIGNED("미배정"),
     PENDING("배정요청"),
     IN_PROGRESS("진행중"),
     COMPLETED("완료");

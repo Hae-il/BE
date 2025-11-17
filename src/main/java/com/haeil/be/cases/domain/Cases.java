@@ -2,12 +2,15 @@ package com.haeil.be.cases.domain;
 
 import com.haeil.be.cases.domain.type.CaseStatus;
 import com.haeil.be.cases.domain.type.CaseType;
+import com.haeil.be.client.domain.Client;
+import com.haeil.be.consultation.domain.Consultation;
 import com.haeil.be.global.entity.BaseEntity;
 import com.haeil.be.user.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -50,8 +53,13 @@ public class Cases extends BaseEntity {
     @Column(name = "occurred_date")
     private LocalDateTime occurredDate;
 
-    @Column(name = "consultation_id")
-    private Long consultationId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "consultation_id")
+    private Consultation consultation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    private Client client;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attorney_id")
@@ -70,4 +78,42 @@ public class Cases extends BaseEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private List<CaseEvent> caseEventList = new ArrayList<>();
+
+    @Builder
+    public Cases(
+            String title,
+            String content,
+            CaseStatus caseStatus,
+            CaseType caseType,
+            String opponentName,
+            String opponentPhone,
+            String opponentInsurance,
+            LocalDateTime occurredDate,
+            User attorney,
+            Consultation consultation,
+            Client client) {
+        this.title = title;
+        this.content = content;
+        this.caseStatus = caseStatus;
+        this.caseType = caseType;
+        this.opponentName = opponentName;
+        this.opponentPhone = opponentPhone;
+        this.opponentInsurance = opponentInsurance;
+        this.occurredDate = occurredDate;
+        this.attorney = attorney;
+        this.consultation = consultation;
+        this.client = client;
+    }
+
+    public void assignAttorney(User attorney) {
+        this.attorney = attorney;
+    }
+
+    public void removeAttorney() {
+        this.attorney = null;
+    }
+
+    public void updateStatus(CaseStatus caseStatus) {
+        this.caseStatus = caseStatus;
+    }
 }

@@ -1,6 +1,6 @@
 package com.haeil.be.contract.service;
 
-import static com.haeil.be.cases.exception.errorcode.CasesErrorCode.CASES_NOT_FOUND;
+import static com.haeil.be.cases.exception.errorcode.CasesErrorCode.CASE_NOT_FOUND;
 import static com.haeil.be.contract.exception.errorcode.ContractErrorCode.*;
 
 import com.haeil.be.cases.domain.Cases;
@@ -67,7 +67,7 @@ public class ContractService {
     private Cases findCasesOrThrow(Long caseId) {
         return casesRepository
                 .findById(caseId)
-                .orElseThrow(() -> new CasesException(CASES_NOT_FOUND));
+                .orElseThrow(() -> new CasesException(CASE_NOT_FOUND));
     }
 
     private ExpenseInfo createExpenseInfo(ExpenseInfoRequest request) {
