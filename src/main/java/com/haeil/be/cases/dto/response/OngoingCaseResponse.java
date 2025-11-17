@@ -11,8 +11,7 @@ public record OngoingCaseResponse(
         CaseType caseType,
         CaseStatus caseStatus,
         LocalDateTime occurredDate,
-        String attorneyName
-) {
+        String attorneyName) {
     public static OngoingCaseResponse from(Cases cases) {
         return new OngoingCaseResponse(
                 cases.getId(),
@@ -20,8 +19,6 @@ public record OngoingCaseResponse(
                 cases.getCaseType(),
                 cases.getCaseStatus(),
                 cases.getOccurredDate(),
-                cases.getAttorney() != null ? cases.getAttorney().getName() : null
-        );
+                cases.getAttorney() != null ? cases.getAttorney().getName() : null);
     }
 }
-

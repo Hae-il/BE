@@ -10,16 +10,13 @@ public record RequestedCaseResponse(
         String title,
         CaseType caseType,
         CaseStatus caseStatus,
-        LocalDateTime occurredDate
-) {
+        LocalDateTime occurredDate) {
     public static RequestedCaseResponse from(Cases cases) {
         return new RequestedCaseResponse(
                 cases.getId(),
                 cases.getTitle(),
                 cases.getCaseType(),
                 cases.getCaseStatus(),
-                cases.getOccurredDate()
-        );
+                cases.getOccurredDate());
     }
 }
-

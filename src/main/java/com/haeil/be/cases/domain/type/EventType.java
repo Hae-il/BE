@@ -9,8 +9,7 @@ public enum EventType {
     MEDIATION_DATE("조정기일"),
     CONFERENCE_DATE("준비기일"),
     SENTENCE_DATE("선고기일"),
-    INVESTIGATION_DATE("조사기일")
-    ;
+    INVESTIGATION_DATE("조사기일");
 
     private final String label;
 

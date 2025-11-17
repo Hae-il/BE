@@ -25,21 +25,21 @@ public class CasesController {
 
     private final CasesService casesService;
 
-    //미배정 사건 목록조회
+    // 미배정 사건 목록조회
     @Operation(summary = "미배정 사건 목록 조회", description = "현재 배정되지 않은 사건들을 조회합니다.")
     @GetMapping("/unassigned")
     public ApiResponse<Object> getUnassignedCases() {
         return ApiResponse.from(casesService.getUnassignedCases());
     }
 
-    //미배정 사건 상세보기
+    // 미배정 사건 상세보기
     @Operation(summary = "미배정 사건 상세보기", description = "미배정 사건의 상세 내용을 조회합니다.")
     @GetMapping("/unassigned/{caseId}")
     public ApiResponse<Object> getUnassignedCaseDetail(@PathVariable Long caseId) {
         return ApiResponse.from(casesService.getUnassignedCaseDetail(caseId));
     }
 
-    //변호사 배정요청
+    // 변호사 배정요청
     @Operation(summary = "변호사 배정 요청", description = "변호사 배정을 요청합니다.")
     @PostMapping("/unassigned/{caseId}/assign")
     public ApiResponse<Object> assignAttorney(
@@ -48,14 +48,15 @@ public class CasesController {
         return ApiResponse.EMPTY_RESPONSE;
     }
 
-    //요청된 사건 목록조회
+    // 요청된 사건 목록조회
     @Operation(summary = "요청된 사건 목록 조회", description = "변호사가 자신의 사건 배정 요청 목록을 조회합니다.")
     @GetMapping("/requested")
-    public ApiResponse<Object> getRequestedCases(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ApiResponse<Object> getRequestedCases(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.from(casesService.getRequestedCases(userDetails.getId()));
     }
 
-    //요청된 사건 상세보기
+    // 요청된 사건 상세보기
     @Operation(summary = "요청된 사건 상세보기", description = "요청된 사건의 상세 내용을 조회합니다.")
     @GetMapping("/requested/{caseId}")
     public ApiResponse<Object> getRequestedCaseDetail(
@@ -63,7 +64,7 @@ public class CasesController {
         return ApiResponse.from(casesService.getRequestedCaseDetail(caseId, userDetails.getId()));
     }
 
-    //사건 배정 승인/거절
+    // 사건 배정 승인/거절
     @Operation(summary = "사건배정 승인/거절", description = "요청받은 변호사가 사건 배정을 승인하거나 거절합니다.")
     @PatchMapping("/requested/{caseId}")
     public ApiResponse<Object> decideCaseAssignment(
@@ -74,14 +75,15 @@ public class CasesController {
         return ApiResponse.EMPTY_RESPONSE;
     }
 
-    //진행중인 사건 목록조회
+    // 진행중인 사건 목록조회
     @Operation(summary = "진행 중 사건 목록 조회", description = "담당 변호사가 맡은 진행 중 사건들을 조회합니다.")
     @GetMapping("/ongoing")
-    public ApiResponse<Object> getOngoingCases(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ApiResponse<Object> getOngoingCases(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.from(casesService.getOngoingCases(userDetails.getId()));
     }
 
-    //진행중인 사건 상세보기
+    // 진행중인 사건 상세보기
     @Operation(summary = "진행 중 사건 상세보기", description = "진행 중 사건의 상세 정보를 조회합니다.")
     @GetMapping("/ongoing/{caseId}")
     public ApiResponse<Object> getOngoingCaseDetail(

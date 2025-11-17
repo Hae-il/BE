@@ -11,8 +11,7 @@ public record RequestedCaseDetailResponse(
         String content,
         CaseType caseType,
         CaseStatus caseStatus,
-        LocalDateTime occurredDate
-) {
+        LocalDateTime occurredDate) {
     public static RequestedCaseDetailResponse from(Cases cases) {
         return new RequestedCaseDetailResponse(
                 cases.getId(),
@@ -20,8 +19,6 @@ public record RequestedCaseDetailResponse(
                 cases.getContent(),
                 cases.getCaseType(),
                 cases.getCaseStatus(),
-                cases.getOccurredDate()
-        );
+                cases.getOccurredDate());
     }
 }
-

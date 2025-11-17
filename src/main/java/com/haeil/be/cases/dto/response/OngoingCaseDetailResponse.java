@@ -19,8 +19,7 @@ public record OngoingCaseDetailResponse(
         LocalDateTime occurredDate,
         String attorneyName,
         // 사건진행결과
-        List<CaseEventResponse> caseProgress
-) {
+        List<CaseEventResponse> caseProgress) {
     public static OngoingCaseDetailResponse from(Cases cases) {
         return new OngoingCaseDetailResponse(
                 CaseManagementResponse.createDefault(),
@@ -32,10 +31,6 @@ public record OngoingCaseDetailResponse(
                 cases.getCaseStatus(),
                 cases.getOccurredDate(),
                 cases.getAttorney() != null ? cases.getAttorney().getName() : null,
-                cases.getCaseEventList().stream()
-                        .map(CaseEventResponse::from)
-                        .toList()
-        );
+                cases.getCaseEventList().stream().map(CaseEventResponse::from).toList());
     }
 }
-
