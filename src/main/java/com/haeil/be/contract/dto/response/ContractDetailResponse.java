@@ -24,7 +24,7 @@ public class ContractDetailResponse {
     private String caseNumber;
     private String caseName;
     private String attorneyName;
-    // private String clientName; 매핑이 안되어 있어서 추후에 수정 필요
+    private String clientName;
     private LocalDate dueDate;
     private ContractStatus status;
     private ExpenseInfoResponse expenseInfoResponse;
@@ -45,7 +45,7 @@ public class ContractDetailResponse {
                         .contractId(contract.getId())
                         .caseId(contract.getCases().getId())
                         .caseNumber(contract.getCases().getCaseNumber())
-                        // .clientName(contract.getCases().getClient().getName())
+                        .clientName(contract.getCases().getClient().getName())
                         .attorneyName(contract.getCases().getAttorney().getName())
                         .dueDate(contract.getDueDate())
                         .status(contract.getStatus())
