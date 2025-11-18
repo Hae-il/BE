@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum EventType {
-    // 여기는 맞게 더 채워주세요.
     HEARING_DATE("변론기일"),
     TRIAL_DATE("공판일"),
     MEDIATION_DATE("조정기일"),
-    ;
+    CONFERENCE_DATE("준비기일"),
+    SENTENCE_DATE("선고기일"),
+    INVESTIGATION_DATE("조사기일");
 
     private final String label;
 

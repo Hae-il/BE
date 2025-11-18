@@ -51,6 +51,12 @@ public class SecurityConfig {
                                                 "/api/v1/auth/signup",
                                                 "/api/v1/auth/login")
                                         .permitAll()
+                                        .requestMatchers("/api/v1/cases/unassigned/**")
+                                        .hasRole("SECRETARY")
+                                        .requestMatchers(
+                                                "/api/v1/cases/requested/**",
+                                                "/api/v1/cases/ongoing/**")
+                                        .hasRole("ATTORNEY")
                                         .anyRequest()
                                         .permitAll())
                 .addFilterBefore(
