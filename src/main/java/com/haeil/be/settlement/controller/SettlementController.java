@@ -2,6 +2,7 @@ package com.haeil.be.settlement.controller;
 
 import com.haeil.be.global.response.ApiResponse;
 import com.haeil.be.settlement.dto.request.CreateSettlementRequest;
+import com.haeil.be.settlement.dto.request.UpdatePaymentStatusRequest;
 import com.haeil.be.settlement.dto.request.UpdateSettlementRequest;
 import com.haeil.be.settlement.dto.response.SettlementListResponse;
 import com.haeil.be.settlement.dto.response.SettlementResponse;
@@ -46,7 +47,7 @@ public class SettlementController {
         return ApiResponse.from(responses);
     }
 
-    @Operation(summary = "정산 상세 조회", description = "정산 상세 정보를 조회합니다.")
+    @Operation(summary = "정산서 조회", description = "정산서 상세 정보를 조회합니다.")
     @GetMapping("/{id}")
     public ApiResponse<Object> getSettlement(@PathVariable Long id) {
         SettlementResponse response = settlementService.getSettlement(id);
@@ -58,6 +59,15 @@ public class SettlementController {
     public ApiResponse<Object> updateSettlement(
             @PathVariable Long id, @Valid @RequestBody UpdateSettlementRequest request) {
         SettlementResponse response = settlementService.updateSettlement(id, request);
+        return ApiResponse.from(response);
+    }
+
+    @Operation(summary = "정산 상태 변경", description = "정산서의 결제 상태를 변경합니다.")
+    @PatchMapping("/{id}/payment-status")
+    public ApiResponse<Object> updatePaymentStatus(
+            @PathVariable Long id, @Valid @RequestBody UpdatePaymentStatusRequest request) {
+        SettlementResponse response =
+                settlementService.updatePaymentStatus(id, request.getPaymentStatus());
         return ApiResponse.from(response);
     }
 

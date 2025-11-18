@@ -79,7 +79,6 @@ public class Settlement extends BaseEntity {
     /**
      * 정산 정보를 업데이트합니다.
      *
-     * @param paymentStatus 결제 상태
      * @param lawyerFee 변호사 수임료
      * @param total 총액
      * @param expenses 경비
@@ -90,7 +89,6 @@ public class Settlement extends BaseEntity {
      * @param note 비고
      */
     public void update(
-            PaymentStatus paymentStatus,
             BigDecimal lawyerFee,
             BigDecimal total,
             BigDecimal expenses,
@@ -99,9 +97,6 @@ public class Settlement extends BaseEntity {
             LocalDate settlementDate,
             LocalDate dueDate,
             String note) {
-        if (paymentStatus != null) {
-            this.changePaymentStatus(paymentStatus);
-        }
         if (lawyerFee != null) {
             this.lawyerFee = lawyerFee;
         }

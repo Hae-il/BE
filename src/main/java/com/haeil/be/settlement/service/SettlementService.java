@@ -117,7 +117,6 @@ public class SettlementService {
                                                 SettlementErrorCode.SETTLEMENT_NOT_FOUND));
 
         settlement.update(
-                request.getPaymentStatus(),
                 request.getLawyerFee(),
                 request.getTotal(),
                 request.getExpenses(),
@@ -126,6 +125,30 @@ public class SettlementService {
                 request.getSettlementDate(),
                 request.getDueDate(),
                 request.getNote());
+
+        Settlement updatedSettlement = settlementRepository.save(settlement);
+        return SettlementResponse.from(updatedSettlement);
+    }
+
+    /**
+     * 정산 상태 변경 정산서의 결제 상태를 변경합니다.
+     *
+     * @param id 정산서 ID
+     * @param paymentStatus 변경할 결제 상태
+     * @return 수정된 정산서 정보
+     * @throws SettlementException 정산서가 존재하지 않는 경우
+     */
+    @Transactional
+    public SettlementResponse updatePaymentStatus(Long id, PaymentStatus paymentStatus) {
+        Settlement settlement =
+                settlementRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new SettlementException(
+                                                SettlementErrorCode.SETTLEMENT_NOT_FOUND));
+
+        settlement.changePaymentStatus(paymentStatus);
 
         Settlement updatedSettlement = settlementRepository.save(settlement);
         return SettlementResponse.from(updatedSettlement);
