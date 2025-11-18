@@ -66,12 +66,15 @@ public class SettlementService {
                                 request.getIsVatIncluded() != null
                                         ? request.getIsVatIncluded()
                                         : false)
-                        .clientReceivable(request.getClientReceivable())
+                        .clientReceivable(null) // 자동 계산됨
                         .settlementDate(request.getSettlementDate())
                         .dueDate(request.getDueDate())
                         .note(request.getNote())
                         .relatedCase(relatedCase)
                         .build();
+
+        // clientReceivable 자동 계산
+        settlement.recalculateClientReceivable();
 
         Settlement savedSettlement = settlementRepository.save(settlement);
         return SettlementResponse.from(savedSettlement);

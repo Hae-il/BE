@@ -128,37 +128,48 @@ public class Settlement extends BaseEntity {
         }
 
         // 금액이 변경된 경우 clientReceivable 재계산
-        if (lawyerFee != null || expenses != null || isVatIncluded != null) {
+        if (total != null || lawyerFee != null || expenses != null || isVatIncluded != null) {
             this.recalculateClientReceivable();
         }
     }
 
     /**
-     * clientReceivable을 계산합니다. VAT 포함 여부에 따라 10% 부가세를 반영합니다.
+     * clientReceivable을 계산합니다. 공식: clientReceivable = total - (lawyerFee + expenses + VAT) VAT =
+     * (lawyerFee + expenses) * 0.1
      *
-     * @param lawyerFee 변호사 수임료
-     * @param expenses 경비
+     * @param total 합의금 전체 금액
+     * @param lawyerFee 변호사 보수
+     * @param expenses 실비
      * @param isVatIncluded VAT 포함 여부
-     * @return 계산된 의뢰인 미수금
+     * @return 계산된 의뢰인 최종 수령액
      */
     public static BigDecimal calculateClientReceivable(
-            BigDecimal lawyerFee, BigDecimal expenses, Boolean isVatIncluded) {
+            BigDecimal total, BigDecimal lawyerFee, BigDecimal expenses, Boolean isVatIncluded) {
+        // 변호사 보수 + 실비
         BigDecimal subtotal = lawyerFee.add(expenses);
 
+        // VAT 계산: (lawyerFee + expenses) * 0.1
+        BigDecimal vat = subtotal.multiply(new BigDecimal("0.1"));
+
+        // VAT 포함 여부에 따라 차감 금액 결정
+        BigDecimal deduction;
         if (Boolean.TRUE.equals(isVatIncluded)) {
-            // VAT 10% 포함
-            BigDecimal vat = subtotal.multiply(new BigDecimal("0.1"));
-            return subtotal.add(vat);
+            // VAT 포함: subtotal + VAT를 차감
+            deduction = subtotal.add(vat);
         } else {
-            // VAT 미포함
-            return subtotal;
+            // VAT 미포함: subtotal만 차감
+            deduction = subtotal;
         }
+
+        // clientReceivable = total - deduction
+        return total.subtract(deduction);
     }
 
     /** clientReceivable을 재계산하여 업데이트합니다. */
     public void recalculateClientReceivable() {
         this.clientReceivable =
-                calculateClientReceivable(this.lawyerFee, this.expenses, this.isVatIncluded);
+                calculateClientReceivable(
+                        this.total, this.lawyerFee, this.expenses, this.isVatIncluded);
     }
 
     /**
