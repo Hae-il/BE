@@ -2,6 +2,8 @@ package com.haeil.be.settlement.service;
 
 import com.haeil.be.cases.domain.Cases;
 import com.haeil.be.cases.domain.type.CaseStatus;
+import com.haeil.be.cases.exception.CasesException;
+import com.haeil.be.cases.exception.errorcode.CasesErrorCode;
 import com.haeil.be.cases.repository.CasesRepository;
 import com.haeil.be.settlement.domain.Settlement;
 import com.haeil.be.settlement.domain.type.PaymentStatus;
@@ -51,10 +53,7 @@ public class SettlementService {
         Cases cases =
                 casesRepository
                         .findById(request.getCaseId())
-                        .orElseThrow(
-                                () ->
-                                        new SettlementException(
-                                                SettlementErrorCode.SETTLEMENT_NOT_FOUND));
+                        .orElseThrow(() -> new CasesException(CasesErrorCode.CASE_NOT_FOUND));
 
         Settlement settlement =
                 Settlement.builder()

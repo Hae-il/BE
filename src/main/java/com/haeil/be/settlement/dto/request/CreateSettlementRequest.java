@@ -1,6 +1,5 @@
 package com.haeil.be.settlement.dto.request;
 
-import com.haeil.be.settlement.domain.type.PaymentStatus;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,9 +10,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class CreateSettlementRequest {
-
-    @NotNull(message = "결제 상태는 필수 입력 항목입니다.")
-    private PaymentStatus paymentStatus;
 
     @NotNull(message = "변호사 수임료는 필수 입력 항목입니다.")
     private BigDecimal lawyerFee;
@@ -41,7 +37,6 @@ public class CreateSettlementRequest {
 
     @Builder
     public CreateSettlementRequest(
-            PaymentStatus paymentStatus,
             BigDecimal lawyerFee,
             BigDecimal total,
             BigDecimal expenses,
@@ -51,7 +46,6 @@ public class CreateSettlementRequest {
             LocalDate dueDate,
             String note,
             Long caseId) {
-        this.paymentStatus = paymentStatus;
         this.lawyerFee = lawyerFee;
         this.total = total;
         this.expenses = expenses;
