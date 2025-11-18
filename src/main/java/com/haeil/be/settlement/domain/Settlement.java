@@ -48,9 +48,9 @@ public class Settlement extends BaseEntity {
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "case_id")
-    private Cases relatedCase;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "case_id", unique = true)
+    private Cases cases;
 
     @Builder
     public Settlement(
@@ -63,7 +63,7 @@ public class Settlement extends BaseEntity {
             LocalDate settlementDate,
             LocalDate dueDate,
             String note,
-            Cases relatedCase) {
+            Cases cases) {
         this.paymentStatus = paymentStatus;
         this.lawyerFee = lawyerFee;
         this.total = total;
@@ -73,7 +73,7 @@ public class Settlement extends BaseEntity {
         this.settlementDate = settlementDate;
         this.dueDate = dueDate;
         this.note = note;
-        this.relatedCase = relatedCase;
+        this.cases = cases;
     }
 
     /**

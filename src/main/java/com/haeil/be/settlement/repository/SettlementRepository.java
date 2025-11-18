@@ -17,7 +17,7 @@ public interface SettlementRepository extends JpaRepository<Settlement, Long> {
      */
     @Query(
             "SELECT c, s FROM com.haeil.be.cases.domain.Cases c "
-                    + "LEFT JOIN com.haeil.be.settlement.domain.Settlement s ON s.relatedCase.id = c.id "
+                    + "LEFT JOIN com.haeil.be.settlement.domain.Settlement s ON s.cases.id = c.id "
                     + "WHERE c.caseStatus = :caseStatus "
                     + "ORDER BY c.createdDate DESC")
     List<Object[]> findSettlementsByCaseStatus(@Param("caseStatus") CaseStatus caseStatus);

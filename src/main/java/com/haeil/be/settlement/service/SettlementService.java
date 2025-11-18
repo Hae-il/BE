@@ -48,7 +48,7 @@ public class SettlementService {
      */
     @Transactional
     public SettlementResponse createSettlement(CreateSettlementRequest request) {
-        Cases relatedCase =
+        Cases cases =
                 casesRepository
                         .findById(request.getCaseId())
                         .orElseThrow(
@@ -70,7 +70,7 @@ public class SettlementService {
                         .settlementDate(request.getSettlementDate())
                         .dueDate(request.getDueDate())
                         .note(request.getNote())
-                        .relatedCase(relatedCase)
+                        .cases(cases)
                         .build();
 
         // clientReceivable 자동 계산

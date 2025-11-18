@@ -38,10 +38,7 @@ public class SettlementResponse {
                 .settlementDate(settlement.getSettlementDate())
                 .dueDate(settlement.getDueDate())
                 .note(settlement.getNote())
-                .caseId(
-                        settlement.getRelatedCase() != null
-                                ? settlement.getRelatedCase().getId()
-                                : null)
+                .caseId(settlement.getCases() != null ? settlement.getCases().getId() : null)
                 .createdDate(settlement.getCreatedDate())
                 .modifiedDate(settlement.getModifiedDate())
                 .build();
