@@ -13,6 +13,8 @@ import com.haeil.be.cases.dto.request.PetitionRequest;
 import com.haeil.be.cases.dto.response.CaseDocumentResponse;
 import com.haeil.be.cases.dto.response.CaseInfoResponse;
 import com.haeil.be.cases.dto.response.PetitionResponse;
+import com.haeil.be.cases.dto.response.CompletedCaseDetailResponse;
+import com.haeil.be.cases.dto.response.CompletedCaseResponse;
 import com.haeil.be.cases.dto.response.OngoingCaseDetailResponse;
 import com.haeil.be.cases.dto.response.OngoingCaseResponse;
 import com.haeil.be.cases.dto.response.RequestedCaseDetailResponse;
@@ -458,6 +460,41 @@ public class CasesService {
 
         // 상태 변경
         foundCase.updateStatus(CaseStatus.COMPLETED);
+    }
+
+    // 완료된 사건 목록조회
+    @Transactional(readOnly = true)
+    public List<CompletedCaseResponse> getCompletedCases(Long userId) {
+        User attorney =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new CasesException(CasesErrorCode.ATTORNEY_NOT_FOUND));
+
+        return casesRepository
+                .findByCaseStatusAndAttorney(CaseStatus.COMPLETED, attorney)
+                .stream()
+                .map(CompletedCaseResponse::from)
+                .toList();
+    }
+
+    // 완료된 사건 상세보기
+    @Transactional(readOnly = true)
+    public CompletedCaseDetailResponse getCompletedCaseDetail(Long caseId, Long userId) {
+        Cases foundCase =
+                casesRepository
+                        .findById(caseId)
+                        .orElseThrow(() -> new CasesException(CASE_NOT_FOUND));
+
+        if (foundCase.getCaseStatus() != CaseStatus.COMPLETED) {
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
+        }
+
+        // 변호사는 본인 담당 사건만 확인 가능
+        if (foundCase.getAttorney() == null || !foundCase.getAttorney().getId().equals(userId)) {
+            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+        }
+
+        return CompletedCaseDetailResponse.from(foundCase);
     }
 
 }

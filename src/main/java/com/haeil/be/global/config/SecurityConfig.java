@@ -55,7 +55,8 @@ public class SecurityConfig {
                                         .hasRole("SECRETARY")
                                         .requestMatchers(
                                                 "/api/v1/cases/requested/**",
-                                                "/api/v1/cases/ongoing/**")
+                                                "/api/v1/cases/ongoing/**",
+                                                "/api/v1/cases/completed/**")
                                         .hasRole("ATTORNEY")
                                         .anyRequest()
                                         .permitAll())

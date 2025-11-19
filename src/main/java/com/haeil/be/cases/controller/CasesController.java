@@ -181,4 +181,20 @@ public class CasesController {
         casesService.completeCase(caseId, userDetails.getId());
         return ApiResponse.EMPTY_RESPONSE;
     }
+
+    // 완료된 사건 목록조회
+    @Operation(summary = "완료된 사건 목록 조회", description = "담당 변호사가 완료한 사건들을 조회합니다.")
+    @GetMapping("/completed")
+    public ApiResponse<Object> getCompletedCases(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.from(casesService.getCompletedCases(userDetails.getId()));
+    }
+
+    // 완료된 사건 상세보기
+    @Operation(summary = "완료된 사건 상세보기", description = "완료된 사건의 상세 정보를 조회합니다.")
+    @GetMapping("/completed/{caseId}")
+    public ApiResponse<Object> getCompletedCaseDetail(
+            @PathVariable Long caseId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.from(casesService.getCompletedCaseDetail(caseId, userDetails.getId()));
+    }
 }
