@@ -7,6 +7,7 @@ import com.haeil.be.cases.exception.errorcode.CasesErrorCode;
 import com.haeil.be.cases.repository.CasesRepository;
 import com.haeil.be.settlement.domain.Settlement;
 import com.haeil.be.settlement.domain.type.PaymentStatus;
+import com.haeil.be.settlement.domain.type.SettlementStatus;
 import com.haeil.be.settlement.dto.request.CreateSettlementRequest;
 import com.haeil.be.settlement.dto.request.UpdateSettlementRequest;
 import com.haeil.be.settlement.dto.response.SettlementListResponse;
@@ -58,8 +59,9 @@ public class SettlementService {
         Settlement settlement =
                 Settlement.builder()
                         .paymentStatus(PaymentStatus.PENDING) // 초기값: 입금 대기
-                        .lawyerFee(request.getLawyerFee())
-                        .total(request.getTotal())
+                        .settlementStatus(SettlementStatus.NONE) // 초기값: NONE
+                        .attorneyFee(request.getAttorneyFee())
+                        .agreementAmount(request.getAgreementAmount())
                         .expenses(request.getExpenses())
                         .isVatIncluded(
                                 request.getIsVatIncluded() != null
@@ -67,10 +69,13 @@ public class SettlementService {
                                         : false)
                         .clientReceivable(null) // 자동 계산됨
                         .settlementDate(request.getSettlementDate())
-                        .dueDate(request.getDueDate())
+                        .paymentDueDate(request.getPaymentDueDate())
                         .note(request.getNote())
                         .cases(cases)
                         .build();
+
+        // 상태 변경 규칙 적용 (NONE → DRAFT → FINAL)
+        settlement.updateSettlementStatus();
 
         // clientReceivable 자동 계산
         settlement.recalculateClientReceivable();
@@ -117,13 +122,13 @@ public class SettlementService {
                                                 SettlementErrorCode.SETTLEMENT_NOT_FOUND));
 
         settlement.update(
-                request.getLawyerFee(),
-                request.getTotal(),
+                request.getAttorneyFee(),
+                request.getAgreementAmount(),
                 request.getExpenses(),
                 request.getIsVatIncluded(),
                 request.getClientReceivable(),
                 request.getSettlementDate(),
-                request.getDueDate(),
+                request.getPaymentDueDate(),
                 request.getNote());
 
         Settlement updatedSettlement = settlementRepository.save(settlement);

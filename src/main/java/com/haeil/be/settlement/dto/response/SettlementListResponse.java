@@ -16,8 +16,8 @@ public class SettlementListResponse {
     private String caseTitle;
     private Long settlementId;
     private PaymentStatus paymentStatus;
-    private BigDecimal total;
-    private LocalDate dueDate;
+    private BigDecimal agreementAmount;
+    private LocalDate paymentDueDate;
 
     /**
      * Repository에서 반환된 Object[] 결과를 SettlementListResponse로 변환합니다. Object[]의 첫 번째 요소는 Cases, 두 번째
@@ -35,8 +35,8 @@ public class SettlementListResponse {
                 .caseTitle(cases.getTitle())
                 .settlementId(settlement != null ? settlement.getId() : null)
                 .paymentStatus(settlement != null ? settlement.getPaymentStatus() : null)
-                .total(settlement != null ? settlement.getTotal() : null)
-                .dueDate(settlement != null ? settlement.getDueDate() : null)
+                .agreementAmount(settlement != null ? settlement.getAgreementAmount() : null)
+                .paymentDueDate(settlement != null ? settlement.getPaymentDueDate() : null)
                 .build();
     }
 }

@@ -2,6 +2,7 @@ package com.haeil.be.settlement.dto.response;
 
 import com.haeil.be.settlement.domain.Settlement;
 import com.haeil.be.settlement.domain.type.PaymentStatus;
+import com.haeil.be.settlement.domain.type.SettlementStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,13 +15,14 @@ public class SettlementResponse {
 
     private Long id;
     private PaymentStatus paymentStatus;
-    private BigDecimal lawyerFee;
-    private BigDecimal total;
+    private SettlementStatus settlementStatus;
+    private BigDecimal attorneyFee;
+    private BigDecimal agreementAmount;
     private BigDecimal expenses;
     private Boolean isVatIncluded;
     private BigDecimal clientReceivable;
     private LocalDate settlementDate;
-    private LocalDate dueDate;
+    private LocalDate paymentDueDate;
     private String note;
     private Long caseId;
     private LocalDateTime createdDate;
@@ -30,13 +32,14 @@ public class SettlementResponse {
         return SettlementResponse.builder()
                 .id(settlement.getId())
                 .paymentStatus(settlement.getPaymentStatus())
-                .lawyerFee(settlement.getLawyerFee())
-                .total(settlement.getTotal())
+                .settlementStatus(settlement.getSettlementStatus())
+                .attorneyFee(settlement.getAttorneyFee())
+                .agreementAmount(settlement.getAgreementAmount())
                 .expenses(settlement.getExpenses())
                 .isVatIncluded(settlement.getIsVatIncluded())
                 .clientReceivable(settlement.getClientReceivable())
                 .settlementDate(settlement.getSettlementDate())
-                .dueDate(settlement.getDueDate())
+                .paymentDueDate(settlement.getPaymentDueDate())
                 .note(settlement.getNote())
                 .caseId(settlement.getCases() != null ? settlement.getCases().getId() : null)
                 .createdDate(settlement.getCreatedDate())

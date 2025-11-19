@@ -10,32 +10,32 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateSettlementRequest {
 
-    private BigDecimal lawyerFee;
-    private BigDecimal total;
+    private BigDecimal attorneyFee;
+    private BigDecimal agreementAmount;
     private BigDecimal expenses;
     private Boolean isVatIncluded;
     private BigDecimal clientReceivable;
     private LocalDate settlementDate;
-    private LocalDate dueDate;
+    private LocalDate paymentDueDate;
     private String note;
 
     @Builder
     public UpdateSettlementRequest(
-            BigDecimal lawyerFee,
-            BigDecimal total,
+            BigDecimal attorneyFee,
+            BigDecimal agreementAmount,
             BigDecimal expenses,
             Boolean isVatIncluded,
             BigDecimal clientReceivable,
             LocalDate settlementDate,
-            LocalDate dueDate,
+            LocalDate paymentDueDate,
             String note) {
-        this.lawyerFee = lawyerFee;
-        this.total = total;
+        this.attorneyFee = attorneyFee;
+        this.agreementAmount = agreementAmount;
         this.expenses = expenses;
         this.isVatIncluded = isVatIncluded;
         this.clientReceivable = clientReceivable;
         this.settlementDate = settlementDate;
-        this.dueDate = dueDate;
+        this.paymentDueDate = paymentDueDate;
         this.note = note;
     }
 }
