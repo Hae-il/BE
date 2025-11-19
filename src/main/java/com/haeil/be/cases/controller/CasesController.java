@@ -106,7 +106,7 @@ public class CasesController {
 
     // 소장 조회
     @Operation(summary = "소장 조회", description = "작성된 소장을 조회합니다.")
-    @GetMapping("/ongoing/{caseId}/petition")
+    @GetMapping("/ongoing/{caseId}/petition/{id}")
     public ApiResponse<Object> getPetition(
             @PathVariable Long caseId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -115,7 +115,7 @@ public class CasesController {
 
     // 소장 수정
     @Operation(summary = "소장 수정", description = "작성된 소장을 수정합니다.")
-    @PatchMapping("/ongoing/{caseId}/petition")
+    @PatchMapping("/ongoing/{caseId}/petition/{id}")
     public ApiResponse<Object> updatePetition(
             @PathVariable Long caseId,
             @RequestBody PetitionRequest request,
