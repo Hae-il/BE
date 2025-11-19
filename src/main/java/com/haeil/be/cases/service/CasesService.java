@@ -104,7 +104,7 @@ public class CasesService {
                         .orElseThrow(() -> new CasesException(CASE_NOT_FOUND));
 
         if (foundCase.getCaseStatus() != CaseStatus.UNASSIGNED) {
-            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
         }
 
         User attorney =
@@ -139,7 +139,7 @@ public class CasesService {
                         .orElseThrow(() -> new CasesException(CASE_NOT_FOUND));
 
         if (foundCase.getCaseStatus() != CaseStatus.PENDING) {
-            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
         }
 
         // 요청받은 변호사만 조회 가능
@@ -158,7 +158,7 @@ public class CasesService {
                         .orElseThrow(() -> new CasesException(CASE_NOT_FOUND));
 
         if (foundCase.getCaseStatus() != CaseStatus.PENDING) {
-            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
         }
 
         // 요청받은 변호사만 승인/거절 가능
@@ -198,7 +198,7 @@ public class CasesService {
                         .orElseThrow(() -> new CasesException(CASE_NOT_FOUND));
 
         if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
-            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
         }
 
         // 변호사는 본인 담당 사건만 확인 가능
@@ -227,7 +227,7 @@ public class CasesService {
         Cases foundCase = getCasesOrThrow(caseId);
 
         if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
-            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
         }
 
         // 변호사는 본인 담당 사건만 소장 작성 가능
@@ -261,7 +261,7 @@ public class CasesService {
         Cases foundCase = getCasesOrThrow(caseId);
 
         if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
-            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
         }
 
         // 변호사는 본인 담당 사건만 소장 조회 가능
@@ -282,7 +282,7 @@ public class CasesService {
         Cases foundCase = getCasesOrThrow(caseId);
 
         if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
-            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
         }
 
         // 변호사는 본인 담당 사건만 소장 수정 가능
@@ -347,7 +347,7 @@ public class CasesService {
         Cases foundCase = getCasesOrThrow(caseId);
 
         if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
-            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
         }
 
         // 변호사는 본인 담당 사건만 소송문서 업로드 가능
@@ -387,7 +387,7 @@ public class CasesService {
         Cases foundCase = getCasesOrThrow(caseId);
 
         if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
-            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
         }
 
         // 변호사는 본인 담당 사건만 소송문서 조회 가능
@@ -407,7 +407,7 @@ public class CasesService {
         Cases foundCase = getCasesOrThrow(caseId);
 
         if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
-            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
         }
 
         // 변호사는 본인 담당 사건만 소송문서 삭제 가능
@@ -439,6 +439,25 @@ public class CasesService {
 
         // 소송문서 삭제
         caseDocumentRepository.delete(caseDocument);
+    }
+
+    //사건 완료처리
+    @Transactional
+    public void completeCase(Long caseId, Long userId) {
+        Cases foundCase = getCasesOrThrow(caseId);
+
+        // 진행중 사건 여부 확인
+        if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
+        }
+
+        // 담당 변호사만 완료 가능
+        if (!foundCase.getAttorney().getId().equals(userId)) {
+            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+        }
+
+        // 상태 변경
+        foundCase.updateStatus(CaseStatus.COMPLETED);
     }
 
 }

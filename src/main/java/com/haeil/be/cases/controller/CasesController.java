@@ -171,5 +171,14 @@ public class CasesController {
         casesService.deleteCaseDocument(caseId, documentId, userDetails.getId());
         return ApiResponse.EMPTY_RESPONSE;
     }
+    //사건 완료처리
+    @Operation(summary = "사건 완료 처리", description = "진행 중 사건을 완료된 사건 상태로 변경합니다.")
+    @PatchMapping("/ongoing/{caseId}/complete")
+    public ApiResponse<Object> completeCase(
+            @PathVariable Long caseId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
+        casesService.completeCase(caseId, userDetails.getId());
+        return ApiResponse.EMPTY_RESPONSE;
+    }
 }
