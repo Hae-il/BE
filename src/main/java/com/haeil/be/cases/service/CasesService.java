@@ -4,9 +4,12 @@ import static com.haeil.be.cases.exception.errorcode.CasesErrorCode.CASE_NOT_FOU
 
 import com.haeil.be.cases.domain.Cases;
 import com.haeil.be.cases.domain.type.CaseStatus;
+import com.haeil.be.cases.domain.Petition;
 import com.haeil.be.cases.dto.request.AssignAttorneyRequest;
 import com.haeil.be.cases.dto.request.DecisionRequest;
+import com.haeil.be.cases.dto.request.PetitionRequest;
 import com.haeil.be.cases.dto.response.CaseInfoResponse;
+import com.haeil.be.cases.dto.response.PetitionResponse;
 import com.haeil.be.cases.dto.response.OngoingCaseDetailResponse;
 import com.haeil.be.cases.dto.response.OngoingCaseResponse;
 import com.haeil.be.cases.dto.response.RequestedCaseDetailResponse;
@@ -16,6 +19,7 @@ import com.haeil.be.cases.dto.response.UnassignedCaseResponse;
 import com.haeil.be.cases.exception.CasesException;
 import com.haeil.be.cases.exception.errorcode.CasesErrorCode;
 import com.haeil.be.cases.repository.CasesRepository;
+import com.haeil.be.cases.repository.PetitionRepository;
 import com.haeil.be.consultation.domain.Consultation;
 import com.haeil.be.user.domain.User;
 import com.haeil.be.user.repository.UserRepository;
@@ -29,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CasesService {
 
     private final CasesRepository casesRepository;
+    private final PetitionRepository petitionRepository;
 
     @Transactional
     public Cases createCaseFromConsultation(Consultation consultation) {
@@ -199,4 +204,124 @@ public class CasesService {
                 .findById(caseId)
                 .orElseThrow(() -> new CasesException(CASE_NOT_FOUND));
     }
+
+    // 소장 작성
+    @Transactional
+    public void createPetition(Long caseId, PetitionRequest request, Long userId) {
+        Cases foundCase = getCasesOrThrow(caseId);
+
+        if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
+            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+        }
+
+        // 변호사는 본인 담당 사건만 소장 작성 가능
+        if (foundCase.getAttorney() == null || !foundCase.getAttorney().getId().equals(userId)) {
+            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+        }
+
+        // 이미 소장이 작성되었는지 확인
+        if (foundCase.getPetition() != null) {
+            throw new CasesException(CasesErrorCode.PETITION_ALREADY_EXISTS);
+        }
+
+        Petition petition = Petition.builder()
+                .cases(foundCase)
+                .claimAmount(request.claimAmount())
+                .claimContent(request.claimContent())
+                .accidentCircumstances(request.accidentCircumstances())
+                .damageItems(request.damageItems())
+                .damageCalculation(request.damageCalculation())
+                .liabilityBasis(request.liabilityBasis())
+                .proofMethod(request.proofMethod())
+                .attachedDocuments(request.attachedDocuments())
+                .build();
+
+        petitionRepository.save(petition);
+    }
+
+    // 소장 조회
+    @Transactional(readOnly = true)
+    public PetitionResponse getPetition(Long caseId, Long userId) {
+        Cases foundCase = getCasesOrThrow(caseId);
+
+        if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
+            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+        }
+
+        // 변호사는 본인 담당 사건만 소장 조회 가능
+        if (foundCase.getAttorney() == null || !foundCase.getAttorney().getId().equals(userId)) {
+            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+        }
+
+        if (foundCase.getPetition() == null) {
+            throw new CasesException(CasesErrorCode.PETITION_NOT_FOUND);
+        }
+
+        return PetitionResponse.from(foundCase.getPetition());
+    }
+
+    // 소장 수정
+    @Transactional
+    public void updatePetition(Long caseId, PetitionRequest request, Long userId) {
+        Cases foundCase = getCasesOrThrow(caseId);
+
+        if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
+            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+        }
+
+        // 변호사는 본인 담당 사건만 소장 수정 가능
+        if (foundCase.getAttorney() == null || !foundCase.getAttorney().getId().equals(userId)) {
+            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+        }
+
+        Petition petition = foundCase.getPetition();
+        if (petition == null) {
+            throw new CasesException(CasesErrorCode.PETITION_NOT_FOUND);
+        }
+
+        // 소장 정보 업데이트
+        updatePetitionFields(petition, request);
+    }
+
+    private void updatePetitionFields(Petition petition, PetitionRequest request) {
+        if (request.claimAmount() != null) {
+            petition.updateClaimAmount(request.claimAmount());
+        }
+        if (request.claimContent() != null) {
+            petition.updateClaimContent(request.claimContent());
+        }
+        if (request.accidentCircumstances() != null) {
+            petition.updateAccidentCircumstances(request.accidentCircumstances());
+        }
+        if (request.damageItems() != null) {
+            petition.updateDamageItems(request.damageItems());
+        }
+        if (request.damageCalculation() != null) {
+            petition.updateDamageCalculation(request.damageCalculation());
+        }
+        if (request.liabilityBasis() != null) {
+            petition.updateLiabilityBasis(request.liabilityBasis());
+        }
+        if (request.proofMethod() != null) {
+            petition.updateProofMethod(request.proofMethod());
+        }
+        if (request.attachedDocuments() != null) {
+            petition.updateAttachedDocuments(request.attachedDocuments());
+        }
+    }
+
+    //법원에서 할당된 사건번호 추가
+    @Transactional
+    public void updateCaseNumber(Long caseId, String caseNumber, Long userId) {
+        Cases foundCase = getCasesOrThrow(caseId);
+
+        // 담당 변호사만 가능
+        if (foundCase.getAttorney() == null || !foundCase.getAttorney().getId().equals(userId)) {
+            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+        }
+
+        // 사건번호 업데이트
+        foundCase.updateCaseNumber(caseNumber);
+    }
+
 }

@@ -1,7 +1,9 @@
 package com.haeil.be.cases.controller;
 
 import com.haeil.be.cases.dto.request.AssignAttorneyRequest;
+import com.haeil.be.cases.dto.request.CaseNumberRequest;
 import com.haeil.be.cases.dto.request.DecisionRequest;
+import com.haeil.be.cases.dto.request.PetitionRequest;
 import com.haeil.be.cases.service.CasesService;
 import com.haeil.be.global.response.ApiResponse;
 import com.haeil.be.user.service.CustomUserDetails;
@@ -90,4 +92,48 @@ public class CasesController {
             @PathVariable Long caseId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.from(casesService.getOngoingCaseDetail(caseId, userDetails.getId()));
     }
+
+    // 소장 작성
+    @Operation(summary = "소장 작성", description = "진행 중인 사건에 대한 소장을 작성합니다.")
+    @PostMapping("/ongoing/{caseId}/petition")
+    public ApiResponse<Object> createPetition(
+            @PathVariable Long caseId,
+            @RequestBody PetitionRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        casesService.createPetition(caseId, request, userDetails.getId());
+        return ApiResponse.EMPTY_RESPONSE;
+    }
+
+    // 소장 조회
+    @Operation(summary = "소장 조회", description = "작성된 소장을 조회합니다.")
+    @GetMapping("/ongoing/{caseId}/petition")
+    public ApiResponse<Object> getPetition(
+            @PathVariable Long caseId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.from(casesService.getPetition(caseId, userDetails.getId()));
+    }
+
+    // 소장 수정
+    @Operation(summary = "소장 수정", description = "작성된 소장을 수정합니다.")
+    @PatchMapping("/ongoing/{caseId}/petition")
+    public ApiResponse<Object> updatePetition(
+            @PathVariable Long caseId,
+            @RequestBody PetitionRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        casesService.updatePetition(caseId, request, userDetails.getId());
+        return ApiResponse.EMPTY_RESPONSE;
+    }
+
+    //법원에서 할당된 사건번호 추가
+    @Operation(summary = "사건번호 등록", description = "정식 사건 번호를 추가합니다")
+    @PatchMapping("/ongoing/{caseId}/caseNumber")
+    public ApiResponse<Object> updateCaseNumber(
+            @PathVariable Long caseId,
+            @RequestBody CaseNumberRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        casesService.updateCaseNumber(caseId, request.caseNumber(), userDetails.getId());
+        return ApiResponse.EMPTY_RESPONSE;
+    }
+
 }
