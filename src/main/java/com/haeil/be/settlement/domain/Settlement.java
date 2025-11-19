@@ -90,7 +90,6 @@ public class Settlement extends BaseEntity {
      * @param agreementAmount 합의금 총액
      * @param expenses 경비
      * @param isVatIncluded VAT 포함 여부
-     * @param clientReceivable 의뢰인 미수금
      * @param settlementDate 합의일자
      * @param paymentDueDate 입금기한
      * @param note 비고
@@ -100,7 +99,6 @@ public class Settlement extends BaseEntity {
             BigDecimal agreementAmount,
             BigDecimal expenses,
             Boolean isVatIncluded,
-            BigDecimal clientReceivable,
             LocalDate settlementDate,
             LocalDate paymentDueDate,
             String note) {
@@ -116,9 +114,6 @@ public class Settlement extends BaseEntity {
         if (isVatIncluded != null) {
             this.isVatIncluded = isVatIncluded;
         }
-        if (clientReceivable != null) {
-            this.clientReceivable = clientReceivable;
-        }
         if (settlementDate != null) {
             this.settlementDate = settlementDate;
         }
@@ -132,7 +127,7 @@ public class Settlement extends BaseEntity {
         // 상태 변경 규칙 적용
         updateSettlementStatus();
 
-        // 금액이 변경된 경우 clientReceivable 재계산
+        // 금액이 변경된 경우 clientReceivable 자동 재계산
         if (agreementAmount != null
                 || attorneyFee != null
                 || expenses != null
@@ -142,21 +137,24 @@ public class Settlement extends BaseEntity {
     }
 
     /**
-     * 정산서 상태를 자동으로 업데이트합니다. - NONE → DRAFT: 어떤 필드든 값이 입력되면 - DRAFT → FINAL: attorneyFee,
-     * agreementAmount, expenses, paymentDueDate 모두 채워지면
+     * 정산서 상태를 자동으로 업데이트합니다. - NONE → FINAL: 필수 필드 모두 채워지면 - NONE → DRAFT: 어떤 필드든 값이 입력되면 (필수 필드가 모두
+     * 채워지지 않은 경우) - DRAFT → FINAL: 필수 필드 모두 채워지면
      */
     public void updateSettlementStatus() {
-        // NONE → DRAFT: 어떤 필드든 값이 입력되면
         if (this.settlementStatus == SettlementStatus.NONE) {
-            if (hasAnyFieldValue()) {
+            if (isAllRequiredFieldsFilled()) {
+                // 필수 필드 모두 채워지면 → FINAL로 직접 변경
+                this.settlementStatus = SettlementStatus.FINAL;
+            } else if (hasAnyFieldValue()) {
+                // 필수 필드가 모두 채워지지 않았지만 어떤 필드든 값이 입력되면 → DRAFT로 변경
                 this.settlementStatus = SettlementStatus.DRAFT;
             }
             return;
         }
 
-        // DRAFT → FINAL: 필수 필드 모두 채워지면
         if (this.settlementStatus == SettlementStatus.DRAFT) {
             if (isAllRequiredFieldsFilled()) {
+                // 필수 필드 모두 채워지면 → FINAL로 변경
                 this.settlementStatus = SettlementStatus.FINAL;
             }
         }

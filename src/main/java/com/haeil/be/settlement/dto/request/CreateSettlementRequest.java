@@ -19,8 +19,6 @@ public class CreateSettlementRequest {
 
     private Boolean isVatIncluded = false;
 
-    private BigDecimal clientReceivable;
-
     private LocalDate settlementDate;
 
     private LocalDate paymentDueDate;
@@ -36,7 +34,6 @@ public class CreateSettlementRequest {
             BigDecimal agreementAmount,
             BigDecimal expenses,
             Boolean isVatIncluded,
-            BigDecimal clientReceivable,
             LocalDate settlementDate,
             LocalDate paymentDueDate,
             String note,
@@ -45,7 +42,6 @@ public class CreateSettlementRequest {
         this.agreementAmount = agreementAmount;
         this.expenses = expenses;
         this.isVatIncluded = isVatIncluded;
-        this.clientReceivable = clientReceivable;
         this.settlementDate = settlementDate;
         this.paymentDueDate = paymentDueDate;
         this.note = note;

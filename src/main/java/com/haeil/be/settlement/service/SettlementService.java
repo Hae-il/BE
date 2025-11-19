@@ -15,6 +15,7 @@ import com.haeil.be.settlement.dto.response.SettlementResponse;
 import com.haeil.be.settlement.exception.SettlementException;
 import com.haeil.be.settlement.exception.errorcode.SettlementErrorCode;
 import com.haeil.be.settlement.repository.SettlementRepository;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -29,15 +30,16 @@ public class SettlementService {
     private final CasesRepository casesRepository;
 
     /**
-     * 정산 관리 리스트 조회 완료된 사건 기준으로 정산서 리스트를 조회합니다. 정산서가 없는 사건도 포함하여 반환합니다. 프론트에서 settlementId가 null이면
-     * "정산서 작성" 버튼을 활성화할 수 있습니다.
+     * 정산 관리 리스트 조회 진행중 또는 완료된 사건 기준으로 정산서 리스트를 조회합니다. 정산서가 없는 사건도 포함하여 반환합니다. 프론트에서 settlementId가
+     * null이면 "정산서 작성" 버튼을 활성화할 수 있습니다.
      *
      * @return 정산 리스트 정보 (사건 정보 + 정산서 정보, 정산서가 없으면 null)
      */
     @Transactional(readOnly = true)
     public List<SettlementListResponse> getSettlements() {
         List<Object[]> results =
-                settlementRepository.findSettlementsByCaseStatus(CaseStatus.COMPLETED);
+                settlementRepository.findSettlementsByCaseStatuses(
+                        Arrays.asList(CaseStatus.IN_PROGRESS, CaseStatus.COMPLETED));
 
         return results.stream().map(SettlementListResponse::from).collect(Collectors.toList());
     }
@@ -126,7 +128,6 @@ public class SettlementService {
                 request.getAgreementAmount(),
                 request.getExpenses(),
                 request.getIsVatIncluded(),
-                request.getClientReceivable(),
                 request.getSettlementDate(),
                 request.getPaymentDueDate(),
                 request.getNote());
