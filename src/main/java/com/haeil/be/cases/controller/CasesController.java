@@ -1,6 +1,7 @@
 package com.haeil.be.cases.controller;
 
 import com.haeil.be.cases.dto.request.AssignAttorneyRequest;
+import com.haeil.be.cases.dto.request.CaseDocumentRequest;
 import com.haeil.be.cases.dto.request.CaseNumberRequest;
 import com.haeil.be.cases.dto.request.DecisionRequest;
 import com.haeil.be.cases.dto.request.PetitionRequest;
@@ -11,13 +12,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Cases", description = "사건 관련 API")
 @RequestMapping("/api/v1/cases")
@@ -106,7 +110,7 @@ public class CasesController {
 
     // 소장 조회
     @Operation(summary = "소장 조회", description = "작성된 소장을 조회합니다.")
-    @GetMapping("/ongoing/{caseId}/petition/{id}")
+    @GetMapping("/ongoing/{caseId}/petition")
     public ApiResponse<Object> getPetition(
             @PathVariable Long caseId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -115,7 +119,7 @@ public class CasesController {
 
     // 소장 수정
     @Operation(summary = "소장 수정", description = "작성된 소장을 수정합니다.")
-    @PatchMapping("/ongoing/{caseId}/petition/{id}")
+    @PatchMapping("/ongoing/{caseId}/petition")
     public ApiResponse<Object> updatePetition(
             @PathVariable Long caseId,
             @RequestBody PetitionRequest request,
@@ -133,6 +137,38 @@ public class CasesController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         casesService.updateCaseNumber(caseId, request.caseNumber(), userDetails.getId());
+        return ApiResponse.EMPTY_RESPONSE;
+    }
+
+    // 소송문서 업로드
+    @Operation(summary = "소송문서 업로드", description = "진행 중인 사건에 소송문서를 업로드합니다.")
+    @PostMapping("/ongoing/{caseId}/documents")
+    public ApiResponse<Object> uploadCaseDocument(
+            @PathVariable Long caseId,
+            @RequestPart("file") MultipartFile file,
+            @RequestPart("request") CaseDocumentRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws java.io.IOException {
+        return ApiResponse.from(
+                casesService.uploadCaseDocument(caseId, file, request, userDetails.getId()));
+    }
+
+    // 소송문서 목록 조회
+    @Operation(summary = "소송문서 목록 조회", description = "업로드된 소송문서 목록을 조회합니다.")
+    @GetMapping("/ongoing/{caseId}/documents")
+    public ApiResponse<Object> getCaseDocuments(
+            @PathVariable Long caseId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ApiResponse.from(casesService.getCaseDocuments(caseId, userDetails.getId()));
+    }
+
+    // 소송문서 삭제
+    @Operation(summary = "소송문서 삭제", description = "업로드된 소송문서를 삭제합니다.")
+    @DeleteMapping("/ongoing/{caseId}/documents/{documentId}")
+    public ApiResponse<Object> deleteCaseDocument(
+            @PathVariable Long caseId,
+            @PathVariable Long documentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) throws java.io.IOException {
+        casesService.deleteCaseDocument(caseId, documentId, userDetails.getId());
         return ApiResponse.EMPTY_RESPONSE;
     }
 
