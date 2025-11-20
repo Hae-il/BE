@@ -79,6 +79,13 @@ public class Cases extends BaseEntity {
             orphanRemoval = true)
     private List<CaseEvent> caseEventList = new ArrayList<>();
 
+    @OneToOne(
+            mappedBy = "cases",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private Petition petition;
+
     @Builder
     public Cases(
             String title,
@@ -115,5 +122,9 @@ public class Cases extends BaseEntity {
 
     public void updateStatus(CaseStatus caseStatus) {
         this.caseStatus = caseStatus;
+    }
+
+    public void updateCaseNumber(String caseNumber) {
+        this.caseNumber = caseNumber;
     }
 }
