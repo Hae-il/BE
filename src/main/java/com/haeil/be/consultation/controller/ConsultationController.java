@@ -162,4 +162,13 @@ public class ConsultationController {
         List<ConsultationFile> files = consultationService.getConsultationFiles(id);
         return ApiResponse.from(files);
     }
+
+    @Operation(summary = "상담 담당자 변경", description = "진행 중인 상담의 담당 상담사를 변경합니다.")
+    @PatchMapping("/{consultationId}/counselor")
+    public ApiResponse<Object> updateCounselor(
+            @PathVariable Long consultationId,
+            @RequestParam Long newCounselorId) {
+        ConsultationResponse response = consultationService.updateCounselor(consultationId, newCounselorId);
+        return ApiResponse.from(response);
+    }
 }
