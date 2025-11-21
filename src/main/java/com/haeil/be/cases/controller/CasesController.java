@@ -112,8 +112,7 @@ public class CasesController {
     @Operation(summary = "소장 조회", description = "작성된 소장을 조회합니다.")
     @GetMapping("/ongoing/{caseId}/petition")
     public ApiResponse<Object> getPetition(
-            @PathVariable Long caseId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @PathVariable Long caseId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.from(casesService.getPetition(caseId, userDetails.getId()));
     }
 
@@ -128,14 +127,13 @@ public class CasesController {
         return ApiResponse.EMPTY_RESPONSE;
     }
 
-    //법원에서 할당된 사건번호 추가
+    // 법원에서 할당된 사건번호 추가
     @Operation(summary = "사건번호 등록", description = "정식 사건 번호를 추가합니다")
     @PatchMapping("/ongoing/{caseId}/caseNumber")
     public ApiResponse<Object> updateCaseNumber(
             @PathVariable Long caseId,
             @RequestBody CaseNumberRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         casesService.updateCaseNumber(caseId, request.caseNumber(), userDetails.getId());
         return ApiResponse.EMPTY_RESPONSE;
     }
@@ -147,7 +145,8 @@ public class CasesController {
             @PathVariable Long caseId,
             @RequestPart("file") MultipartFile file,
             @RequestPart("request") CaseDocumentRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws java.io.IOException {
+            @AuthenticationPrincipal CustomUserDetails userDetails)
+            throws java.io.IOException {
         return ApiResponse.from(
                 casesService.uploadCaseDocument(caseId, file, request, userDetails.getId()));
     }
@@ -156,8 +155,7 @@ public class CasesController {
     @Operation(summary = "소송문서 목록 조회", description = "업로드된 소송문서 목록을 조회합니다.")
     @GetMapping("/ongoing/{caseId}/documents")
     public ApiResponse<Object> getCaseDocuments(
-            @PathVariable Long caseId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @PathVariable Long caseId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ApiResponse.from(casesService.getCaseDocuments(caseId, userDetails.getId()));
     }
 
@@ -167,16 +165,17 @@ public class CasesController {
     public ApiResponse<Object> deleteCaseDocument(
             @PathVariable Long caseId,
             @PathVariable Long documentId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) throws java.io.IOException {
+            @AuthenticationPrincipal CustomUserDetails userDetails)
+            throws java.io.IOException {
         casesService.deleteCaseDocument(caseId, documentId, userDetails.getId());
         return ApiResponse.EMPTY_RESPONSE;
     }
-    //사건 완료처리
+
+    // 사건 완료처리
     @Operation(summary = "사건 완료 처리", description = "진행 중 사건을 완료된 사건 상태로 변경합니다.")
     @PatchMapping("/ongoing/{caseId}/complete")
     public ApiResponse<Object> completeCase(
-            @PathVariable Long caseId,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @PathVariable Long caseId, @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         casesService.completeCase(caseId, userDetails.getId());
         return ApiResponse.EMPTY_RESPONSE;

@@ -15,8 +15,7 @@ public record PetitionResponse(
         // 입증 방법
         String proofMethod,
         // 첨부 서류
-        String attachedDocuments
-) {
+        String attachedDocuments) {
     public static PetitionResponse from(Petition petition) {
         return new PetitionResponse(
                 petition.getId(),
@@ -27,8 +26,6 @@ public record PetitionResponse(
                 petition.getDamageCalculation(),
                 petition.getLiabilityBasis(),
                 petition.getProofMethod(),
-                petition.getAttachedDocuments()
-        );
+                petition.getAttachedDocuments());
     }
 }
-

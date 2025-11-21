@@ -31,4 +31,3 @@ public record CompletedCaseDetailResponse(
                 cases.getCaseEventList().stream().map(CaseEventResponse::from).toList());
     }
 }
-

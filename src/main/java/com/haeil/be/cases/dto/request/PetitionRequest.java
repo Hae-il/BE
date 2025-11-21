@@ -12,6 +12,4 @@ public record PetitionRequest(
         // 입증 방법
         String proofMethod,
         // 첨부 서류(일단 string으로 처리했습니다!)
-        String attachedDocuments
-) {}
-
+        String attachedDocuments) {}

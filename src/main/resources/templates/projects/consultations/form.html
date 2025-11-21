@@ -1,0 +1,140 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+
+<head>
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('상담 등록')}" />
+</head>
+
+<body>
+    <th:block layout:fragment="content">
+        <div class="container-fluid">
+            <th:block th:replace="~{partials/page-title :: page-title('상담 등록', 'Consultations')}" />
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">새 상담 등록</h4>
+                        </div>
+                        <div class="card-body">
+                            <form class="needs-validation" th:action="@{/consultations}" th:object="${request}" method="post" novalidate>
+                                
+                                <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+                                
+                                <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-calendar-event me-1"></i> 기본 정보</h5>
+                                <div class="row mb-4">
+                                    <div class="col-md-6 mb-3 position-relative">
+                                        <label for="reservationId" class="form-label">예약 번호 (ID) <span class="text-danger">*</span></label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text">#</span>
+                                            <input type="number" class="form-control" id="reservationId" th:field="*{reservationId}" required placeholder="예약 승인된 번호 입력">
+                                            <div class="invalid-tooltip">
+                                                유효한 예약 번호를 입력해주세요.
+                                            </div>
+                                        </div>
+                                        <div class="form-text">승인된 예약 번호가 필요합니다.</div>
+                                        <div class="text-danger" th:if="${#fields.hasErrors('reservationId')}" th:errors="*{reservationId}"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3 position-relative">
+                                        <label for="counselorId" class="form-label">담당 변호사 ID <span class="text-danger">*</span></label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text"><i class="ti ti-user-check"></i></span>
+                                            <input type="number" class="form-control" id="counselorId" th:field="*{counselorId}" required>
+                                            <div class="invalid-tooltip">
+                                                담당 변호사 ID를 입력해주세요.
+                                            </div>
+                                        </div>
+                                        <div class="text-danger" th:if="${#fields.hasErrors('counselorId')}" th:errors="*{counselorId}"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3 position-relative">
+                                        <label for="consultationDate" class="form-label">상담 일시</label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text"><i class="ti ti-calendar-time"></i></span>
+                                            <input type="datetime-local" class="form-control" id="consultationDate" th:field="*{consultationDate}">
+                                        </div>
+                                        <div class="text-danger" th:if="${#fields.hasErrors('consultationDate')}" th:errors="*{consultationDate}"></div>
+                                    </div>
+                                </div>
+
+                                <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-user me-1"></i> 의뢰인 정보</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3 position-relative">
+                                        <label for="clientName" class="form-label">이름 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="clientName" th:field="*{client.name}" required>
+                                        <div class="valid-tooltip">Looks good!</div>
+                                        <div class="invalid-tooltip">이름을 입력해주세요.</div>
+                                        <div class="text-danger" th:if="${#fields.hasErrors('client.name')}" th:errors="*{client.name}"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3 position-relative">
+                                        <label for="clientPhone" class="form-label">연락처 <span class="text-danger">*</span></label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text"><i class="ti ti-phone"></i></span>
+                                            <input type="text" class="form-control" id="clientPhone" th:field="*{client.phone}" placeholder="010-0000-0000" required>
+                                            <div class="invalid-tooltip">유효한 연락처를 입력해주세요.</div>
+                                        </div>
+                                        <div class="text-danger" th:if="${#fields.hasErrors('client.phone')}" th:errors="*{client.phone}"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3 position-relative">
+                                        <label for="clientEmail" class="form-label">이메일</label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text"><i class="ti ti-mail"></i></span>
+                                            <input type="email" class="form-control" id="clientEmail" th:field="*{client.email}">
+                                            <div class="invalid-tooltip">유효한 이메일 주소를 입력해주세요.</div>
+                                        </div>
+                                        <div class="text-danger" th:if="${#fields.hasErrors('client.email')}" th:errors="*{client.email}"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3 position-relative">
+                                        <label for="clientGender" class="form-label">성별</label>
+                                        <select class="form-select" id="clientGender" th:field="*{client.gender}">
+                                            <option value="" selected disabled>선택하세요</option>
+                                            <option th:each="type : ${T(com.haeil.full.client.domain.type.Gender).values()}" 
+                                                    th:value="${type}" th:text="${type}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="clientAddress" class="form-label">주소</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="ti ti-map-pin"></i></span>
+                                            <input type="text" class="form-control" id="clientAddress" th:field="*{client.address}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <a href="/consultations" class="btn btn-light">취소</a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="ti ti-device-floppy me-1"></i> 상담 등록
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block layout:fragment="javascripts">
+        <script>
+            // Bootstrap Validation Loop
+            (function () {
+                'use strict'
+                
+                var forms = document.querySelectorAll('.needs-validation')
+                
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+                            
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
+        </script>
+    </th:block>
+
+
+</html>

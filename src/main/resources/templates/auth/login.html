@@ -1,0 +1,115 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/base}">
+
+<head>
+
+    <th:block layout:fragment="page-meta"
+              th:replace="~{partials/page-meta :: page-meta('로그인')}" />
+
+</head>
+
+<body>
+
+<th:block layout:fragment="content">
+
+    <div class="auth-box d-flex align-items-center">
+        <div class="container-xxl">
+            <div class="row align-items-center justify-content-center">
+                <div class="col-xl-10">
+                    <div class="card rounded-4">
+                        <div class="row justify-content-between g-0">
+                            <div class="col-lg-6">
+                                <div class="card-body">
+                                    <div class="auth-brand text-center mb-4">
+                                        <a href="/" class="logo-dark">
+                                            <img src="/images/logo-black.png" alt="dark logo" height="32">
+                                        </a>
+                                        <a href="/" class="logo-light">
+                                            <img src="/images/logo.png" alt="logo" height="32">
+                                        </a>
+                                        <h4 class="fw-bold mt-4">해일 법률사무소</h4>
+                                        <p class="text-muted w-lg-75 mx-auto">로그인하여 시스템에 접속하세요.</p>
+                                    </div>
+
+                                    <form th:action="@{/auth/login}" method="post" th:object="${loginRequest}">
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">이메일 <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light"><i class="ti ti-mail text-muted fs-xl"></i></span>
+                                                <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="이메일을 입력하세요" required autofocus>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label">비밀번호 <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light"><i class="ti ti-lock-password text-muted fs-xl"></i></span>
+                                                <input type="password" class="form-control" id="password" th:field="*{password}" placeholder="••••••••" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input form-check-input-light fs-14" type="checkbox" id="remember" name="remember-me">
+                                                <label class="form-check-label" for="remember">로그인 상태 유지</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-primary fw-semibold py-2">로그인</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- 성공 메시지 표시 (회원가입 후) -->
+                                    <div th:if="${param.success}" class="alert alert-success mt-3" role="alert">
+                                        회원가입이 완료되었습니다. 로그인해주세요.
+                                    </div>
+                                    
+                                    <!-- 로그아웃 메시지 -->
+                                    <div th:if="${param.logout}" class="alert alert-info mt-3" role="alert">
+                                        성공적으로 로그아웃되었습니다.
+                                    </div>
+                                    
+                                    <!-- 에러 메시지 표시 -->
+                                    <div th:if="${error}" class="alert alert-danger mt-3" role="alert" th:text="${error}">
+                                        에러 메시지가 표시됩니다.
+                                    </div>
+                                    
+                                    <!-- Spring Security 기본 에러 처리 -->
+                                    <div th:if="${param.error != null and param.error[0] == 'user_load_failed'}" class="alert alert-danger mt-3" role="alert">
+                                        사용자 정보를 불러오는 중 오류가 발생했습니다. 다시 로그인해주세요.
+                                    </div>
+                                    
+                                    <div th:if="${param.error != null and param.error[0] != 'user_load_failed'}" class="alert alert-danger mt-3" role="alert">
+                                        이메일 또는 비밀번호가 올바르지 않습니다.
+                                    </div>
+
+                                    <p class="text-muted text-center mt-4 mb-0">
+                                        계정이 없으신가요? <a th:href="@{/auth/signup}" class="text-decoration-underline link-offset-3 fw-semibold">회원가입</a>
+                                    </p>
+
+                                    <p class="text-center text-muted mt-4 mb-0">
+                                        © 2014 -
+                                        <script>document.write(new Date().getFullYear())</script> 해일 법률사무소
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 d-none d-lg-block">
+                                <div class="h-100 position-relative card-side-img rounded-end-4 rounded-end rounded-0 overflow-hidden">
+                                    <div class="p-4 card-img-overlay rounded-4 rounded-start-0 auth-overlay d-flex align-items-end justify-content-center">
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</th:block>
+
+</body>
+
+</html>

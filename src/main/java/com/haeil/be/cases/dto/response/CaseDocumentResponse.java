@@ -9,17 +9,16 @@ public record CaseDocumentResponse(
         String originalFilename,
         String fileUrl,
         Long fileSize,
-        String description
-) {
+        String description) {
     public static CaseDocumentResponse from(CaseDocument caseDocument) {
         return new CaseDocumentResponse(
                 caseDocument.getId(),
                 caseDocument.getDocumentType(),
-                caseDocument.getFile() != null ? caseDocument.getFile().getOriginalFilename() : null,
+                caseDocument.getFile() != null
+                        ? caseDocument.getFile().getOriginalFilename()
+                        : null,
                 caseDocument.getFile() != null ? caseDocument.getFile().getFileUrl() : null,
                 caseDocument.getFile() != null ? caseDocument.getFile().getFileSize() : null,
-                caseDocument.getDescription()
-        );
+                caseDocument.getDescription());
     }
 }
-
