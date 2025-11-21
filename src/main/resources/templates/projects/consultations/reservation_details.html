@@ -243,11 +243,18 @@
                                 <div class="card-body p-0">
                                     <div class="p-3 border-bottom border-dashed">
                                         <h5 class="mb-2">예약 상태</h5>
-                                        <div class="d-flex align-items-center">
+                                        <div class="d-grid gap-2">
                                             <span class="badge fs-sm badge-label w-100 py-2" 
                                                   th:text="${reservation.status.label}"
                                                   th:classappend="${reservation.status.name() == 'APPROVED' ? 'badge-soft-success' : 
                                                                   (reservation.status.name() == 'PENDING' ? 'badge-soft-warning' : 'badge-soft-secondary')}"></span>
+                                                                  
+                                            <!-- 상담 시작 버튼 (예약 승인된 경우) -->
+                                            <a th:if="${reservation.status.name() == 'APPROVED'}" 
+                                               th:href="@{/consultations/new(reservationId=${reservation.id})}" 
+                                               class="btn btn-primary w-100">
+                                                <i class="ti ti-player-play me-1"></i> 상담 시작
+                                            </a>
                                         </div>
                                     </div>
 

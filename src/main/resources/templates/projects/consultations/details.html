@@ -97,93 +97,72 @@
                                     <div class="tab-content">
                                         <div class="tab-pane fade active show" id="consultation-notes" role="tabpanel">
                                             
-                                            <!-- ConsultationNoteResponse 기반 상담 기록 -->
-                                            <div th:if="${consultationNote}" class="row g-3">
-                                                <div class="col-12">
-                                                    <div class="card border-dashed">
-                                                        <div class="card-body p-3">
-                                                            <h6 class="fs-sm text-muted mb-2">사실관계 요약</h6>
-                                                            <p class="mb-0" th:text="${consultationNote.factSummary ?: '작성된 내용이 없습니다.'}"></p>
-                                                        </div>
+                                            <!-- 상담 기록 추가 버튼 -->
+                                            <div class="d-flex justify-content-end mb-3">
+                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#noteModal">
+                                                    <i class="ti ti-plus me-1"></i> 상담 기록 추가
+                                                </button>
+                                            </div>
+
+                                            <!-- 상담 기록 목록 -->
+                                            <div th:each="note : ${notes}" class="card border-dashed mb-3">
+                                                <div class="card-header bg-light bg-opacity-50 d-flex justify-content-between align-items-center py-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="fw-bold text-dark" th:text="${note.authorName}">작성자</span>
+                                                        <span class="text-muted small">|</span>
+                                                        <span class="text-muted small" th:text="${#temporals.format(note.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
                                                     </div>
+                                                    <button class="btn btn-sm btn-ghost-secondary" data-bs-toggle="modal" th:data-bs-target="'#updateNoteModal-' + ${note.id}">
+                                                        <i class="ti ti-pencil"></i>
+                                                    </button>
                                                 </div>
-                                                
-                                                <div class="col-12">
-                                                    <div class="card border-dashed">
-                                                        <div class="card-body p-3">
-                                                            <h6 class="fs-sm text-muted mb-2">증거자료 정리</h6>
-                                                            <p class="mb-0" th:text="${consultationNote.evidenceSummary ?: '작성된 내용이 없습니다.'}"></p>
+                                                <div class="card-body p-3">
+                                                    <div class="row g-3">
+                                                        <div class="col-12" th:if="${note.factSummary}">
+                                                            <h6 class="fs-sm text-muted mb-1">사실관계 요약</h6>
+                                                            <p class="mb-0" th:text="${note.factSummary}"></p>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-md-6">
-                                                    <div class="card border-dashed">
-                                                        <div class="card-body p-3">
-                                                            <h6 class="fs-sm text-muted mb-2">법적 쟁점</h6>
-                                                            <p class="mb-0" th:text="${consultationNote.legalIssue ?: '작성된 내용이 없습니다.'}"></p>
+                                                        <div class="col-12" th:if="${note.evidenceSummary}">
+                                                            <h6 class="fs-sm text-muted mb-1">증거자료 정리</h6>
+                                                            <p class="mb-0" th:text="${note.evidenceSummary}"></p>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-md-6">
-                                                    <div class="card border-dashed">
-                                                        <div class="card-body p-3">
-                                                            <h6 class="fs-sm text-muted mb-2">관련 법령</h6>
-                                                            <p class="mb-0" th:text="${consultationNote.relatedLaws ?: '작성된 내용이 없습니다.'}"></p>
+                                                        <div class="col-md-6" th:if="${note.legalIssue}">
+                                                            <h6 class="fs-sm text-muted mb-1">법적 쟁점</h6>
+                                                            <p class="mb-0" th:text="${note.legalIssue}"></p>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-12">
-                                                    <div class="card border-dashed">
-                                                        <div class="card-body p-3">
-                                                            <h6 class="fs-sm text-muted mb-2">의뢰인 목표</h6>
-                                                            <p class="mb-0" th:text="${consultationNote.clientGoal ?: '작성된 내용이 없습니다.'}"></p>
+                                                        <div class="col-md-6" th:if="${note.relatedLaws}">
+                                                            <h6 class="fs-sm text-muted mb-1">관련 법령</h6>
+                                                            <p class="mb-0" th:text="${note.relatedLaws}"></p>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-12">
-                                                    <div class="card border-dashed">
-                                                        <div class="card-body p-3">
-                                                            <h6 class="fs-sm text-muted mb-2">변호사 의견</h6>
-                                                            <p class="mb-0" th:text="${consultationNote.lawyerOpinion ?: '작성된 내용이 없습니다.'}"></p>
+                                                        <div class="col-12" th:if="${note.clientGoal}">
+                                                            <h6 class="fs-sm text-muted mb-1">의뢰인 목표</h6>
+                                                            <p class="mb-0" th:text="${note.clientGoal}"></p>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-md-6">
-                                                    <div class="card border-dashed">
-                                                        <div class="card-body p-3">
-                                                            <h6 class="fs-sm text-muted mb-2">위험성 평가</h6>
-                                                            <p class="mb-0" th:text="${consultationNote.riskAssessment ?: '작성된 내용이 없습니다.'}"></p>
+                                                        <div class="col-12" th:if="${note.lawyerOpinion}">
+                                                            <h6 class="fs-sm text-muted mb-1">변호사 의견</h6>
+                                                            <p class="mb-0" th:text="${note.lawyerOpinion}"></p>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="col-md-6">
-                                                    <div class="card border-dashed">
-                                                        <div class="card-body p-3">
-                                                            <h6 class="fs-sm text-muted mb-2">향후 조치</h6>
-                                                            <p class="mb-0" th:text="${consultationNote.nextAction ?: '작성된 내용이 없습니다.'}"></p>
+                                                        <div class="col-md-6" th:if="${note.riskAssessment}">
+                                                            <h6 class="fs-sm text-muted mb-1">위험성 평가</h6>
+                                                            <p class="mb-0" th:text="${note.riskAssessment}"></p>
+                                                        </div>
+                                                        <div class="col-md-6" th:if="${note.nextAction}">
+                                                            <h6 class="fs-sm text-muted mb-1">향후 조치</h6>
+                                                            <p class="mb-0" th:text="${note.nextAction}"></p>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <!-- 상담 기록이 없을 때 -->
-                                            <div th:unless="${consultationNote}" class="text-center py-5">
+                                            <div th:if="${#lists.isEmpty(notes)}" class="text-center py-5">
                                                 <div class="avatar-xl mx-auto mb-4">
                                                     <div class="avatar-title bg-light text-muted rounded">
                                                         <i class="ti ti-notes fs-2"></i>
                                                     </div>
                                                 </div>
                                                 <h5 class="fs-md">아직 상담 기록이 없습니다</h5>
-                                                <p class="text-muted">상담이 진행되면 상세한 기록이 여기에 표시됩니다.</p>
-                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#noteModal">
-                                                    <i class="ti ti-pencil me-1"></i> 상담 기록 작성
-                                                </button>
+                                                <p class="text-muted">첫 번째 상담 기록을 작성해보세요.</p>
                                             </div>
 
                                         </div>
@@ -493,7 +472,7 @@
         </div>
     </div>
 
-    <!-- Note Modal -->
+    <!-- Note Modal (Create) -->
     <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -501,38 +480,42 @@
                     <h5 class="modal-title" id="noteModalLabel">상담 기록 작성</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form th:action="@{'/consultations/' + ${consultation.id} + '/notes'}" method="post" th:object="${noteRequest}">
+                <form class="needs-validation" th:action="@{'/consultations/' + ${consultation.id} + '/notes'}" method="post" th:object="${noteRequest}" novalidate>
                     <div class="modal-body">
                         <div class="row g-3">
-                            <div class="col-12">
+                            <div class="col-12 position-relative">
                                 <label for="factSummary" class="form-label">사실관계 요약</label>
-                                <textarea class="form-control" id="factSummary" th:field="*{factSummary}" rows="3" placeholder="사건의 주요 사실관계를 입력하세요"></textarea>
+                                <textarea class="form-control" id="factSummary" th:field="*{factSummary}" rows="3" placeholder="사건의 주요 사실관계를 입력하세요" required></textarea>
+                                <div class="invalid-tooltip">사실관계 요약을 입력해주세요.</div>
                             </div>
-                            <div class="col-12">
+                            <div class="col-12 position-relative">
                                 <label for="evidenceSummary" class="form-label">증거자료 정리</label>
                                 <textarea class="form-control" id="evidenceSummary" th:field="*{evidenceSummary}" rows="2"></textarea>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 position-relative">
                                 <label for="legalIssue" class="form-label">법적 쟁점</label>
                                 <textarea class="form-control" id="legalIssue" th:field="*{legalIssue}" rows="3"></textarea>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 position-relative">
                                 <label for="relatedLaws" class="form-label">관련 법령</label>
                                 <textarea class="form-control" id="relatedLaws" th:field="*{relatedLaws}" rows="3"></textarea>
                             </div>
-                            <div class="col-12">
+                            <div class="col-12 position-relative">
                                 <label for="clientGoal" class="form-label">의뢰인 목표</label>
-                                <input type="text" class="form-control" id="clientGoal" th:field="*{clientGoal}">
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text"><i class="ti ti-target"></i></span>
+                                    <input type="text" class="form-control" id="clientGoal" th:field="*{clientGoal}">
+                                </div>
                             </div>
-                            <div class="col-12">
+                            <div class="col-12 position-relative">
                                 <label for="lawyerOpinion" class="form-label">변호사 의견</label>
                                 <textarea class="form-control" id="lawyerOpinion" th:field="*{lawyerOpinion}" rows="3"></textarea>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 position-relative">
                                 <label for="riskAssessment" class="form-label">위험성 평가</label>
                                 <textarea class="form-control" id="riskAssessment" th:field="*{riskAssessment}" rows="2"></textarea>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 position-relative">
                                 <label for="nextAction" class="form-label">향후 조치</label>
                                 <textarea class="form-control" id="nextAction" th:field="*{nextAction}" rows="2"></textarea>
                             </div>
@@ -547,12 +530,85 @@
         </div>
     </div>
 
+    <!-- Note Modals (Edit) -->
+    <div th:each="note : ${notes}" class="modal fade" th:id="'updateNoteModal-' + ${note.id}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">상담 기록 수정</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form class="needs-validation" th:action="@{'/consultations/' + ${consultation.id} + '/notes/' + ${note.id}}" method="post" novalidate>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12 position-relative">
+                                <label class="form-label">사실관계 요약</label>
+                                <textarea class="form-control" name="factSummary" rows="3" required th:text="${note.factSummary}"></textarea>
+                                <div class="invalid-tooltip">사실관계 요약을 입력해주세요.</div>
+                            </div>
+                            <div class="col-12 position-relative">
+                                <label class="form-label">증거자료 정리</label>
+                                <textarea class="form-control" name="evidenceSummary" rows="2" th:text="${note.evidenceSummary}"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label class="form-label">법적 쟁점</label>
+                                <textarea class="form-control" name="legalIssue" rows="3" th:text="${note.legalIssue}"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label class="form-label">관련 법령</label>
+                                <textarea class="form-control" name="relatedLaws" rows="3" th:text="${note.relatedLaws}"></textarea>
+                            </div>
+                            <div class="col-12 position-relative">
+                                <label class="form-label">의뢰인 목표</label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text"><i class="ti ti-target"></i></span>
+                                    <input type="text" class="form-control" name="clientGoal" th:value="${note.clientGoal}">
+                                </div>
+                            </div>
+                            <div class="col-12 position-relative">
+                                <label class="form-label">변호사 의견</label>
+                                <textarea class="form-control" name="lawyerOpinion" rows="3" th:text="${note.lawyerOpinion}"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label class="form-label">위험성 평가</label>
+                                <textarea class="form-control" name="riskAssessment" rows="2" th:text="${note.riskAssessment}"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label class="form-label">향후 조치</label>
+                                <textarea class="form-control" name="nextAction" rows="2" th:text="${note.nextAction}"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary">수정 저장</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     </th:block>
 
     <!-- Dropzone Plugin Js -->
     <script src="/plugins/dropzone/dropzone-min.js"></script>
     
     <script>
+        // Bootstrap Validation Loop
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+
         // Dropzone 설정
         Dropzone.autoDiscover = false;
         

@@ -140,8 +140,26 @@ public class ConsultationController {
     }
 
     @GetMapping("/new")
-    public String consultationForm(Model model) {
-        model.addAttribute("request", new CreateConsultationRequest());
+    public String consultationForm(
+            @RequestParam(value = "reservationId", required = false) Long reservationId,
+            Model model) {
+        
+        CreateConsultationRequest request = new CreateConsultationRequest();
+        
+        if (reservationId != null) {
+            try {
+                ConsultationReservationResponse reservation = consultationService.getConsultationRequest(reservationId);
+                request.setReservationId(reservationId);
+                request.setCounselorId(reservation.getAssignedLawyerId());
+                request.setConsultationDate(reservation.getRequestedDate());
+                request.getClient().setName(reservation.getName());
+                request.getClient().setPhone(reservation.getPhone());
+            } catch (Exception e) {
+                // 예약 정보를 찾을 수 없는 경우 무시하고 빈 폼 출력
+            }
+        }
+        
+        model.addAttribute("request", request);
         return "projects/consultations/form";
     }
 
