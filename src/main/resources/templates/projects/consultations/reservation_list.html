@@ -1,0 +1,157 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+
+<head>
+
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta(${pageTitle})}" />
+
+</head>
+
+<body>
+    <th:block layout:fragment="content">
+
+        <div class="container-fluid">
+
+            <th:block th:replace="~{partials/page-title :: page-title(${pageTitle},${pageSubtitle})}" />
+
+            <div class="row">
+                <div class="col-12">
+                    <div data-table data-table-rows-per-page="8" class="card">
+                        <!-- Search, Filter, Sort ... -->
+                        <div class="card-header border-light justify-content-between">
+
+                            <div class="d-flex gap-2">
+                                <div class="app-search">
+                                    <input data-table-search type="search" class="form-control"
+                                        placeholder="신청자명 검색...">
+                                    <i data-lucide="search" class="app-search-icon text-muted"></i>
+                                </div>
+                                <button data-table-delete-selected class="btn btn-danger d-none">Delete</button>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="me-2 fw-semibold">Filter By:</span>
+
+                                <!-- Deadline Filter -->
+                                <div class="app-search">
+                                    <select data-table-range-filter="date"
+                                        class="form-select form-control my-1 my-md-0">
+                                        <option value="All">전체상태</option>
+                                        <option value="PENDING">예약대기</option>
+                                        <option value="APPROVED">예약승인</option>
+                                        <option value="REJECTED">예약거절</option>
+                                    </select>
+                                    <i data-lucide="calendar-clock" class="app-search-icon text-muted"></i>
+                                </div>
+
+                                <!-- Records Per Page -->
+                                <div>
+                                    <select data-table-set-rows-per-page class="form-select form-control my-1 my-md-0">
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Contents -->
+                        <div class="table-responsive">
+                            <table class="table table-custom table-centered table-select table-hover w-100 mb-0">
+                                <thead class="bg-light align-middle bg-opacity-25 thead-sm">
+                                    <tr class="text-uppercase fs-xxs">
+                                        <th class="ps-3" style="width: 1%;">
+                                            <input data-table-select-all
+                                                class="form-check-input form-check-input-light fs-14 mt-0"
+                                                type="checkbox" id="select-all-files" value="option">
+                                        </th>
+                                        <th data-table-sort="id">예약번호</th>
+                                        <th data-table-sort="name">신청자</th>
+                                        <th data-table-sort data-column="status">상태</th>
+                                        <th>담당변호사</th>
+                                        <th data-table-sort data-column="date">신청일시</th>
+                                        <th class="text-center" style="width: 1%;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dynamic Rows -->
+                                    <tr th:each="reservation : ${reservations}">
+                                        <td class="ps-3"><input
+                                                class="form-check-input form-check-input-light fs-14 file-item-check mt-0"
+                                                type="checkbox" value="option"></td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <div class="avatar-md me-3">
+                                                    <span class="avatar-title text-bg-light rounded">
+                                                        <i class="ti ti-calendar-event fs-24 text-primary"></i>
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <h5 class="mb-1 d-flex align-items-center">
+                                                        <a th:text="'R' + ${reservation.id}" 
+                                                           th:href="'/reservations/' + ${reservation.id}" 
+                                                           class="link-reset"></a>
+                                                    </h5>
+                                                    <p class="text-muted mb-0 fs-xxs" th:text="'신청: ' + ${#temporals.format(reservation.createdAt, 'yyyy-MM-dd')}"></p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <h5 class="mb-1" th:text="${reservation.name}"></h5>
+                                                <p class="text-muted mb-0 fs-xxs" th:text="${reservation.phone}"></p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge fs-xxs badge-label" 
+                                                  th:text="${reservation.status.label}"
+                                                  th:classappend="${reservation.status.name() == 'PENDING' ? 'badge-soft-warning' : 
+                                                                   reservation.status.name() == 'APPROVED' ? 'badge-soft-success' :
+                                                                   'badge-soft-danger'}"></span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${reservation.assignedLawyerName}" th:text="${reservation.assignedLawyerName}"></span>
+                                            <span th:if="${reservation.assignedLawyerName == null}" class="text-muted fs-xxs">-</span>
+                                        </td>
+                                        <td th:text="${#temporals.format(reservation.requestedDate, 'yyyy-MM-dd HH:mm')}"></td>
+                                        <td>
+                                            <div class="d-flex justify-content-center gap-1">
+                                                <a href="#" class="btn btn-light btn-icon btn-sm rounded-circle"><i
+                                                        class="ti ti-eye fs-lg"></i></a>
+                                                <a href="#" class="btn btn-light btn-icon btn-sm rounded-circle"><i
+                                                        class="ti ti-edit fs-lg"></i></a>
+                                                <a href="#" data-table-delete-row
+                                                    class="btn btn-light btn-icon btn-sm rounded-circle"><i
+                                                        class="ti ti-trash fs-lg"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Empty State -->
+                                    <tr th:if="${#lists.isEmpty(reservations)}">
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            예약 신청이 없습니다.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                </div><!-- end col -->
+            </div><!-- end row -->
+
+        </div>
+
+    </th:block>
+
+    <th:block layout:fragment="javascripts">
+        <!-- Custom table script removed - not functional -->
+    </th:block>
+
+</body>
+
+</html>
