@@ -43,6 +43,7 @@ public class SwaggerConfig {
                                                 .name("Hae:il BE Github")
                                                 .url("https://github.com/Hae-il/BE"))
                                 .version("1.0.0"))
-                .addSecurityItem(securityRequirement);
+                .addSecurityItem(securityRequirement)
+                .security(java.util.Collections.singletonList(securityRequirement));
     }
 }
