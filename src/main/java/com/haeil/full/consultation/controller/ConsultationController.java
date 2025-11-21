@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.validation.BindingResult;
+
 @RequestMapping("/consultations")
 @Controller
 @RequiredArgsConstructor
@@ -34,13 +36,19 @@ public class ConsultationController {
     @GetMapping("/reservations/new")
     public String reservationForm(Model model) {
         model.addAttribute("request", new CreateConsultationReservationRequest());
-        return "consultation/reservation-form";
+        return "projects/consultations/reservation_form";
     }
 
     @PostMapping("/reservations")
     public String createConsultationReservation(
             @Valid @ModelAttribute("request") CreateConsultationReservationRequest request,
+            BindingResult bindingResult,
             Model model) {
+        
+        if (bindingResult.hasErrors()) {
+            return "projects/consultations/reservation_form";
+        }
+
         try {
             ConsultationReservationResponse response =
                     consultationService.createConsultationReservation(request);
@@ -48,7 +56,7 @@ public class ConsultationController {
             return "redirect:/consultations/reservations?success";
         } catch (Exception e) {
             model.addAttribute("error", "상담 예약 신청 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/reservation-form";
+            return "projects/consultations/reservation_form";
         }
     }
 
@@ -57,7 +65,7 @@ public class ConsultationController {
         List<ConsultationReservationResponse> responses =
                 consultationService.getConsultationReservations();
         model.addAttribute("reservations", responses);
-        return "consultation/reservation-list";
+        return "projects/consultations/reservation_list";
     }
 
     @GetMapping("/reservations/{id}")
@@ -68,58 +76,91 @@ public class ConsultationController {
             model.addAttribute("reservation", response);
             model.addAttribute("approveRequest", new ApproveConsultationReservation());
             model.addAttribute("rejectRequest", new RejectConsultationReservation());
-            return "consultation/reservation-detail";
+            return "projects/consultations/reservation_details";
         } catch (Exception e) {
             model.addAttribute("error", "상담 예약 조회 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/reservation-list";
+            return "projects/consultations/reservation_list";
         }
     }
 
     @PostMapping("/reservations/{id}/approve")
     public String approveConsultationReservation(
             @PathVariable Long id,
-            @Valid @ModelAttribute ApproveConsultationReservation request,
+            @Valid @ModelAttribute("approveRequest") ApproveConsultationReservation request,
+            BindingResult bindingResult,
             Model model) {
+        
+        if (bindingResult.hasErrors()) {
+            // 에러 발생 시 다시 상세 페이지로 이동하며 데이터를 채워줘야 함
+            ConsultationReservationResponse response = consultationService.getConsultationRequest(id);
+            model.addAttribute("reservation", response);
+            model.addAttribute("rejectRequest", new RejectConsultationReservation());
+            return "projects/consultations/reservation_details";
+        }
+
         try {
             ConsultationReservationResponse response =
                     consultationService.approveConsultationReservation(id, request);
             return "redirect:/consultations/reservations/" + id + "?approved";
         } catch (Exception e) {
             model.addAttribute("error", "상담 예약 승인 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/reservation-detail";
+            // 에러 발생 시에도 상세 페이지 데이터 필요
+            ConsultationReservationResponse response = consultationService.getConsultationRequest(id);
+            model.addAttribute("reservation", response);
+            model.addAttribute("rejectRequest", new RejectConsultationReservation());
+            return "projects/consultations/reservation_details";
         }
     }
 
     @PostMapping("/reservations/{id}/reject")
     public String rejectConsultationReservation(
             @PathVariable Long id,
-            @Valid @ModelAttribute RejectConsultationReservation request,
+            @Valid @ModelAttribute("rejectRequest") RejectConsultationReservation request,
+            BindingResult bindingResult,
             Model model) {
+            
+        if (bindingResult.hasErrors()) {
+            ConsultationReservationResponse response = consultationService.getConsultationRequest(id);
+            model.addAttribute("reservation", response);
+            model.addAttribute("approveRequest", new ApproveConsultationReservation());
+            return "projects/consultations/reservation_details";
+        }
+
         try {
             ConsultationReservationResponse response =
                     consultationService.rejectConsultationReservation(id, request);
             return "redirect:/consultations/reservations/" + id + "?rejected";
         } catch (Exception e) {
             model.addAttribute("error", "상담 예약 거절 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/reservation-detail";
+            ConsultationReservationResponse response = consultationService.getConsultationRequest(id);
+            model.addAttribute("reservation", response);
+            model.addAttribute("approveRequest", new ApproveConsultationReservation());
+            return "projects/consultations/reservation_details";
         }
     }
 
     @GetMapping("/new")
     public String consultationForm(Model model) {
         model.addAttribute("request", new CreateConsultationRequest());
-        return "consultation/form";
+        return "projects/consultations/form";
     }
 
     @PostMapping
     public String createConsultation(
-            @Valid @ModelAttribute("request") CreateConsultationRequest request, Model model) {
+            @Valid @ModelAttribute("request") CreateConsultationRequest request,
+            BindingResult bindingResult,
+            Model model) {
+            
+        if (bindingResult.hasErrors()) {
+            return "projects/consultations/form";
+        }
+
         try {
             ConsultationResponse response = consultationService.createConsultation(request);
             return "redirect:/consultations/" + response.getId() + "?created";
         } catch (Exception e) {
             model.addAttribute("error", "상담 시작 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/form";
+            return "projects/consultations/form";
         }
     }
 
@@ -127,19 +168,33 @@ public class ConsultationController {
     public String getConsultations(Model model) {
         List<ConsultationResponse> responses = consultationService.getConsultations();
         model.addAttribute("consultations", responses);
-        return "consultation/list";
+        return "projects/consultations/list";
     }
 
     @GetMapping("/{id}")
     public String getConsultation(@PathVariable Long id, Model model) {
         try {
             ConsultationResponse response = consultationService.getConsultation(id);
+            List<ConsultationNoteResponse> notes = consultationService.getConsultationNotes(id);
+            List<ConsultationFile> files = consultationService.getConsultationFiles(id);
+
             model.addAttribute("consultation", response);
+            model.addAttribute("notes", notes);
+            model.addAttribute("files", files);
+            model.addAttribute("consultationFiles", files);
+            if (!notes.isEmpty()) {
+                model.addAttribute("consultationNote", notes.get(0));
+            }
+            
+            model.addAttribute("tasks", java.util.Collections.emptyList());
+            model.addAttribute("activities", java.util.Collections.emptyList());
+            model.addAttribute("teamMembers", java.util.Collections.emptyList());
+            
             model.addAttribute("noteRequest", new ConsultationNoteRequest());
-            return "consultation/detail";
+            return "projects/consultations/details";
         } catch (Exception e) {
             model.addAttribute("error", "상담 조회 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/list";
+            return "projects/consultations/list";
         }
     }
 
@@ -150,7 +205,7 @@ public class ConsultationController {
             return "redirect:/consultations/" + id + "?started";
         } catch (Exception e) {
             model.addAttribute("error", "상담 시작 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/detail";
+            return "projects/consultations/details";
         }
     }
 
@@ -161,7 +216,7 @@ public class ConsultationController {
             return "redirect:/consultations/" + id + "?completed";
         } catch (Exception e) {
             model.addAttribute("error", "상담 완료 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/detail";
+            return "projects/consultations/details";
         }
     }
 
@@ -169,14 +224,22 @@ public class ConsultationController {
     public String createConsultationNote(
             @PathVariable Long id,
             @Valid @ModelAttribute ConsultationNoteRequest request,
+            BindingResult bindingResult,
             Model model) {
+            
+        if (bindingResult.hasErrors()) {
+            // 에러 발생 시 상세 페이지 데이터 재조회 필요
+            return getConsultation(id, model);
+        }
+
         try {
             ConsultationNoteResponse response =
                     consultationService.createConsultationNote(id, request);
             return "redirect:/consultations/" + id + "?noteCreated";
         } catch (Exception e) {
             model.addAttribute("error", "노트 작성 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/detail";
+            // 에러 발생 시 상세 페이지 데이터 재조회 필요
+            return getConsultation(id, model);
         }
     }
 
@@ -186,10 +249,10 @@ public class ConsultationController {
             List<ConsultationNoteResponse> responses = consultationService.getConsultationNotes(id);
             model.addAttribute("notes", responses);
             model.addAttribute("consultationId", id);
-            return "consultation/notes";
+            return "projects/consultations/details"; 
         } catch (Exception e) {
             model.addAttribute("error", "노트 조회 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/detail";
+            return "projects/consultations/details";
         }
     }
 
@@ -198,14 +261,20 @@ public class ConsultationController {
             @PathVariable Long consultationId,
             @PathVariable Long noteId,
             @Valid @ModelAttribute ConsultationNoteRequest request,
+            BindingResult bindingResult,
             Model model) {
+            
+        if (bindingResult.hasErrors()) {
+             return getConsultation(consultationId, model);
+        }
+
         try {
             ConsultationNoteResponse response =
                     consultationService.updateConsultationNote(consultationId, noteId, request);
             return "redirect:/consultations/" + consultationId + "/notes?updated";
         } catch (Exception e) {
             model.addAttribute("error", "노트 수정 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/notes";
+            return getConsultation(consultationId, model);
         }
     }
 
@@ -221,7 +290,7 @@ public class ConsultationController {
             return "redirect:/consultations/" + id + "?fileUploaded";
         } catch (Exception e) {
             model.addAttribute("error", "파일 업로드 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/detail";
+            return "projects/consultations/details";
         }
     }
 
@@ -231,10 +300,10 @@ public class ConsultationController {
             List<ConsultationFile> files = consultationService.getConsultationFiles(id);
             model.addAttribute("files", files);
             model.addAttribute("consultationId", id);
-            return "consultation/files";
+            return "projects/consultations/details";
         } catch (Exception e) {
             model.addAttribute("error", "파일 목록 조회 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/detail";
+            return "projects/consultations/details";
         }
     }
 
@@ -247,7 +316,7 @@ public class ConsultationController {
             return "redirect:/consultations/" + consultationId + "?counselorUpdated";
         } catch (Exception e) {
             model.addAttribute("error", "담당자 변경 중 오류가 발생했습니다: " + e.getMessage());
-            return "consultation/detail";
+            return "projects/consultations/details";
         }
     }
 }

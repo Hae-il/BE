@@ -6,7 +6,10 @@ import com.haeil.full.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import lombok.Setter;
+
 @Getter
+@Setter
 @NoArgsConstructor
 public class ConsultationNoteRequest {
 

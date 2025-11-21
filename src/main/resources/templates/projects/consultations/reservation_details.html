@@ -40,7 +40,7 @@
                                     </div>
                                     <div class="ms-auto">
                                         <div th:if="${reservation.status.name() == 'PENDING'}" class="d-flex gap-2">
-                                            <button type="button" class="btn btn-success" onclick="approveReservation()">
+                                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveModal">
                                                 <i class="ti ti-check me-1"></i> 승인
                                             </button>
                                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
@@ -243,13 +243,11 @@
                                 <div class="card-body p-0">
                                     <div class="p-3 border-bottom border-dashed">
                                         <h5 class="mb-2">예약 상태</h5>
-                                        <div class="app-search">
-                                            <select id="statusSelect" class="form-select form-control my-1 my-md-0">
-                                                <option value="PENDING" th:selected="${reservation.status.name() == 'PENDING'}">대기중</option>
-                                                <option value="APPROVED" th:selected="${reservation.status.name() == 'APPROVED'}">승인</option>
-                                                <option value="REJECTED" th:selected="${reservation.status.name() == 'REJECTED'}">거부</option>
-                                            </select>
-                                            <i class="ti ti-calendar-clock app-search-icon text-muted"></i>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge fs-sm badge-label w-100 py-2" 
+                                                  th:text="${reservation.status.label}"
+                                                  th:classappend="${reservation.status.name() == 'APPROVED' ? 'badge-soft-success' : 
+                                                                  (reservation.status.name() == 'PENDING' ? 'badge-soft-warning' : 'badge-soft-secondary')}"></span>
                                         </div>
                                     </div>
 
@@ -297,6 +295,32 @@
 
         </div>
 
+        <!-- Approve Modal -->
+        <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="approveModalLabel">예약 승인</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form th:action="@{'/consultations/reservations/' + ${reservation.id} + '/approve'}" method="post" th:object="${approveRequest}">
+                        <div class="modal-body">
+                            <p>해당 상담 예약을 승인하시겠습니까?</p>
+                            <div class="mb-3">
+                                <label for="lawyerId" class="form-label">담당 변호사 ID</label>
+                                <input type="number" class="form-control" id="lawyerId" th:field="*{lawyerId}" required placeholder="변호사 ID 입력">
+                                <div class="form-text">임시: 변호사 ID를 직접 입력해주세요.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <button type="submit" class="btn btn-success">승인</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- Reject Reason Modal -->
         <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -305,121 +329,26 @@
                         <h5 class="modal-title" id="rejectModalLabel">예약 거절 사유</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <form id="rejectForm">
+                    <form th:action="@{'/consultations/reservations/' + ${reservation.id} + '/reject'}" method="post" th:object="${rejectRequest}">
+                        <div class="modal-body">
                             <div class="mb-3">
-                                <label for="rejectReason" class="form-label">거절 사유 <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="rejectReason" rows="4" 
+                                <label for="rejectionReason" class="form-label">거절 사유 <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="rejectionReason" th:field="*{rejectionReason}" rows="4" 
                                           placeholder="예약을 거절하는 사유를 입력해주세요." required></textarea>
                             </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                        <button type="button" class="btn btn-danger" onclick="confirmReject()">거절 처리</button>
-                    </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <button type="submit" class="btn btn-danger">거절 처리</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
     </th:block>
     
-    <script>
-        const reservationId = /*[[${reservation.id}]]*/ '';
-        
-        // 승인 처리
-        function approveReservation() {
-            if (confirm('예약을 승인하시겠습니까?')) {
-                fetch(`/reservations/${reservationId}/status`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ status: 'APPROVED' })
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert('예약이 승인되었습니다.');
-                        location.reload();
-                    } else {
-                        return response.json().then(data => {
-                            throw new Error(data.message || '승인 처리에 실패했습니다.');
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('승인 처리 중 오류가 발생했습니다: ' + error.message);
-                });
-            }
-        }
-        
-        // 거절 처리 확인
-        function confirmReject() {
-            const reason = document.getElementById('rejectReason').value.trim();
-            
-            if (!reason) {
-                alert('거절 사유를 입력해주세요.');
-                return;
-            }
-            
-            fetch(`/reservations/${reservationId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    status: 'REJECTED',
-                    rejectReason: reason
-                })
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert('예약이 거절 처리되었습니다.');
-                    // 모달 닫기
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('rejectModal'));
-                    if (modal) {
-                        modal.hide();
-                    }
-                    location.reload();
-                } else {
-                    return response.json().then(data => {
-                        throw new Error(data.message || '거절 처리에 실패했습니다.');
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('거절 처리 중 오류가 발생했습니다: ' + error.message);
-            });
-        }
-        
-        // 상태 선택 변경
-        document.getElementById('statusSelect').addEventListener('change', function() {
-            const newStatus = this.value;
-            
-            fetch(`/reservations/${reservationId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ status: newStatus })
-            })
-            .then(response => {
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    alert('상태 변경에 실패했습니다.');
-                    this.value = /*[[${reservation.status.name()}]]*/ '';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('상태 변경 중 오류가 발생했습니다.');
-                this.value = /*[[${reservation.status.name()}]]*/ '';
-            });
-        });
-    </script>
+    <!-- Script removed (handled by form submission) -->
 
 </body>
 

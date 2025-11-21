@@ -11,7 +11,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import lombok.Setter;
+
 @Getter
+@Setter
 @NoArgsConstructor
 public class CreateConsultationReservationRequest {
 

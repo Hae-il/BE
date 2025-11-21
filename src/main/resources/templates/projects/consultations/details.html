@@ -181,7 +181,7 @@
                                                 </div>
                                                 <h5 class="fs-md">아직 상담 기록이 없습니다</h5>
                                                 <p class="text-muted">상담이 진행되면 상세한 기록이 여기에 표시됩니다.</p>
-                                                <button type="button" class="btn btn-primary btn-sm">
+                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#noteModal">
                                                     <i class="ti ti-pencil me-1"></i> 상담 기록 작성
                                                 </button>
                                             </div>
@@ -311,15 +311,27 @@
                                 <div class="card-body p-0">
                                     <div class="p-3 border-bottom border-dashed">
                                         <h5 class="mb-2">상담 상태</h5>
-                                        <div class="app-search">
-                                            <select id="statusSelect" class="form-select form-control my-1 my-md-0">
-                                                <option value="예약대기" th:selected="${consultation.status == '예약대기'}">예약대기</option>
-                                                <option value="예약확정" th:selected="${consultation.status == '예약확정'}">예약확정</option>
-                                                <option value="상담중" th:selected="${consultation.status == '상담중'}">상담중</option>
-                                                <option value="상담완료" th:selected="${consultation.status == '상담완료'}">상담완료</option>
-                                                <option value="취소" th:selected="${consultation.status == '취소'}">취소</option>
-                                            </select>
-                                            <i data-lucide="calendar-clock" class="app-search-icon text-muted"></i>
+                                        <div class="d-grid gap-2">
+                                            <!-- 상담 시작 버튼 -->
+                                            <form th:if="${consultation.status.name() == 'RESERVATION_CONFIRMED' or consultation.status.name() == 'PENDING'}" 
+                                                  th:action="@{'/consultations/' + ${consultation.id} + '/start'}" method="post">
+                                                <button type="submit" class="btn btn-success w-100">
+                                                    <i class="ti ti-play me-1"></i> 상담 시작
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- 상담 완료 버튼 -->
+                                            <form th:if="${consultation.status.name() == 'IN_PROGRESS'}" 
+                                                  th:action="@{'/consultations/' + ${consultation.id} + '/complete'}" method="post">
+                                                <button type="submit" class="btn btn-primary w-100">
+                                                    <i class="ti ti-check me-1"></i> 상담 완료
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- 완료됨 표시 -->
+                                            <div th:if="${consultation.status.name() == 'COMPLETED'}" class="alert alert-primary mb-0 text-center p-2">
+                                                <i class="ti ti-check-double me-1"></i> 상담 완료됨
+                                            </div>
                                         </div>
                                     </div>
 
@@ -426,9 +438,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="fileUploadForm" class="dropzone" data-plugin="dropzone" 
-                          data-previews-container="#file-previews" 
+                    <form th:action="@{'/consultations/' + ${consultation.id} + '/files'}" method="post" 
+                          enctype="multipart/form-data" class="dropzone" id="fileUploadForm" 
+                          data-plugin="dropzone" data-previews-container="#file-previews" 
                           data-upload-preview-template="#uploadPreviewTemplate">
+                        
                         <div class="fallback">
                             <input name="file" type="file" multiple>
                         </div>
@@ -472,9 +486,63 @@
                     <!-- end file preview template -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                    <button type="button" class="btn btn-primary" id="uploadFiles">업로드</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <!-- Dropzone은 자동 업로드 또는 processQueue 호출 필요. 여기서는 자동 업로드 설정 -->
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noteModalLabel">상담 기록 작성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{'/consultations/' + ${consultation.id} + '/notes'}" method="post" th:object="${noteRequest}">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="factSummary" class="form-label">사실관계 요약</label>
+                                <textarea class="form-control" id="factSummary" th:field="*{factSummary}" rows="3" placeholder="사건의 주요 사실관계를 입력하세요"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="evidenceSummary" class="form-label">증거자료 정리</label>
+                                <textarea class="form-control" id="evidenceSummary" th:field="*{evidenceSummary}" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="legalIssue" class="form-label">법적 쟁점</label>
+                                <textarea class="form-control" id="legalIssue" th:field="*{legalIssue}" rows="3"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="relatedLaws" class="form-label">관련 법령</label>
+                                <textarea class="form-control" id="relatedLaws" th:field="*{relatedLaws}" rows="3"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="clientGoal" class="form-label">의뢰인 목표</label>
+                                <input type="text" class="form-control" id="clientGoal" th:field="*{clientGoal}">
+                            </div>
+                            <div class="col-12">
+                                <label for="lawyerOpinion" class="form-label">변호사 의견</label>
+                                <textarea class="form-control" id="lawyerOpinion" th:field="*{lawyerOpinion}" rows="3"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="riskAssessment" class="form-label">위험성 평가</label>
+                                <textarea class="form-control" id="riskAssessment" th:field="*{riskAssessment}" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nextAction" class="form-label">향후 조치</label>
+                                <textarea class="form-control" id="nextAction" th:field="*{nextAction}" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary">저장</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -485,105 +553,47 @@
     <script src="/plugins/dropzone/dropzone-min.js"></script>
     
     <script>
-        document.getElementById('statusSelect').addEventListener('change', function() {
-            const consultationId = /*[[${consultation.consultationNumber}]]*/ '';
-            const newStatus = this.value;
-            
-            fetch(`/consultations/${consultationId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ status: newStatus })
-            })
-            .then(response => {
-                if (response.ok) {
-                    // 성공 시 페이지의 상태 배지 업데이트
-                    const statusBadge = document.querySelector('.badge.fs-xxs.badge-label');
-                    statusBadge.textContent = newStatus;
-                    statusBadge.className = 'badge fs-xxs badge-label ' + getStatusBadgeClass(newStatus);
-                    
-                    // 알림 표시
-                    alert('상태가 성공적으로 변경되었습니다.');
-                } else {
-                    alert('상태 변경에 실패했습니다.');
-                    // 원래 값으로 되돌리기
-                    this.value = /*[[${consultation.status}]]*/ '';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('상태 변경 중 오류가 발생했습니다.');
-                // 원래 값으로 되돌리기
-                this.value = /*[[${consultation.status}]]*/ '';
-            });
-        });
-        
-        function getStatusBadgeClass(status) {
-            switch(status) {
-                case '예약대기': return 'badge-soft-warning';
-                case '예약확정': return 'badge-soft-info';
-                case '상담중': return 'badge-soft-success';
-                case '상담완료': return 'badge-soft-primary';
-                case '취소': return 'badge-soft-secondary';
-                default: return 'badge-soft-secondary';
-            }
-        }
-        
         // Dropzone 설정
         Dropzone.autoDiscover = false;
         
         let myDropzone;
         document.addEventListener('DOMContentLoaded', function() {
-            myDropzone = new Dropzone("#fileUploadForm", {
-                url: "#", // POST 요청 비활성화를 위해 임시 URL
-                autoProcessQueue: false, // 자동 업로드 비활성화
-                addRemoveLinks: true,
-                maxFilesize: 10, // MB
-                maxFiles: 10,
-                acceptedFiles: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.txt",
-                dictDefaultMessage: "파일을 여기에 드롭하거나 클릭하여 업로드하세요.",
-                dictRemoveFile: "삭제",
-                dictCancelUpload: "취소",
-                dictCancelUploadConfirmation: "업로드를 취소하시겠습니까?",
-                dictMaxFilesExceeded: "더 이상 파일을 추가할 수 없습니다.",
-                dictFileTooBig: "파일 크기가 너무 큽니다. ({{filesize}}MB). 최대 크기: {{maxFilesize}}MB.",
-                dictInvalidFileType: "지원하지 않는 파일 형식입니다.",
-                init: function() {
-                    this.on("addedfile", function(file) {
-                        console.log("파일이 추가되었습니다:", file.name);
-                    });
-                    
-                    this.on("removedfile", function(file) {
-                        console.log("파일이 제거되었습니다:", file.name);
-                    });
-                }
-            });
-            
-            // 업로드 버튼 클릭 이벤트
-            document.getElementById('uploadFiles').addEventListener('click', function() {
-                if (myDropzone.getQueuedFiles().length > 0) {
-                    alert('파일 업로드 기능은 아직 구현되지 않았습니다. UI만 확인용입니다.');
-                    console.log('업로드할 파일들:', myDropzone.getQueuedFiles());
-                    
-                    // 모달 닫기
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('fileUploadModal'));
-                    if (modal) {
-                        modal.hide();
+            const fileUploadForm = document.getElementById('fileUploadForm');
+            if (fileUploadForm) {
+                myDropzone = new Dropzone("#fileUploadForm", {
+                    // url 속성은 form의 action 속성 사용
+                    paramName: "file",
+                    maxFilesize: 10, // MB
+                    maxFiles: 10,
+                    acceptedFiles: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.txt",
+                    dictDefaultMessage: "파일을 여기에 드롭하거나 클릭하여 업로드하세요.",
+                    dictRemoveFile: "삭제",
+                    dictCancelUpload: "취소",
+                    addRemoveLinks: true,
+                    success: function(file, response) {
+                        console.log("업로드 성공");
+                        // 파일 업로드 성공 시 페이지 새로고침하여 목록 갱신
+                        location.reload();
+                    },
+                    error: function(file, errorMessage) {
+                        console.error("업로드 실패:", errorMessage);
+                        alert("파일 업로드 중 오류가 발생했습니다: " + errorMessage);
                     }
-                } else {
-                    alert('업로드할 파일을 선택해주세요.');
-                }
-            });
+                });
+            }
             
             // 모달이 닫힐 때 Dropzone 초기화
-            document.getElementById('fileUploadModal').addEventListener('hidden.bs.modal', function() {
-                if (myDropzone) {
-                    myDropzone.removeAllFiles(true);
-                }
-            });
+            const fileUploadModal = document.getElementById('fileUploadModal');
+            if (fileUploadModal) {
+                fileUploadModal.addEventListener('hidden.bs.modal', function() {
+                    if (myDropzone) {
+                        myDropzone.removeAllFiles(true);
+                    }
+                });
+            }
         });
     </script>
+
 
 </body>
 

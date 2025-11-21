@@ -35,11 +35,9 @@
                                 <div class="app-search">
                                     <select data-table-range-filter="date"
                                         class="form-select form-control my-1 my-md-0">
-                                        <option value="All">Deadline</option>
-                                        <option value="Today">Today</option>
-                                        <option value="Last 7 Days">Last 7 Days</option>
-                                        <option value="Last 30 Days">Last 30 Days</option>
-                                        <option value="This Year">This Year</option>
+                                        <option value="All">전체상태</option>
+                                        <option value="IN_PROGRESS">상담진행</option>
+                                        <option value="COMPLETED">상담완료</option>
                                     </select>
                                     <i data-lucide="calendar-clock" class="app-search-icon text-muted"></i>
                                 </div>
@@ -68,7 +66,7 @@
                                                 class="form-check-input form-check-input-light fs-14 mt-0"
                                                 type="checkbox" id="select-all-files" value="option">
                                         </th>
-                                        <th data-table-sort="consultationNumber">상담번호</th>
+                                        <th data-table-sort="id">상담번호</th>
                                         <th data-table-sort="clientName">의뢰인</th>
                                         <th data-table-sort data-column="status">상태</th>
                                         <th>담당변호사</th>
@@ -91,11 +89,11 @@
                                                 </div>
                                                 <div>
                                                     <h5 class="mb-1 d-flex align-items-center">
-                                                        <a th:text="${consultation.consultationNumber}" 
-                                                           th:href="'/consultations/' + ${consultation.consultationNumber}" 
+                                                        <a th:text="'C' + ${consultation.id}" 
+                                                           th:href="'/consultations/' + ${consultation.id}" 
                                                            class="link-reset"></a>
                                                     </h5>
-                                                    <p class="text-muted mb-0 fs-xxs" th:text="'등록: ' + ${#temporals.format(consultation.consultationDate, 'yyyy-MM-dd')}"></p>
+                                                    <p class="text-muted mb-0 fs-xxs" th:text="'등록: ' + ${#temporals.format(consultation.createdAt, 'yyyy-MM-dd')}"></p>
                                                 </div>
                                             </div>
                                         </td>
@@ -104,14 +102,12 @@
                                         </td>
                                         <td>
                                             <span class="badge fs-xxs badge-label" 
-                                                  th:text="${consultation.status}"
-                                                  th:classappend="${consultation.status == '예약대기' ? 'badge-soft-warning' : 
-                                                                   consultation.status == '예약확정' ? 'badge-soft-info' :
-                                                                   consultation.status == '상담중' ? 'badge-soft-success' : 
-                                                                   consultation.status == '상담완료' ? 'badge-soft-primary' :
+                                                  th:text="${consultation.status.label}"
+                                                  th:classappend="${consultation.status.name() == 'IN_PROGRESS' ? 'badge-soft-success' : 
+                                                                   consultation.status.name() == 'COMPLETED' ? 'badge-soft-primary' :
                                                                    'badge-soft-secondary'}"></span>
                                         </td>
-                                        <td th:text="${consultation.lawyerName}"></td>
+                                        <td th:text="${consultation.counselorName}"></td>
                                         <td th:text="${#temporals.format(consultation.consultationDate, 'yyyy-MM-dd HH:mm')}"></td>
                                         <td>
                                             <div class="d-flex justify-content-center gap-1">

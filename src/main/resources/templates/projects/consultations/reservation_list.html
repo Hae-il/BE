@@ -91,7 +91,7 @@
                                                 <div>
                                                     <h5 class="mb-1 d-flex align-items-center">
                                                         <a th:text="'R' + ${reservation.id}" 
-                                                           th:href="'/reservations/' + ${reservation.id}" 
+                                                           th:href="'/consultations/reservations/' + ${reservation.id}" 
                                                            class="link-reset"></a>
                                                     </h5>
                                                     <p class="text-muted mb-0 fs-xxs" th:text="'신청: ' + ${#temporals.format(reservation.createdAt, 'yyyy-MM-dd')}"></p>
