@@ -56,7 +56,7 @@ public class ConsultationController {
     }
 
     @Operation(summary = "상담 예약 상세 조회", description = "상담 예약 상세 정보를 조회합니다.")
-    @GetMapping("/requests/{id}")
+    @GetMapping("/reservations/{id}")
     public ApiResponse<Object> getConsultationRequest(@PathVariable Long id) {
         ConsultationReservationResponse response = consultationService.getConsultationRequest(id);
         return ApiResponse.from(response);
@@ -161,5 +161,14 @@ public class ConsultationController {
     public ApiResponse<Object> getConsultationFiles(@PathVariable Long id) {
         List<ConsultationFile> files = consultationService.getConsultationFiles(id);
         return ApiResponse.from(files);
+    }
+
+    @Operation(summary = "상담 담당자 변경", description = "진행 중인 상담의 담당 상담사를 변경합니다.")
+    @PatchMapping("/{consultationId}/counselor")
+    public ApiResponse<Object> updateCounselor(
+            @PathVariable Long consultationId,
+            @RequestParam Long newCounselorId) {
+        ConsultationResponse response = consultationService.updateCounselor(consultationId, newCounselorId);
+        return ApiResponse.from(response);
     }
 }

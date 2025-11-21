@@ -2,6 +2,8 @@ package com.haeil.be.consultation.domain;
 
 import com.haeil.be.client.domain.Client;
 import com.haeil.be.consultation.domain.type.ConsultationStatus;
+import com.haeil.be.consultation.exception.ConsultationException;
+import com.haeil.be.consultation.exception.errorcode.ConsultationErrorCode;
 import com.haeil.be.global.entity.BaseEntity;
 import com.haeil.be.user.domain.User;
 import jakarta.persistence.*;
@@ -78,5 +80,12 @@ public class Consultation extends BaseEntity {
 
     public User getCounselor() {
         return this.counselor;
+    }
+
+    public void updateCounselor(User newCounselor) {
+        if (!this.isInProgress()) {
+            throw new ConsultationException(ConsultationErrorCode.CONSULTATION_NOT_IN_PROGRESS);
+        }
+        this.counselor = newCounselor;
     }
 }

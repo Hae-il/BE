@@ -282,4 +282,20 @@ public class ConsultationService {
     public List<ConsultationFile> getConsultationFiles(Long consultationId) {
         return consultationFileRepository.findByConsultationId(consultationId);
     }
+
+    @Transactional
+    public ConsultationResponse updateCounselor(Long consultationId, Long newCounselorId) {
+        Consultation consultation =
+                consultationRepository
+                        .findById(consultationId)
+                        .orElseThrow(
+                                () ->
+                                        new ConsultationException(
+                                                ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+
+        User newCounselor = userService.getUser(newCounselorId);
+        consultation.updateCounselor(newCounselor);
+
+        return ConsultationResponse.from(consultation);
+    }
 }
