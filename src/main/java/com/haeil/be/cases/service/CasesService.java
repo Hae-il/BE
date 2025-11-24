@@ -30,6 +30,8 @@ import com.haeil.be.consultation.domain.Consultation;
 import com.haeil.be.file.domain.FileEntity;
 import com.haeil.be.file.repository.FileRepository;
 import com.haeil.be.file.service.FileService;
+import com.haeil.be.notification.domain.type.NotificationType;
+import com.haeil.be.notification.service.NotificationService;
 import com.haeil.be.user.domain.User;
 import com.haeil.be.user.repository.UserRepository;
 import java.io.IOException;
@@ -52,6 +54,7 @@ public class CasesService {
     private final CaseDocumentRepository caseDocumentRepository;
     private final FileService fileService;
     private final FileRepository fileRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public Cases createCaseFromConsultation(Consultation consultation) {
@@ -70,6 +73,7 @@ public class CasesService {
                         .caseType(consultation.getConsultationReservation().getCaseType())
                         .attorney(consultation.getCounselor())
                         .consultation(consultation)
+                        .client(consultation.getClient())
                         .build();
 
         return casesRepository.save(newCase);
@@ -119,6 +123,11 @@ public class CasesService {
 
         // 배정요청으로 상태변경
         foundCase.updateStatus(CaseStatus.PENDING);
+
+        // 알림 전송
+        String content = String.format("새로운 사건이 배정 요청되었습니다: %s", foundCase.getTitle());
+        String url = "/cases/requested/" + foundCase.getId();
+        notificationService.send(attorney, NotificationType.CASE_ASSIGNED, content, url);
     }
 
     // 요청된 사건 목록조회
