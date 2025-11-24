@@ -1,0 +1,126 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+
+<head>
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('상담 예약 신청')}" />
+</head>
+
+<body>
+    <th:block layout:fragment="content">
+        <div class="container-fluid">
+            <th:block th:replace="~{partials/page-title :: page-title('상담 예약 신청', 'Consultations')}" />
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">상담 예약 신청서</h4>
+                        </div>
+                        <div class="card-body">
+                            <form class="row g-3 needs-validation" th:action="@{/consultations/reservations}" th:object="${request}" method="post" novalidate>
+                                
+                                <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+                                
+                                <div class="mb-3 position-relative">
+                                    <label for="name" class="form-label">신청자 성명 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="성명을 입력하세요" required>
+                                    <div class="valid-tooltip">
+                                        Looks good!
+                                    </div>
+                                    <div class="invalid-tooltip">
+                                        이름을 입력해주세요.
+                                    </div>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                                </div>
+
+                                <div class="mb-3 position-relative">
+                                    <label for="phone" class="form-label">연락처 <span class="text-danger">*</span></label>
+                                    <div class="input-group has-validation">
+                                        <span class="input-group-text"><i class="ti ti-phone"></i></span>
+                                        <input type="text" class="form-control" id="phone" th:field="*{phone}" placeholder="010-0000-0000" required>
+                                        <div class="invalid-tooltip">
+                                            유효한 전화번호를 입력해주세요.
+                                        </div>
+                                    </div>
+                                    <div class="form-text">'-'를 포함하여 입력해주세요.</div>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                                </div>
+
+                                <div class="mb-3 position-relative">
+                                    <label for="caseType" class="form-label">사건 유형 <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="caseType" th:field="*{caseType}" required>
+                                        <option value="" selected disabled>선택하세요</option>
+                                        <option th:each="type : ${T(com.haeil.full.cases.domain.type.CaseType).values()}" 
+                                                th:value="${type}" th:text="${type.label}"></option>
+                                    </select>
+                                    <div class="invalid-tooltip">
+                                        사건 유형을 선택해주세요.
+                                    </div>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('caseType')}" th:errors="*{caseType}"></div>
+                                </div>
+
+                                <div class="mb-3 position-relative">
+                                    <label for="requestedDate" class="form-label">희망 상담 일시</label>
+                                    <div class="input-group has-validation">
+                                        <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                                        <input type="datetime-local" class="form-control" id="requestedDate" th:field="*{requestedDate}">
+                                    </div>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('requestedDate')}" th:errors="*{requestedDate}"></div>
+                                </div>
+
+                                <div class="mb-3 position-relative">
+                                    <label for="description" class="form-label">상담 내용</label>
+                                    <textarea class="form-control" id="description" th:field="*{description}" rows="5" placeholder="상담 받고자 하는 내용을 간략히 적어주세요."></textarea>
+                                    <div class="text-danger" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="agreementCheck" required>
+                                        <label class="form-check-label" for="agreementCheck">
+                                            개인정보 수집 및 이용에 동의합니다.
+                                        </label>
+                                        <div class="invalid-tooltip">
+                                            동의가 필요합니다.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <a href="/consultations/reservations" class="btn btn-light">취소</a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="ti ti-send me-1"></i> 예약 신청
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block layout:fragment="javascripts">
+        <script>
+            // Bootstrap Validation Loop
+            (function () {
+                'use strict'
+                
+                var forms = document.querySelectorAll('.needs-validation')
+                
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+                            
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
+        </script>
+    </th:block>
+
+
+</html>

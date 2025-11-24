@@ -32,6 +32,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
@@ -56,6 +58,11 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Specify main class for full MVC application
+springBoot {
+	mainClass = 'com.haeil.full.FullApplication'
 }
 
 // CheckStyle configuration

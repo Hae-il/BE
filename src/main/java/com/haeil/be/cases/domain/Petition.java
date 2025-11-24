@@ -21,23 +21,23 @@ public class Petition extends BaseEntity {
     private Cases cases;
 
     // 청구 취지
-    @Column(name = "claim_amount")  //청구금액
+    @Column(name = "claim_amount") // 청구금액
     private Long claimAmount;
 
-    @Column(name = "claim_content", columnDefinition = "TEXT") //청구내용
+    @Column(name = "claim_content", columnDefinition = "TEXT") // 청구내용
     private String claimContent;
 
     // 청구 원인
-    @Column(name = "accident_circumstances", columnDefinition = "TEXT")  //사고경위
+    @Column(name = "accident_circumstances", columnDefinition = "TEXT") // 사고경위
     private String accidentCircumstances;
 
-    @Column(name = "damage_items", columnDefinition = "TEXT")  //손해항목
+    @Column(name = "damage_items", columnDefinition = "TEXT") // 손해항목
     private String damageItems;
 
-    @Column(name = "damage_calculation", columnDefinition = "TEXT")  //손해액상정
+    @Column(name = "damage_calculation", columnDefinition = "TEXT") // 손해액상정
     private String damageCalculation;
 
-    @Column(name = "liability_basis", columnDefinition = "TEXT")  //책임 인정 근거
+    @Column(name = "liability_basis", columnDefinition = "TEXT") // 책임 인정 근거
     private String liabilityBasis;
 
     // 입증 방법
@@ -51,17 +51,17 @@ public class Petition extends BaseEntity {
     @Builder
     public Petition(
             Cases cases,
-            //청구취지
+            // 청구취지
             Long claimAmount,
             String claimContent,
-            //청구원인
+            // 청구원인
             String accidentCircumstances,
             String damageItems,
             String damageCalculation,
             String liabilityBasis,
-            //입증방법
+            // 입증방법
             String proofMethod,
-            //첨부 서류(당장은 string으로 처리했습니다)
+            // 첨부 서류(당장은 string으로 처리했습니다)
             String attachedDocuments) {
         this.cases = cases;
         this.claimAmount = claimAmount;
@@ -106,4 +106,3 @@ public class Petition extends BaseEntity {
         this.attachedDocuments = attachedDocuments;
     }
 }
-

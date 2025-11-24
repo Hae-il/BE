@@ -1,0 +1,362 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+
+<th:block layout:fragment="styles">
+    <!-- Dropzone Plugin CSS -->
+    <link rel="stylesheet" href="/plugins/dropzone/dropzone.css" type="text/css">
+</th:block>
+
+<head>
+
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta(${pageTitle})}" />
+
+</head>
+
+<body>
+    <th:block layout:fragment="content">
+
+        <div class="container-fluid">
+
+            <th:block th:replace="~{partials/page-title :: page-title(${pageTitle},${pageSubtitle})}" />
+
+            <div class="row justify-content-center">
+                <div class="col-xxl-10">
+                    <div class="row g-0">
+                        <!-- Reservation Main Details -->
+                        <div class="col-xl-9">
+                            <div class="card card-h-100 rounded-0 rounded-start">
+                                <div class="card-header align-items-start p-4">
+                                    <div class="avatar-xxl me-3">
+                                        <span class="avatar-title text-bg-light rounded">
+                                            <i class="ti ti-calendar-event fs-xxl text-primary"></i>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <h3 class="mb-1 d-flex fs-xl align-items-center" th:text="'R' + ${reservation.id} + ' - ' + ${reservation.name}"></h3>
+                                        <p class="text-muted mb-2 fs-xxs" th:text="'마지막 수정: ' + ${#temporals.format(reservation.updatedAt, 'MM월 dd일 HH:mm')}"></p>
+                                        <span class="badge fs-xxs badge-label" 
+                                              th:text="${reservation.status.label}"
+                                              th:classappend="${reservation.status.name() == 'APPROVED' ? 'badge-soft-success' : 
+                                                              (reservation.status.name() == 'PENDING' ? 'badge-soft-warning' : 'badge-soft-secondary')}"></span>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <div th:if="${reservation.status.name() == 'PENDING'}" class="d-flex gap-2">
+                                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveModal">
+                                                <i class="ti ti-check me-1"></i> 승인
+                                            </button>
+                                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                                <i class="ti ti-x me-1"></i> 거절
+                                            </button>
+                                        </div>
+                                        <a th:unless="${reservation.status.name() == 'PENDING'}" href="javascript: void(0);" class="btn btn-light"><i
+                                                class="ti ti-pencil me-1"></i> 수정</a>
+                                    </div>
+                                </div>
+                                <div class="card-body px-4">
+                                    <div class="mb-4">
+                                        <h5 class="fs-base mb-2">예약 정보:</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p class="text-muted"><strong>희망 상담일시:</strong> <span th:text="${#temporals.format(reservation.requestedDate, 'yyyy년 MM월 dd일 HH:mm')}"></span></p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p class="text-muted"><strong>담당 변호사:</strong> <span th:text="${reservation.assignedLawyerName ?: '미배정'}"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-md-4 col-xl-3">
+                                            <h6 class="mb-1 text-muted text-uppercase">신청일:</h6>
+                                            <p class="fw-medium mb-0" th:text="${#temporals.format(reservation.createdAt, 'yyyy년 MM월 dd일')}"></p>
+                                        </div>
+                                        <div class="col-md-4 col-xl-3">
+                                            <h6 class="mb-1 text-muted text-uppercase">연락처:</h6>
+                                            <p class="fw-medium mb-0" th:text="${reservation.phone}"></p>
+                                        </div>
+                                        <div class="col-md-4 col-xl-3">
+                                            <h6 class="mb-1 text-muted text-uppercase">사건 유형:</h6>
+                                            <p class="fw-medium mb-0" th:text="${reservation.caseType.label}"></p>
+                                        </div>
+                                        <div class="col-md-4 col-xl-3">
+                                            <h6 class="mb-1 text-muted text-uppercase">상태:</h6>
+                                            <p class="fw-medium mb-0" th:text="${reservation.status.label}"></p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tabs -->
+                                    <ul class="nav nav-tabs nav-bordered mb-3" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-bs-toggle="tab" href="#reservation-details" role="tab">
+                                                <i class="ti ti-file-text fs-lg me-md-1 align-middle"></i>
+                                                <span class="d-none d-md-inline-block align-middle">상담 신청 내용</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-bs-toggle="tab" href="#tasks" role="tab">
+                                                <i class="ti ti-list-check fs-lg me-md-1 align-middle"></i>
+                                                <span class="d-none d-md-inline-block align-middle">처리 현황</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-bs-toggle="tab" href="#activity" role="tab">
+                                                <i class="ti ti-activity fs-lg me-md-1 align-middle"></i>
+                                                <span class="d-none d-md-inline-block align-middle">처리 이력</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div class="tab-pane fade active show" id="reservation-details" role="tabpanel">
+                                            
+                                            <!-- 상담 신청 내용 -->
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <div class="card border-dashed">
+                                                        <div class="card-body p-3">
+                                                            <h6 class="fs-sm text-muted mb-2">신청 내용</h6>
+                                                            <p class="mb-0" th:text="${reservation.description ?: '작성된 내용이 없습니다.'}"></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- 거부 사유가 있는 경우 -->
+                                                <div th:if="${reservation.rejectReason}" class="col-12">
+                                                    <div class="card border-dashed border-danger">
+                                                        <div class="card-body p-3">
+                                                            <h6 class="fs-sm text-danger mb-2">
+                                                                <i class="ti ti-alert-circle me-1"></i>거부 사유
+                                                            </h6>
+                                                            <p class="mb-0 text-danger" th:text="${reservation.rejectReason}"></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- 신청자 정보 요약 -->
+                                                <div class="col-md-6">
+                                                    <div class="card border-dashed">
+                                                        <div class="card-body p-3">
+                                                            <h6 class="fs-sm text-muted mb-2">신청자 정보</h6>
+                                                            <p class="mb-1"><strong>이름:</strong> <span th:text="${reservation.name}"></span></p>
+                                                            <p class="mb-0"><strong>연락처:</strong> <span th:text="${reservation.phone}"></span></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-6">
+                                                    <div class="card border-dashed">
+                                                        <div class="card-body p-3">
+                                                            <h6 class="fs-sm text-muted mb-2">희망 상담 정보</h6>
+                                                            <p class="mb-1"><strong>사건 유형:</strong> <span th:text="${reservation.caseType.label}"></span></p>
+                                                            <p class="mb-0"><strong>희망 일시:</strong> <span th:text="${#temporals.format(reservation.requestedDate, 'yyyy년 MM월 dd일 HH:mm')}"></span></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="tab-pane fade" id="tasks" role="tabpanel">
+                                            <!-- 처리 현황 -->
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <div class="card border-dashed">
+                                                        <div class="card-body p-3">
+                                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                <h6 class="fs-sm text-muted mb-0">처리 상태</h6>
+                                                                <span class="badge" 
+                                                                      th:text="${reservation.status.label}"
+                                                                      th:classappend="${reservation.status.name() == 'APPROVED' ? 'badge-soft-success' : 
+                                                                                      (reservation.status.name() == 'PENDING' ? 'badge-soft-warning' : 'badge-soft-secondary')}"></span>
+                                                            </div>
+                                                            <div class="progress mb-2" style="height: 8px;">
+                                                                <div class="progress-bar" role="progressbar" 
+                                                                     th:style="'width: ' + ${reservation.status.name() == 'PENDING' ? '33' : 
+                                                                                              (reservation.status.name() == 'APPROVED' ? '100' : '66')} + '%'"
+                                                                     th:classappend="${reservation.status.name() == 'APPROVED' ? 'bg-success' : 
+                                                                                     (reservation.status.name() == 'PENDING' ? 'bg-warning' : 'bg-secondary')}"></div>
+                                                            </div>
+                                                            <small class="text-muted" th:text="'최종 업데이트: ' + ${#temporals.format(reservation.updatedAt, 'yyyy년 MM월 dd일 HH:mm')}"></small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div th:if="${reservation.assignedLawyerName}" class="col-12">
+                                                    <div class="card border-dashed">
+                                                        <div class="card-body p-3">
+                                                            <h6 class="fs-sm text-muted mb-2">배정 변호사</h6>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="avatar avatar-sm me-2">
+                                                                    <span class="avatar-title bg-primary text-white rounded-circle">
+                                                                        <i class="ti ti-user"></i>
+                                                                    </span>
+                                                                </div>
+                                                                <div>
+                                                                    <p class="mb-0 fw-medium" th:text="${reservation.assignedLawyerName}"></p>
+                                                                    <small class="text-muted">담당 변호사</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="tab-pane fade" id="activity" role="tabpanel">
+                                            <!-- 처리 이력 -->
+                                            <div class="timeline">
+                                                <div class="timeline-item">
+                                                    <div class="timeline-marker bg-primary"></div>
+                                                    <div class="timeline-content">
+                                                        <h6 class="timeline-title">상담 예약 신청</h6>
+                                                        <p class="timeline-text" th:text="${reservation.name} + '님이 ' + ${reservation.caseType.label} + ' 관련 상담을 신청했습니다.'"></p>
+                                                        <small class="timeline-time text-muted" th:text="${#temporals.format(reservation.createdAt, 'yyyy년 MM월 dd일 HH:mm')}"></small>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div th:if="${reservation.status.name() != 'PENDING'}" class="timeline-item">
+                                                    <div class="timeline-marker" 
+                                                         th:classappend="${reservation.status.name() == 'APPROVED' ? 'bg-success' : 'bg-secondary'}"></div>
+                                                    <div class="timeline-content">
+                                                        <h6 class="timeline-title" th:text="${reservation.status.label}"></h6>
+                                                        <p class="timeline-text" th:text="${reservation.status.name() == 'APPROVED' ? '상담 예약이 승인되었습니다.' : '상담 예약이 거부되었습니다.'}"></p>
+                                                        <div th:if="${reservation.assignedLawyerName}" class="mt-1">
+                                                            <small class="text-muted">담당 변호사: </small>
+                                                            <span class="fw-medium" th:text="${reservation.assignedLawyerName}"></span>
+                                                        </div>
+                                                        <div th:if="${reservation.rejectReason}" class="mt-1">
+                                                            <small class="text-danger">거부 사유: </small>
+                                                            <span th:text="${reservation.rejectReason}"></span>
+                                                        </div>
+                                                        <small class="timeline-time text-muted" th:text="${#temporals.format(reservation.updatedAt, 'yyyy년 MM월 dd일 HH:mm')}"></small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div> <!-- end card-body -->
+                            </div> <!-- end card -->
+                        </div> <!-- end col-xl-9 -->
+
+                        <!-- Status Sidebar -->
+                        <div class="col-xl-3">
+                            <div class="card card-h-100 rounded-0 rounded-end">
+                                <div class="card-body p-0">
+                                    <div class="p-3 border-bottom border-dashed">
+                                        <h5 class="mb-2">예약 상태</h5>
+                                        <div class="d-grid gap-2">
+                                            <span class="badge fs-sm badge-label w-100 py-2" 
+                                                  th:text="${reservation.status.label}"
+                                                  th:classappend="${reservation.status.name() == 'APPROVED' ? 'badge-soft-success' : 
+                                                                  (reservation.status.name() == 'PENDING' ? 'badge-soft-warning' : 'badge-soft-secondary')}"></span>
+                                                                  
+                                            <!-- 상담 시작 버튼 (예약 승인된 경우) -->
+                                            <a th:if="${reservation.status.name() == 'APPROVED'}" 
+                                               th:href="@{/consultations/new(reservationId=${reservation.id})}" 
+                                               class="btn btn-primary w-100">
+                                                <i class="ti ti-player-play me-1"></i> 상담 시작
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div th:if="${reservation.assignedLawyerName}" class="p-3 border-bottom border-dashed">
+                                        <h5 class="mb-2">담당 변호사</h5>
+                                        <div class="d-flex align-items-center py-1 gap-2">
+                                            <div class="avatar avatar-sm">
+                                                <span class="avatar-title bg-primary text-white rounded-circle">
+                                                    <i class="ti ti-user"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <h5 class="text-nowrap mb-0 lh-base" th:text="${reservation.assignedLawyerName}"></h5>
+                                                <p class="text-muted fs-xxs mb-0">담당 변호사</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-3 border-bottom border-dashed">
+                                        <h5 class="mb-2">예약 정보</h5>
+                                        <div class="mb-3">
+                                            <h6 class="fs-sm text-muted mb-1">신청자</h6>
+                                            <p class="mb-0" th:text="${reservation.name}"></p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <h6 class="fs-sm text-muted mb-1">연락처</h6>
+                                            <p class="mb-0" th:text="${reservation.phone}"></p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <h6 class="fs-sm text-muted mb-1">사건 유형</h6>
+                                            <p class="mb-0" th:text="${reservation.caseType.label}"></p>
+                                        </div>
+                                        <div>
+                                            <h6 class="fs-sm text-muted mb-1">희망 일시</h6>
+                                            <p class="mb-0" th:text="${#temporals.format(reservation.requestedDate, 'yyyy년 MM월 dd일 HH:mm')}"></p>
+                                        </div>
+                                    </div>
+
+                                </div> <!-- end card-body -->
+                            </div> <!-- end card -->
+                        </div> <!-- end col-xl-3 -->
+                    </div> <!-- end row -->
+                </div> <!-- end col-xxl-10 -->
+            </div> <!-- end row -->
+
+        </div>
+
+        <!-- Approve Modal -->
+        <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="approveModalLabel">예약 승인</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form th:action="@{'/consultations/reservations/' + ${reservation.id} + '/approve'}" method="post" th:object="${approveRequest}">
+                        <div class="modal-body">
+                            <p>해당 상담 예약을 승인하시겠습니까?</p>
+                            <div class="mb-3">
+                                <label for="lawyerId" class="form-label">담당 변호사 ID</label>
+                                <input type="number" class="form-control" id="lawyerId" th:field="*{lawyerId}" required placeholder="변호사 ID 입력">
+                                <div class="form-text">임시: 변호사 ID를 직접 입력해주세요.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <button type="submit" class="btn btn-success">승인</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reject Reason Modal -->
+        <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rejectModalLabel">예약 거절 사유</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form th:action="@{'/consultations/reservations/' + ${reservation.id} + '/reject'}" method="post" th:object="${rejectRequest}">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="rejectionReason" class="form-label">거절 사유 <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="rejectionReason" th:field="*{rejectionReason}" rows="4" 
+                                          placeholder="예약을 거절하는 사유를 입력해주세요." required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <button type="submit" class="btn btn-danger">거절 처리</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </th:block>
+    
+    <!-- Script removed (handled by form submission) -->
+
+</body>
+
+</html>

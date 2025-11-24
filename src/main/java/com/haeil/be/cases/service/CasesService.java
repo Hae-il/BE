@@ -4,19 +4,19 @@ import static com.haeil.be.cases.exception.errorcode.CasesErrorCode.CASE_NOT_FOU
 
 import com.haeil.be.cases.domain.CaseDocument;
 import com.haeil.be.cases.domain.Cases;
-import com.haeil.be.cases.domain.type.CaseStatus;
 import com.haeil.be.cases.domain.Petition;
+import com.haeil.be.cases.domain.type.CaseStatus;
 import com.haeil.be.cases.dto.request.AssignAttorneyRequest;
 import com.haeil.be.cases.dto.request.CaseDocumentRequest;
 import com.haeil.be.cases.dto.request.DecisionRequest;
 import com.haeil.be.cases.dto.request.PetitionRequest;
 import com.haeil.be.cases.dto.response.CaseDocumentResponse;
 import com.haeil.be.cases.dto.response.CaseInfoResponse;
-import com.haeil.be.cases.dto.response.PetitionResponse;
 import com.haeil.be.cases.dto.response.CompletedCaseDetailResponse;
 import com.haeil.be.cases.dto.response.CompletedCaseResponse;
 import com.haeil.be.cases.dto.response.OngoingCaseDetailResponse;
 import com.haeil.be.cases.dto.response.OngoingCaseResponse;
+import com.haeil.be.cases.dto.response.PetitionResponse;
 import com.haeil.be.cases.dto.response.RequestedCaseDetailResponse;
 import com.haeil.be.cases.dto.response.RequestedCaseResponse;
 import com.haeil.be.cases.dto.response.UnassignedCaseDetailResponse;
@@ -242,17 +242,18 @@ public class CasesService {
             throw new CasesException(CasesErrorCode.PETITION_ALREADY_EXISTS);
         }
 
-        Petition petition = Petition.builder()
-                .cases(foundCase)
-                .claimAmount(request.claimAmount())
-                .claimContent(request.claimContent())
-                .accidentCircumstances(request.accidentCircumstances())
-                .damageItems(request.damageItems())
-                .damageCalculation(request.damageCalculation())
-                .liabilityBasis(request.liabilityBasis())
-                .proofMethod(request.proofMethod())
-                .attachedDocuments(request.attachedDocuments())
-                .build();
+        Petition petition =
+                Petition.builder()
+                        .cases(foundCase)
+                        .claimAmount(request.claimAmount())
+                        .claimContent(request.claimContent())
+                        .accidentCircumstances(request.accidentCircumstances())
+                        .damageItems(request.damageItems())
+                        .damageCalculation(request.damageCalculation())
+                        .liabilityBasis(request.liabilityBasis())
+                        .proofMethod(request.proofMethod())
+                        .attachedDocuments(request.attachedDocuments())
+                        .build();
 
         petitionRepository.save(petition);
     }
@@ -328,7 +329,7 @@ public class CasesService {
         }
     }
 
-    //법원에서 할당된 사건번호 추가
+    // 법원에서 할당된 사건번호 추가
     @Transactional
     public void updateCaseNumber(Long caseId, String caseNumber, Long userId) {
         Cases foundCase = getCasesOrThrow(caseId);
@@ -345,7 +346,8 @@ public class CasesService {
     // 소송문서 업로드
     @Transactional
     public CaseDocumentResponse uploadCaseDocument(
-            Long caseId, MultipartFile file, CaseDocumentRequest request, Long userId) throws IOException {
+            Long caseId, MultipartFile file, CaseDocumentRequest request, Long userId)
+            throws IOException {
         Cases foundCase = getCasesOrThrow(caseId);
 
         if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
@@ -371,12 +373,13 @@ public class CasesService {
         }
 
         // 소송문서 생성
-        CaseDocument caseDocument = CaseDocument.builder()
-                .cases(foundCase)
-                .documentType(request.documentType())
-                .file(uploadedFile)
-                .description(request.description())
-                .build();
+        CaseDocument caseDocument =
+                CaseDocument.builder()
+                        .cases(foundCase)
+                        .documentType(request.documentType())
+                        .file(uploadedFile)
+                        .description(request.description())
+                        .build();
 
         caseDocumentRepository.save(caseDocument);
 
@@ -398,9 +401,7 @@ public class CasesService {
         }
 
         List<CaseDocument> documents = caseDocumentRepository.findByCasesId(caseId);
-        return documents.stream()
-                .map(CaseDocumentResponse::from)
-                .collect(Collectors.toList());
+        return documents.stream().map(CaseDocumentResponse::from).collect(Collectors.toList());
     }
 
     // 소송문서 삭제
@@ -417,8 +418,11 @@ public class CasesService {
             throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
         }
 
-        CaseDocument caseDocument = caseDocumentRepository.findById(documentId)
-                .orElseThrow(() -> new CasesException(CasesErrorCode.CASE_DOCUMENT_NOT_FOUND));
+        CaseDocument caseDocument =
+                caseDocumentRepository
+                        .findById(documentId)
+                        .orElseThrow(
+                                () -> new CasesException(CasesErrorCode.CASE_DOCUMENT_NOT_FOUND));
 
         // 해당 사건의 문서인지 확인
         if (!caseDocument.getCases().getId().equals(caseId)) {
@@ -443,7 +447,7 @@ public class CasesService {
         caseDocumentRepository.delete(caseDocument);
     }
 
-    //사건 완료처리
+    // 사건 완료처리
     @Transactional
     public void completeCase(Long caseId, Long userId) {
         Cases foundCase = getCasesOrThrow(caseId);
@@ -470,9 +474,7 @@ public class CasesService {
                         .findById(userId)
                         .orElseThrow(() -> new CasesException(CasesErrorCode.ATTORNEY_NOT_FOUND));
 
-        return casesRepository
-                .findByCaseStatusAndAttorney(CaseStatus.COMPLETED, attorney)
-                .stream()
+        return casesRepository.findByCaseStatusAndAttorney(CaseStatus.COMPLETED, attorney).stream()
                 .map(CompletedCaseResponse::from)
                 .toList();
     }
@@ -496,5 +498,4 @@ public class CasesService {
 
         return CompletedCaseDetailResponse.from(foundCase);
     }
-
 }
