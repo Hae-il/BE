@@ -22,4 +22,3 @@ public record CompletedCaseResponse(
                 cases.getAttorney() != null ? cases.getAttorney().getName() : null);
     }
 }
-

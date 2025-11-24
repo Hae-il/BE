@@ -35,10 +35,7 @@ public class CaseDocument extends BaseEntity {
 
     @Builder
     public CaseDocument(
-            DocumentType documentType,
-            Cases cases,
-            FileEntity file,
-            String description) {
+            DocumentType documentType, Cases cases, FileEntity file, String description) {
         this.documentType = documentType;
         this.cases = cases;
         this.file = file;

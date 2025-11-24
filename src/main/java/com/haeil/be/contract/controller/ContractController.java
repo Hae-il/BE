@@ -40,7 +40,6 @@ public class ContractController {
     public ResponseEntity<ApiResponse<Object>> getContract(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        // 추후에 @AuthenticationalPrincipal 사용 예정
         Pageable pageable = PageRequest.of(page, size);
         Page<ContractItemResponse> contractItemResponses =
                 contractService.getContractList(pageable);

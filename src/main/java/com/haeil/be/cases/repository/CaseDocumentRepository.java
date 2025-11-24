@@ -7,4 +7,3 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface CaseDocumentRepository extends JpaRepository<CaseDocument, Long> {
     List<CaseDocument> findByCasesId(Long caseId);
 }
-
