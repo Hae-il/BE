@@ -1,0 +1,656 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+
+<th:block layout:fragment="styles">
+    <!-- Dropzone Plugin CSS -->
+    <link rel="stylesheet" href="/plugins/dropzone/dropzone.css" type="text/css">
+</th:block>
+
+<head>
+
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta(${pageTitle})}" />
+
+</head>
+
+<body>
+    <th:block layout:fragment="content">
+
+        <div class="container-fluid">
+
+            <th:block th:replace="~{partials/page-title :: page-title(${pageTitle},${pageSubtitle})}" />
+
+            <div class="row justify-content-center">
+                <div class="col-xxl-10">
+                    <div class="row g-0">
+                        <!-- Project Main Details -->
+                        <div class="col-xl-9">
+                            <div class="card card-h-100 rounded-0 rounded-start">
+                                <div class="card-header align-items-start p-4">
+                                    <div class="avatar-xxl me-3">
+                                        <span class="avatar-title text-bg-light rounded">
+                                            <i class="ti ti-user fs-xxl text-primary"></i>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <h3 class="mb-1 d-flex fs-xl align-items-center" th:text="'C' + ${consultation.id} + ' - ' + ${consultation.clientName}"></h3>
+                                        <p class="text-muted mb-2 fs-xxs" th:text="'마지막 수정: ' + ${#temporals.format(consultation.updatedAt, 'MM월 dd일 HH:mm')}"></p>
+                                        <span class="badge fs-xxs badge-label" 
+                                              th:text="${consultation.status.label}"
+                                              th:classappend="${consultation.status.name() == 'IN_PROGRESS' ? 'badge-soft-success' : 'badge-soft-primary'}"></span>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <a href="javascript: void(0);" class="btn btn-light"><i
+                                                class="ti ti-pencil me-1"></i> 수정</a>
+                                    </div>
+                                </div>
+                                <div class="card-body px-4">
+                                    <div class="mb-4">
+                                        <h5 class="fs-base mb-2">상담 정보:</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p class="text-muted"><strong>상담일시:</strong> <span th:text="${#temporals.format(consultation.consultationDate, 'yyyy년 MM월 dd일 HH:mm')}"></span></p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p class="text-muted"><strong>담당 변호사:</strong> <span th:text="${consultation.counselorName}"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-md-4 col-xl-3">
+                                            <h6 class="mb-1 text-muted text-uppercase">등록일:</h6>
+                                            <p class="fw-medium mb-0" th:text="${#temporals.format(consultation.createdAt, 'yyyy년 MM월 dd일')}"></p>
+                                        </div>
+                                        <div class="col-md-4 col-xl-3">
+                                            <h6 class="mb-1 text-muted text-uppercase">상담일:</h6>
+                                            <p class="fw-medium mb-0" th:text="${#temporals.format(consultation.consultationDate, 'yyyy년 MM월 dd일')}"></p>
+                                        </div>
+                                        <div class="col-md-4 col-xl-3">
+                                            <h6 class="mb-1 text-muted text-uppercase">담당 변호사:</h6>
+                                            <p class="fw-medium mb-0" th:text="${consultation.counselorName}"></p>
+                                        </div>
+                                        <div class="col-md-4 col-xl-3">
+                                            <h6 class="mb-1 text-muted text-uppercase">상태:</h6>
+                                            <p class="fw-medium mb-0" th:text="${consultation.status.label}"></p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tabs -->
+                                    <ul class="nav nav-tabs nav-bordered mb-3" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-bs-toggle="tab" href="#consultation-notes" role="tab">
+                                                <i class="ti ti-notes fs-lg me-md-1 align-middle"></i>
+                                                <span class="d-none d-md-inline-block align-middle">상담 기록</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-bs-toggle="tab" href="#tasks" role="tab">
+                                                <i class="ti ti-list-check fs-lg me-md-1 align-middle"></i>
+                                                <span class="d-none d-md-inline-block align-middle">Task List</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-bs-toggle="tab" href="#activity" role="tab">
+                                                <i class="ti ti-activity fs-lg me-md-1 align-middle"></i>
+                                                <span class="d-none d-md-inline-block align-middle">Activity</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div class="tab-pane fade active show" id="consultation-notes" role="tabpanel">
+                                            
+                                            <!-- 상담 기록 추가 버튼 -->
+                                            <div class="d-flex justify-content-end mb-3">
+                                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#noteModal">
+                                                    <i class="ti ti-plus me-1"></i> 상담 기록 추가
+                                                </button>
+                                            </div>
+
+                                            <!-- 상담 기록 목록 -->
+                                            <div th:each="note : ${notes}" class="card border-dashed mb-3">
+                                                <div class="card-header bg-light bg-opacity-50 d-flex justify-content-between align-items-center py-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="fw-bold text-dark" th:text="${note.authorName}">작성자</span>
+                                                        <span class="text-muted small">|</span>
+                                                        <span class="text-muted small" th:text="${#temporals.format(note.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                                    </div>
+                                                    <button class="btn btn-sm btn-ghost-secondary" data-bs-toggle="modal" th:data-bs-target="'#updateNoteModal-' + ${note.id}">
+                                                        <i class="ti ti-pencil"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="card-body p-3">
+                                                    <div class="row g-3">
+                                                        <div class="col-12" th:if="${note.factSummary}">
+                                                            <h6 class="fs-sm text-muted mb-1">사실관계 요약</h6>
+                                                            <p class="mb-0" th:text="${note.factSummary}"></p>
+                                                        </div>
+                                                        <div class="col-12" th:if="${note.evidenceSummary}">
+                                                            <h6 class="fs-sm text-muted mb-1">증거자료 정리</h6>
+                                                            <p class="mb-0" th:text="${note.evidenceSummary}"></p>
+                                                        </div>
+                                                        <div class="col-md-6" th:if="${note.legalIssue}">
+                                                            <h6 class="fs-sm text-muted mb-1">법적 쟁점</h6>
+                                                            <p class="mb-0" th:text="${note.legalIssue}"></p>
+                                                        </div>
+                                                        <div class="col-md-6" th:if="${note.relatedLaws}">
+                                                            <h6 class="fs-sm text-muted mb-1">관련 법령</h6>
+                                                            <p class="mb-0" th:text="${note.relatedLaws}"></p>
+                                                        </div>
+                                                        <div class="col-12" th:if="${note.clientGoal}">
+                                                            <h6 class="fs-sm text-muted mb-1">의뢰인 목표</h6>
+                                                            <p class="mb-0" th:text="${note.clientGoal}"></p>
+                                                        </div>
+                                                        <div class="col-12" th:if="${note.lawyerOpinion}">
+                                                            <h6 class="fs-sm text-muted mb-1">변호사 의견</h6>
+                                                            <p class="mb-0" th:text="${note.lawyerOpinion}"></p>
+                                                        </div>
+                                                        <div class="col-md-6" th:if="${note.riskAssessment}">
+                                                            <h6 class="fs-sm text-muted mb-1">위험성 평가</h6>
+                                                            <p class="mb-0" th:text="${note.riskAssessment}"></p>
+                                                        </div>
+                                                        <div class="col-md-6" th:if="${note.nextAction}">
+                                                            <h6 class="fs-sm text-muted mb-1">향후 조치</h6>
+                                                            <p class="mb-0" th:text="${note.nextAction}"></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 상담 기록이 없을 때 -->
+                                            <div th:if="${#lists.isEmpty(notes)}" class="text-center py-5">
+                                                <div class="avatar-xl mx-auto mb-4">
+                                                    <div class="avatar-title bg-light text-muted rounded">
+                                                        <i class="ti ti-notes fs-2"></i>
+                                                    </div>
+                                                </div>
+                                                <h5 class="fs-md">아직 상담 기록이 없습니다</h5>
+                                                <p class="text-muted">첫 번째 상담 기록을 작성해보세요.</p>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="tab-pane fade" id="tasks" role="tabpanel">
+                                            <!-- 동적 작업 목록 -->
+                                            <div th:each="task : ${tasks}" class="card mb-1">
+                                                <div class="card-body p-2">
+                                                    <div class="row g-3 align-items-center justify-content-between">
+                                                        <div class="col-md-6">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <input type="checkbox"
+                                                                    class="form-check-input rounded-circle mt-0 fs-xl"
+                                                                    th:id="'task' + ${task.id}"
+                                                                    th:checked="${task.completed}">
+                                                                <a href="#!" data-bs-toggle="offcanvas" role="button"
+                                                                    class="link-reset fw-medium" th:text="${task.title}"></a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div
+                                                                class="d-flex align-items-center gap-3 justify-content-md-end">
+                                                                <div class="d-flex align-items-center gap-1">
+                                                                    <div class="avatar avatar-xs">
+                                                                        <img th:src="${task.assigneeAvatar != null ? task.assigneeAvatar : '/images/users/user-default.jpg'}"
+                                                                            th:alt="'avatar-' + ${task.assigneeId}"
+                                                                            class="img-fluid rounded-circle">
+                                                                    </div>
+                                                                    <div>
+                                                                        <h5 class="text-nowrap mb-0 lh-base"><a
+                                                                                href="/pages/profile" class="link-reset" th:text="${task.assigneeName}"></a></h5>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="flex-shrink-0">
+                                                                    <span
+                                                                        th:class="'badge badge-label ' + ${task.statusClass}"
+                                                                        th:text="${task.statusText}"></span>
+                                                                </div>
+
+                                                                <ul
+                                                                    class="list-inline fs-base text-end flex-shrink-0 mb-0">
+                                                                    <li class="list-inline-item">
+                                                                        <i
+                                                                            class="ti ti-calendar text-muted fs-lg me-1 align-middle"></i>
+                                                                        <span class="fw-semibold" th:text="${#temporals.format(task.dueDate, 'MM월 dd일')}"></span>
+                                                                    </li>
+                                                                    <li class="list-inline-item ms-1">
+                                                                        <i
+                                                                            class="ti ti-list-details text-muted fs-lg me-1 align-middle"></i>
+                                                                        <span class="fw-medium" th:text="${task.completedCount} + '/' + ${task.totalCount}"></span>
+                                                                    </li>
+                                                                    <li class="list-inline-item ms-1">
+                                                                        <i
+                                                                            class="ti ti-message text-muted fs-lg me-1 align-middle"></i>
+                                                                        <span class="fw-medium" th:text="${task.commentCount}"></span>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            
+                                            <!-- 작업이 없을 때 -->
+                                            <div th:if="${#lists.isEmpty(tasks)}" class="text-center py-5">
+                                                <div class="avatar-xl mx-auto mb-4">
+                                                    <div class="avatar-title bg-light text-muted rounded">
+                                                        <i class="ti ti-list-check fs-2"></i>
+                                                    </div>
+                                                </div>
+                                                <h5 class="fs-md">아직 작업이 없습니다</h5>
+                                                <p class="text-muted">첫 번째 작업을 추가해보세요!</p>
+                                            </div>
+
+
+                                        </div>
+
+                                        <div class="tab-pane fade" id="activity" role="tabpanel">
+
+                                            <!-- 동적 활동 목록 -->
+                                            <div th:each="activity : ${activities}" class="d-flex gap-1 border-bottom border-dashed py-3">
+                                                <div class="me-2 flex-shrink-0">
+                                                    <img th:src="${activity.userAvatar != null ? activity.userAvatar : '/images/users/user-default.jpg'}"
+                                                        class="avatar-md rounded-circle" alt="">
+                                                </div>
+                                                <div class="flex-grow-1 text-muted">
+                                                    <span class="fw-medium text-body" th:text="${activity.userName}"></span>
+                                                    <span th:text="${activity.action}"></span>
+                                                    <p class="fs-xs mb-0 text-body-secondary" th:text="${#temporals.format(activity.createdDate, 'MM월 dd일 HH:mm')}"></p>
+                                                    
+                                                    <!-- 링크나 추가 내용이 있는 경우 -->
+                                                    <div th:if="${activity.content}" class="mt-2">
+                                                        <div th:if="${activity.activityType == 'MESSAGE'}" class="py-2 px-3 bg-light bg-opacity-50" th:text="${activity.content}">
+                                                        </div>
+                                                        <a th:if="${activity.activityType == 'LINK'}" href="#!" class="btn btn-default border px-1 py-0">
+                                                            <i class="ti ti-link me-1"></i> 보기
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <p class="fs-xs flex-shrink-0 text-body-secondary" th:text="${activity.timeAgo}"></p>
+                                            </div>
+
+                                            <!-- 활동이 없을 때 -->
+                                            <div th:if="${#lists.isEmpty(activities)}" class="text-center py-5">
+                                                <div class="avatar-xl mx-auto mb-4">
+                                                    <div class="avatar-title bg-light text-muted rounded">
+                                                        <i class="ti ti-activity fs-2"></i>
+                                                    </div>
+                                                </div>
+                                                <h5 class="fs-md">아직 활동이 없습니다</h5>
+                                                <p class="text-muted">상담이 시작되면 활동 내역이 여기에 표시됩니다.</p>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div> <!-- end card-body -->
+                            </div> <!-- end card -->
+                        </div> <!-- end col-xl-9 -->
+
+                        <!-- Team Sidebar -->
+                        <div class="col-xl-3">
+                            <div class="card card-h-100 rounded-0 rounded-end">
+                                <div class="card-body p-0">
+                                    <div class="p-3 border-bottom border-dashed">
+                                        <h5 class="mb-2">상담 상태</h5>
+                                        <div class="d-grid gap-2">
+                                            <!-- 상담 시작 버튼 -->
+                                            <form th:if="${consultation.status.name() == 'RESERVATION_CONFIRMED' or consultation.status.name() == 'PENDING'}" 
+                                                  th:action="@{'/consultations/' + ${consultation.id} + '/start'}" method="post">
+                                                <button type="submit" class="btn btn-success w-100">
+                                                    <i class="ti ti-play me-1"></i> 상담 시작
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- 상담 완료 버튼 -->
+                                            <form th:if="${consultation.status.name() == 'IN_PROGRESS'}" 
+                                                  th:action="@{'/consultations/' + ${consultation.id} + '/complete'}" method="post">
+                                                <button type="submit" class="btn btn-primary w-100">
+                                                    <i class="ti ti-check me-1"></i> 상담 완료
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- 완료됨 표시 -->
+                                            <div th:if="${consultation.status.name() == 'COMPLETED'}" class="alert alert-primary mb-0 text-center p-2">
+                                                <i class="ti ti-check-double me-1"></i> 상담 완료됨
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-3 border-bottom border-dashed">
+                                        <div class="d-flex mb-3 justify-content-between align-items-center">
+                                            <h5 class="mb-0">Team Members:</h5>
+                                            <a href="javascript: void(0);"
+                                                class="btn btn-light btn-sm btn-icon rounded-circle"><i
+                                                    class="ti ti-plus"></i></a>
+                                        </div>
+
+                                        <!-- 동적 팀 멤버 목록 -->
+                                        <div th:each="member : ${teamMembers}" class="d-flex justify-content-between align-items-center pb-2">
+                                            <div class="d-flex align-items-center py-1 gap-2">
+                                                <div class="avatar avatar-sm">
+                                                    <img th:src="${member.avatar != null ? member.avatar : '/images/users/user-default.jpg'}" th:alt="'avatar-' + ${member.id}"
+                                                        class="img-fluid rounded-circle">
+                                                </div>
+                                                <div>
+                                                    <h5 class="text-nowrap mb-0 lh-base"><a href="/pages/profile"
+                                                            class="link-reset" th:text="${member.name}"></a></h5>
+                                                    <p class="text-muted fs-xxs mb-0" th:text="${member.role}"></p>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <a href="#" class="btn btn-sm btn-icon btn-default" title="Message"><i
+                                                        class="ti ti-message fs-lg"></i></a>
+                                            </div>
+                                        </div>
+
+                                        
+                                        <!-- 팀 멤버가 없을 때 -->
+                                        <div th:if="${#lists.isEmpty(teamMembers)}" class="text-center py-4">
+                                            <div class="avatar-lg mx-auto mb-3">
+                                                <div class="avatar-title bg-light text-muted rounded">
+                                                    <i class="ti ti-users fs-xl"></i>
+                                                </div>
+                                            </div>
+                                            <h6 class="fs-sm">아직 팀 멤버가 없습니다</h6>
+                                            <p class="text-muted fs-xs mb-0">팀 멤버를 추가해보세요!</p>
+                                        </div>
+
+
+                                        <!-- End -->
+                                    </div>
+
+                                    <div class="px-3 pt-3 border-bottom border-dashed">
+                                        <div class="d-flex mb-3 justify-content-between align-items-center">
+                                            <h5 class="mb-0">Files:</h5>
+                                            <button type="button" class="btn btn-light btn-sm btn-icon rounded-circle" 
+                                                    data-bs-toggle="modal" data-bs-target="#fileUploadModal">
+                                                <i class="ti ti-plus"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- 동적 파일 목록 -->
+                                        <div th:each="file : ${consultationFiles}" class="d-flex justify-content-between align-items-center pb-2">
+                                            <div class="d-flex align-items-center py-1 gap-2">
+                                                <div class="flex-shrink-0 avatar-md bg-light bg-opacity-50 text-muted rounded-2">
+                                                    <i th:class="'ti ' + ${file.iconClass} + ' fs-xl avatar-title'"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h5 class="mb-1 fs-base">
+                                                        <a th:href="@{'/consultations/files/' + ${file.id}}" class="link-reset" th:text="${file.fileName}"></a>
+                                                    </h5>
+                                                    <p class="text-muted mb-0 fs-xs" th:text="${file.formattedSize}"></p>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <a th:href="@{'/consultations/files/' + ${file.id} + '/download'}" class="btn btn-sm btn-icon btn-default" title="Download">
+                                                    <i class="ti ti-download fs-lg"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <!-- 파일이 없을 때 -->
+                                        <div th:if="${#lists.isEmpty(consultationFiles)}" class="text-center py-4">
+                                            <div class="avatar-lg mx-auto mb-3">
+                                                <div class="avatar-title bg-light text-muted rounded">
+                                                    <i class="ti ti-folder fs-xl"></i>
+                                                </div>
+                                            </div>
+                                            <h6 class="fs-sm">아직 첨부된 파일이 없습니다</h6>
+                                            <p class="text-muted fs-xs mb-0">상담과 관련된 파일을 업로드해보세요!</p>
+                                        </div>
+
+                                    </div>
+
+                                </div> <!-- end card-body -->
+                            </div> <!-- end card -->
+                        </div> <!-- end col-xl-3 -->
+                    </div> <!-- end row -->
+                </div> <!-- end col-xxl-10 -->
+            </div> <!-- end row -->
+
+        </div>
+
+        <!-- File Upload Modal -->
+        <div class="modal fade" id="fileUploadModal" tabindex="-1" aria-labelledby="fileUploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fileUploadModalLabel">파일 업로드</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{'/consultations/' + ${consultation.id} + '/files'}" method="post" 
+                          enctype="multipart/form-data" class="dropzone" id="fileUploadForm" 
+                          data-plugin="dropzone" data-previews-container="#file-previews" 
+                          data-upload-preview-template="#uploadPreviewTemplate">
+                        
+                        <div class="fallback">
+                            <input name="file" type="file" multiple>
+                        </div>
+                        
+                        <div class="dz-message needsclick">
+                            <div class="avatar-lg mx-auto mb-3">
+                                <span class="avatar-title bg-info-subtle text-info rounded-circle">
+                                    <i class="fs-24 ti ti-cloud-upload"></i>
+                                </span>
+                            </div>
+                            <h4 class="mb-2">파일을 여기에 드롭하거나 클릭하여 업로드하세요.</h4>
+                            <p class="text-muted fst-italic mb-3">파일을 드래그하거나 아래 버튼을 클릭하여 선택하세요.</p>
+                            <button type="button" class="btn btn-sm shadow btn-default">파일 선택</button>
+                        </div>
+                    </form>
+                    
+                    <!-- Preview -->
+                    <div class="dropzone-previews mt-3" id="file-previews"></div>
+                    
+                    <!-- file preview template -->
+                    <div class="d-none" id="uploadPreviewTemplate">
+                        <div class="card mt-1 mb-0 border-dashed border">
+                            <div class="p-2">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <img data-dz-thumbnail src="#" class="avatar-sm rounded bg-light" alt="">
+                                    </div>
+                                    <div class="col ps-0">
+                                        <a href="javascript:void(0);" class="fw-semibold" data-dz-name></a>
+                                        <p class="mb-0 text-muted" data-dz-size></p>
+                                    </div>
+                                    <div class="col-auto">
+                                        <a href="" class="btn btn-link btn-lg text-danger" data-dz-remove>
+                                            <i class="ti ti-x"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end file preview template -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <!-- Dropzone은 자동 업로드 또는 processQueue 호출 필요. 여기서는 자동 업로드 설정 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal (Create) -->
+    <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noteModalLabel">상담 기록 작성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form class="needs-validation" th:action="@{'/consultations/' + ${consultation.id} + '/notes'}" method="post" th:object="${noteRequest}" novalidate>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12 position-relative">
+                                <label for="factSummary" class="form-label">사실관계 요약</label>
+                                <textarea class="form-control" id="factSummary" th:field="*{factSummary}" rows="3" placeholder="사건의 주요 사실관계를 입력하세요" required></textarea>
+                                <div class="invalid-tooltip">사실관계 요약을 입력해주세요.</div>
+                            </div>
+                            <div class="col-12 position-relative">
+                                <label for="evidenceSummary" class="form-label">증거자료 정리</label>
+                                <textarea class="form-control" id="evidenceSummary" th:field="*{evidenceSummary}" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label for="legalIssue" class="form-label">법적 쟁점</label>
+                                <textarea class="form-control" id="legalIssue" th:field="*{legalIssue}" rows="3"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label for="relatedLaws" class="form-label">관련 법령</label>
+                                <textarea class="form-control" id="relatedLaws" th:field="*{relatedLaws}" rows="3"></textarea>
+                            </div>
+                            <div class="col-12 position-relative">
+                                <label for="clientGoal" class="form-label">의뢰인 목표</label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text"><i class="ti ti-target"></i></span>
+                                    <input type="text" class="form-control" id="clientGoal" th:field="*{clientGoal}">
+                                </div>
+                            </div>
+                            <div class="col-12 position-relative">
+                                <label for="lawyerOpinion" class="form-label">변호사 의견</label>
+                                <textarea class="form-control" id="lawyerOpinion" th:field="*{lawyerOpinion}" rows="3"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label for="riskAssessment" class="form-label">위험성 평가</label>
+                                <textarea class="form-control" id="riskAssessment" th:field="*{riskAssessment}" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label for="nextAction" class="form-label">향후 조치</label>
+                                <textarea class="form-control" id="nextAction" th:field="*{nextAction}" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary">저장</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modals (Edit) -->
+    <div th:each="note : ${notes}" class="modal fade" th:id="'updateNoteModal-' + ${note.id}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">상담 기록 수정</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form class="needs-validation" th:action="@{'/consultations/' + ${consultation.id} + '/notes/' + ${note.id}}" method="post" novalidate>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-12 position-relative">
+                                <label class="form-label">사실관계 요약</label>
+                                <textarea class="form-control" name="factSummary" rows="3" required th:text="${note.factSummary}"></textarea>
+                                <div class="invalid-tooltip">사실관계 요약을 입력해주세요.</div>
+                            </div>
+                            <div class="col-12 position-relative">
+                                <label class="form-label">증거자료 정리</label>
+                                <textarea class="form-control" name="evidenceSummary" rows="2" th:text="${note.evidenceSummary}"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label class="form-label">법적 쟁점</label>
+                                <textarea class="form-control" name="legalIssue" rows="3" th:text="${note.legalIssue}"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label class="form-label">관련 법령</label>
+                                <textarea class="form-control" name="relatedLaws" rows="3" th:text="${note.relatedLaws}"></textarea>
+                            </div>
+                            <div class="col-12 position-relative">
+                                <label class="form-label">의뢰인 목표</label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text"><i class="ti ti-target"></i></span>
+                                    <input type="text" class="form-control" name="clientGoal" th:value="${note.clientGoal}">
+                                </div>
+                            </div>
+                            <div class="col-12 position-relative">
+                                <label class="form-label">변호사 의견</label>
+                                <textarea class="form-control" name="lawyerOpinion" rows="3" th:text="${note.lawyerOpinion}"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label class="form-label">위험성 평가</label>
+                                <textarea class="form-control" name="riskAssessment" rows="2" th:text="${note.riskAssessment}"></textarea>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label class="form-label">향후 조치</label>
+                                <textarea class="form-control" name="nextAction" rows="2" th:text="${note.nextAction}"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary">수정 저장</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    </th:block>
+
+    <!-- Dropzone Plugin Js -->
+    <script src="/plugins/dropzone/dropzone-min.js"></script>
+    
+    <script>
+        // Bootstrap Validation Loop
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+
+        // Dropzone 설정
+        Dropzone.autoDiscover = false;
+        
+        let myDropzone;
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileUploadForm = document.getElementById('fileUploadForm');
+            if (fileUploadForm) {
+                myDropzone = new Dropzone("#fileUploadForm", {
+                    // url 속성은 form의 action 속성 사용
+                    paramName: "file",
+                    maxFilesize: 10, // MB
+                    maxFiles: 10,
+                    acceptedFiles: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.txt",
+                    dictDefaultMessage: "파일을 여기에 드롭하거나 클릭하여 업로드하세요.",
+                    dictRemoveFile: "삭제",
+                    dictCancelUpload: "취소",
+                    addRemoveLinks: true,
+                    success: function(file, response) {
+                        console.log("업로드 성공");
+                        // 파일 업로드 성공 시 페이지 새로고침하여 목록 갱신
+                        location.reload();
+                    },
+                    error: function(file, errorMessage) {
+                        console.error("업로드 실패:", errorMessage);
+                        alert("파일 업로드 중 오류가 발생했습니다: " + errorMessage);
+                    }
+                });
+            }
+            
+            // 모달이 닫힐 때 Dropzone 초기화
+            const fileUploadModal = document.getElementById('fileUploadModal');
+            if (fileUploadModal) {
+                fileUploadModal.addEventListener('hidden.bs.modal', function() {
+                    if (myDropzone) {
+                        myDropzone.removeAllFiles(true);
+                    }
+                });
+            }
+        });
+    </script>
+
+
+</body>
+
+</html>

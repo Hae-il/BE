@@ -1,0 +1,123 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/base}">
+
+<head>
+    <th:block layout:fragment="page-meta"
+              th:replace="~{partials/page-meta :: page-meta('회원가입')}" />
+</head>
+
+<body>
+<th:block layout:fragment="content">
+
+    <div class="auth-box d-flex align-items-center">
+        <div class="container-xxl">
+            <div class="row align-items-center justify-content-center">
+                <div class="col-xl-10">
+                    <div class="card rounded-4">
+                        <div class="row justify-content-between g-0">
+                            <div class="col-lg-6">
+                                <div class="card-body">
+                                    <div class="auth-brand text-center mb-4">
+                                        <a href="/" class="logo-dark">
+                                            <img src="/images/logo-black.png" alt="dark logo" height="32">
+                                        </a>
+                                        <a href="/" class="logo-light">
+                                            <img src="/images/logo.png" alt="logo" height="32">
+                                        </a>
+                                        <h4 class="fw-bold mt-4">해일 법률사무소 가입</h4>
+                                        <p class="text-muted w-lg-75 mx-auto">계정을 생성하여 시스템에 접속하세요.</p>
+                                    </div>
+
+                                    <form th:action="@{/auth/signup}" method="post" th:object="${signupRequest}">
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">이름 <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light"><i class="ti ti-user text-muted fs-xl"></i></span>
+                                                <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="이름을 입력하세요" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">이메일 <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light"><i class="ti ti-mail text-muted fs-xl"></i></span>
+                                                <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="이메일을 입력하세요" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3" data-password="bar">
+                                            <label for="password" class="form-label">비밀번호 <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light"><i class="ti ti-lock-password text-muted fs-xl"></i></span>
+                                                <input type="password" class="form-control" id="password" th:field="*{password}" placeholder="••••••••" required minlength="8">
+                                            </div>
+                                            <div class="password-bar my-2"></div>
+                                            <p class="text-muted fs-xs mb-0">8자 이상의 비밀번호를 입력하세요.</p>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="role" class="form-label">역할 <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light"><i class="ti ti-briefcase text-muted fs-xl"></i></span>
+                                                <select class="form-select" id="role" th:field="*{role}" required>
+                                                    <option value="">역할을 선택하세요</option>
+                                                    <option value="ROLE_ADMIN">관리자</option>
+                                                    <option value="ROLE_ATTORNEY">변호사</option>
+                                                    <option value="ROLE_SECRETARY">사무관</option>
+                                                    <option value="ROLE_COUNSEL">상담사</option>
+                                                    <option value="ROLE_ACCOUNT">회계</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-primary fw-semibold py-2">회원가입</button>
+                                        </div>
+                                    </form>
+
+                                    <!-- 에러 메시지 표시 -->
+                                    <div th:if="${error}" class="alert alert-danger mt-3" role="alert" th:text="${error}">
+                                        에러 메시지가 표시됩니다.
+                                    </div>
+                                    
+                                    <!-- 성공 메시지 표시 (URL 파라미터로 전달되는 경우) -->
+                                    <div th:if="${param.success}" class="alert alert-success mt-3" role="alert">
+                                        회원가입이 완료되었습니다. 로그인해주세요.
+                                    </div>
+
+                                    <p class="text-muted text-center mt-4 mb-0">
+                                        이미 계정이 있으신가요? <a th:href="@{/auth/login}" class="text-decoration-underline link-offset-3 fw-semibold">로그인</a>
+                                    </p>
+
+                                    <p class="text-center text-muted mt-4 mb-0">
+                                        © 2014 -
+                                        <script>document.write(new Date().getFullYear())</script> 해일 법률사무소
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 d-none d-lg-block">
+                                <div class="h-100 position-relative card-side-img rounded-end-4 rounded-end rounded-0 overflow-hidden">
+                                    <div class="p-4 card-img-overlay rounded-4 rounded-start-0 auth-overlay d-flex align-items-end justify-content-center">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="javascripts">
+
+   <!-- Password Suggestion Js -->
+    <script src="/js/pages/auth-password.js"></script>
+
+</th:block>
+
+</body>
+
+</html>
