@@ -3,6 +3,7 @@ package com.haeil.be.contract.controller;
 import com.haeil.be.cases.dto.response.CaseInfoResponse;
 import com.haeil.be.cases.service.CasesService;
 import com.haeil.be.contract.dto.request.ContractCreateRequest;
+import com.haeil.be.contract.dto.request.ContractStatusUpdateRequest;
 import com.haeil.be.contract.dto.response.ContractDetailResponse;
 import com.haeil.be.contract.dto.response.ContractItemResponse;
 import com.haeil.be.contract.service.ContractService;
@@ -60,5 +61,17 @@ public class ContractController {
     public ResponseEntity<ApiResponse<Object>> getContractById(@PathVariable Long contractId) {
         ContractDetailResponse response = contractService.getContractDetail(contractId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.from(response));
+    }
+
+    @Operation(
+            summary = "수임의 상태 변경 API",
+            description =
+                    "contractId를 입력하여 수임 상태를 변경합니다. 가능한 상태는 `AWAITING`, `PENDING`, `COMPLETED` 입니다.")
+    @PatchMapping("/{contractId}/status")
+    public ResponseEntity<ApiResponse<Object>> updateContractStatus(
+            @PathVariable Long contractId,
+            @Valid @RequestBody ContractStatusUpdateRequest request) {
+        contractService.updateStatus(contractId, request);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.EMPTY_RESPONSE);
     }
 }
