@@ -6,7 +6,6 @@ import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -45,14 +44,14 @@ public class SecurityConfig {
                                                 "/", "/auth/**")
                                         .permitAll()
                                         .requestMatchers("/cases/unassigned/**")
-                                        .hasRole("SECRETARY")
+                                        .hasAnyRole("SECRETARY", "ADMIN")
                                         .requestMatchers(
                                                 "/cases/requested/**",
-                                                "/cases/ongoing/**", 
+                                                "/cases/ongoing/**",
                                                 "/cases/completed/**")
-                                        .hasRole("ATTORNEY")
+                                        .hasAnyRole("ATTORNEY", "ADMIN")
                                         .requestMatchers("/consultations/**")
-                                        .hasAnyRole("SECRETARY", "ATTORNEY")
+                                        .hasAnyRole("SECRETARY", "ATTORNEY", "COUNSEL", "ADMIN")
                                         .anyRequest()
                                         .authenticated())
                 .addFilterBefore(
