@@ -2,6 +2,8 @@ package com.haeil.be.global.config;
 
 import com.haeil.be.auth.filter.JwtAuthFilter;
 import com.haeil.be.auth.util.JwtTokenProvider;
+import com.haeil.be.global.exception.handler.CustomAccessDeniedHandler;
+import com.haeil.be.global.exception.handler.CustomAuthenticationEntryPoint;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +27,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(
@@ -35,6 +39,11 @@ public class SecurityConfig {
                         session ->
                                 session.sessionCreationPolicy(
                                         SessionCreationPolicy.STATELESS)) // 세션 비활성화
+                .exceptionHandling(
+                        exceptionHandler ->
+                                exceptionHandler
+                                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                                        .accessDeniedHandler(customAccessDeniedHandler))
                 .authorizeHttpRequests(
                         authorize ->
                                 authorize
@@ -51,6 +60,9 @@ public class SecurityConfig {
                                                 "/api/v1/auth/signup",
                                                 "/api/v1/auth/login")
                                         .permitAll()
+                                        .requestMatchers(
+                                                "/api/v1/contract/**", "/api/v1/settlements/**")
+                                        .hasRole("ACCOUNT")
                                         .requestMatchers("/api/v1/cases/unassigned/**")
                                         .hasRole("SECRETARY")
                                         .requestMatchers(
