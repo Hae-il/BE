@@ -99,6 +99,7 @@ public class CasesService {
     }
 
     // 변호사 배정요청
+    @Transactional
     public void assignAttorney(Long caseId, AssignAttorneyRequest request) {
         Cases foundCase =
                 casesRepository
@@ -153,6 +154,7 @@ public class CasesService {
     }
 
     // 사건 배정 승인/거절
+    @Transactional
     public void decideCaseAssignment(Long caseId, DecisionRequest request, Long userId) {
         Cases foundCase =
                 casesRepository
