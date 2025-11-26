@@ -70,6 +70,7 @@ public class CasesService {
                         .caseType(consultation.getConsultationReservation().getCaseType())
                         .attorney(consultation.getCounselor())
                         .consultation(consultation)
+                        .client(consultation.getClient())
                         .build();
 
         return casesRepository.save(newCase);
