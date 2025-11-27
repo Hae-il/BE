@@ -1,4 +1,4 @@
-package com.haeil.be.ai.service;
+package com.haeil.full.ai.service;
 
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;

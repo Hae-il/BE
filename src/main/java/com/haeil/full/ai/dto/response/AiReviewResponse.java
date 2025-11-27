@@ -1,3 +1,3 @@
-package com.haeil.be.ai.dto.response;
+package com.haeil.full.ai.dto.response;
 
 public record AiReviewResponse(String reviewResult) {}
