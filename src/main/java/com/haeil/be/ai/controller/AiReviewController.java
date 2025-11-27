@@ -1,12 +1,9 @@
 package com.haeil.be.ai.controller;
 
-import com.haeil.be.ai.dto.request.AiReviewRequest;
 import com.haeil.be.ai.service.AiReviewService;
-import com.haeil.be.ai.service.LegalAdvisor;
 import com.haeil.be.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,20 +13,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AiReviewController {
 
-    private final LegalAdvisor legalAdvisor;
     private final AiReviewService aiReviewService;
 
     @Operation(summary = "소장 자동 검토 (Case ID)", description = "저장된 소장 데이터를 불러와 AI가 검토합니다.")
     @PostMapping("/review/{caseId}")
     public ApiResponse<Object> reviewPetitionByCaseId(@PathVariable Long caseId) {
         String result = aiReviewService.reviewPetition(caseId);
-        return ApiResponse.from(result);
-    }
-
-    @Operation(summary = "소장 자동 검토 (직접 입력)", description = "입력된 소장 내용을 AI가 분석하여 피드백을 제공합니다.")
-    @PostMapping("/review")
-    public ApiResponse<Object> reviewPetition(@Valid @RequestBody AiReviewRequest request) {
-        String result = legalAdvisor.reviewPetition(request.content());
         return ApiResponse.from(result);
     }
 }
