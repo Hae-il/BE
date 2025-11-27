@@ -12,6 +12,7 @@ public record UnassignedCaseDetailResponse(
         CaseType caseType,
         CaseStatus caseStatus,
         LocalDateTime occurredDate,
+        LocalDateTime modifiedDate,
         String opponentName,
         String opponentPhone,
         String opponentInsurance) {
@@ -23,6 +24,7 @@ public record UnassignedCaseDetailResponse(
                 cases.getCaseType(),
                 cases.getCaseStatus(),
                 cases.getOccurredDate(),
+                cases.getModifiedDate(),
                 cases.getOpponentName(),
                 cases.getOpponentPhone(),
                 cases.getOpponentInsurance());

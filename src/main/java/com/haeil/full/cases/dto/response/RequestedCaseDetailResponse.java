@@ -11,7 +11,14 @@ public record RequestedCaseDetailResponse(
         String content,
         CaseType caseType,
         CaseStatus caseStatus,
-        LocalDateTime occurredDate) {
+        LocalDateTime occurredDate,
+        LocalDateTime modifiedDate,
+        String opponentName,
+        String opponentPhone,
+        String opponentInsurance,
+        Long attorneyId,
+        String attorneyName,
+        String attorneyEmail) {
     public static RequestedCaseDetailResponse from(Cases cases) {
         return new RequestedCaseDetailResponse(
                 cases.getId(),
@@ -19,6 +26,13 @@ public record RequestedCaseDetailResponse(
                 cases.getContent(),
                 cases.getCaseType(),
                 cases.getCaseStatus(),
-                cases.getOccurredDate());
+                cases.getOccurredDate(),
+                cases.getModifiedDate(),
+                cases.getOpponentName(),
+                cases.getOpponentPhone(),
+                cases.getOpponentInsurance(),
+                cases.getAttorney() != null ? cases.getAttorney().getId() : null,
+                cases.getAttorney() != null ? cases.getAttorney().getName() : "미배정",
+                cases.getAttorney() != null ? cases.getAttorney().getEmail() : "-");
     }
 }

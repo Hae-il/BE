@@ -1,0 +1,126 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+<head>
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('요청된 사건 상세')}" />
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="container-fluid">
+            <th:block th:replace="~{partials/page-title :: page-title('요청된 사건 상세','사건 관리')}" />
+
+            <div class="row justify-content-center">
+                <div class="col-xxl-10">
+                    <div class="row g-0">
+                        <div class="col-xl-9">
+                            <div class="card card-h-100 rounded-0 rounded-start">
+                                <div class="card-header align-items-start p-4">
+                                    <div class="d-flex align-items-center w-100">
+                                        <div class="avatar-xxl me-3">
+                                            <span class="avatar-title text-bg-light rounded">
+                                                <i class="ti ti-briefcase fs-36 text-primary"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h3 class="fs-xl fw-bold mb-2" th:text="${case.title}"></h3>
+                                            <p class="text-muted mb-2 fs-xxs" th:text="'마지막 수정: ' + ${#temporals.format(case.modifiedDate, 'MM월 dd일 HH:mm')}"></p>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="badge badge-soft-warning fs-xxs badge-label" th:text="${case.caseStatus.label}">상태</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body px-4">
+                                    <div class="mb-4">
+                                        <h5 class="fs-base mb-3">사건 기본 정보</h5>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted text-uppercase fs-xs">사건 번호</label>
+                                                <p class="fw-medium mb-0 text-danger">미발급</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted text-uppercase fs-xs">발생 일시</label>
+                                                <p class="fw-medium mb-0" th:text="${#temporals.format(case.occurredDate, 'yyyy-MM-dd HH:mm')}"></p>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted text-uppercase fs-xs">사건 유형</label>
+                                                <p class="fw-medium mb-0" th:text="${case.caseType.label}"></p>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-4">
+
+                                        <h5 class="fs-base mb-3">상대방 정보</h5>
+                                        <div class="row mb-3">
+                                            <div class="col-md-4">
+                                                <label class="form-label text-muted text-uppercase fs-xs">이름</label>
+                                                <p class="fw-medium mb-0" th:text="${case.opponentName} ?: '-'"></p>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label text-muted text-uppercase fs-xs">전화번호</label>
+                                                <p class="fw-medium mb-0" th:text="${case.opponentPhone} ?: '-'"></p>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label text-muted text-uppercase fs-xs">보험사</label>
+                                                <p class="fw-medium mb-0" th:text="${case.opponentInsurance} ?: '-'"></p>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-4">
+
+                                        <h5 class="fs-base mb-2">사건 내용</h5>
+                                        <p class="mb-0" th:text="${case.content}"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3">
+                            <div class="card card-h-100 rounded-0 rounded-end">
+                                <div class="card-body p-0">
+                                    <div class="p-3 border-bottom border-dashed">
+                                        <h5 class="mb-3">배정 요청</h5>
+                                        <div class="d-grid gap-2">
+                                            <form th:action="@{/cases/requested/{id}(id=${case.caseId})}" method="post">
+                                                <input type="hidden" name="isApproved" value="true">
+                                                <button class="btn btn-success w-100" type="submit">
+                                                    <i class="ti ti-check me-1"></i> 승인
+                                                </button>
+                                            </form>
+                                            <form th:action="@{/cases/requested/{id}(id=${case.caseId})}" method="post">
+                                                <input type="hidden" name="isApproved" value="false">
+                                                <button class="btn btn-danger w-100" type="submit">
+                                                    <i class="ti ti-x me-1"></i> 거절
+                                                </button>
+                                            </form>
+                                            <a href="/cases/requested" class="btn btn-light">
+                                                <i class="ti ti-arrow-left me-1"></i> 목록으로
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-3 border-bottom border-dashed">
+                                        <h5 class="mb-2">담당 변호사</h5>
+                                        <div class="d-flex align-items-center py-1 gap-2">
+                                            <div class="avatar avatar-sm">
+                                                <span class="avatar-title bg-primary text-white rounded-circle">
+                                                    <i class="ti ti-user"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <h5 class="text-nowrap mb-0 lh-base" th:text="${case.attorneyName}"></h5>
+                                                <p class="text-muted fs-xxs mb-0" th:text="${case.attorneyEmail}"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>
