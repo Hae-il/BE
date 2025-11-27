@@ -1,6 +1,6 @@
 package com.haeil.be.ai.service;
 
-import com.haeil.be.ai.dto.response.AiPetitionResponse;
+import com.haeil.be.cases.dto.response.PetitionResponse;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.spring.AiService;
@@ -10,5 +10,5 @@ public interface PetitionAdvisor {
 
     @SystemMessage("You are a helpful legal assistant specialized in drafting legal petitions.")
     @UserMessage("{{message}}")
-    AiPetitionResponse generateDraft(String message);
+    PetitionResponse generateDraft(String message);
 }

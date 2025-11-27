@@ -1,7 +1,7 @@
 package com.haeil.be.ai.service;
 
-import com.haeil.be.ai.dto.response.AiPetitionResponse;
 import com.haeil.be.cases.domain.Cases;
+import com.haeil.be.cases.dto.response.PetitionResponse;
 import com.haeil.be.cases.exception.CasesException;
 import com.haeil.be.cases.exception.errorcode.CasesErrorCode;
 import com.haeil.be.cases.repository.CasesRepository;
@@ -30,7 +30,7 @@ public class AiPetitionService {
      * @return 생성된 소장 초안 데이터
      */
     @Transactional(readOnly = true)
-    public AiPetitionResponse generatePetitionDraft(Long caseId) {
+    public PetitionResponse generatePetitionDraft(Long caseId) {
         // 1. 데이터 조회
         Cases cases =
                 casesRepository

@@ -1,8 +1,8 @@
 package com.haeil.be.ai.controller;
 
 import com.haeil.be.ai.dto.request.AiPetitionRequest;
-import com.haeil.be.ai.dto.response.AiPetitionResponse;
 import com.haeil.be.ai.service.AiPetitionService;
+import com.haeil.be.cases.dto.response.PetitionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,9 +23,9 @@ public class AiPetitionController {
 
     @Operation(summary = "소장 초안 생성", description = "AI를 이용하여 소장 초안을 생성합니다.")
     @PostMapping("/petition/draft")
-    public ResponseEntity<AiPetitionResponse> generatePetitionDraft(
+    public ResponseEntity<PetitionResponse> generatePetitionDraft(
             @Valid @RequestBody AiPetitionRequest request) {
-        AiPetitionResponse response = aiPetitionService.generatePetitionDraft(request.getCaseId());
+        PetitionResponse response = aiPetitionService.generatePetitionDraft(request.getCaseId());
         return ResponseEntity.ok(response);
     }
 }
