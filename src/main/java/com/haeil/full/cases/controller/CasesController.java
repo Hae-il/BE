@@ -5,6 +5,7 @@ import com.haeil.full.cases.dto.request.CaseDocumentRequest;
 import com.haeil.full.cases.dto.request.CaseNumberRequest;
 import com.haeil.full.cases.dto.request.DecisionRequest;
 import com.haeil.full.cases.dto.request.PetitionRequest;
+import com.haeil.full.cases.dto.request.UpdateCaseRequest;
 import com.haeil.full.cases.service.CasesService;
 import com.haeil.full.user.service.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +25,20 @@ public class CasesController {
     @GetMapping("/unassigned")
     public String getUnassignedCases(Model model) {
         model.addAttribute("cases", casesService.getUnassignedCases());
-        return "case/unassigned";
+        return "projects/cases/unassigned-list";
     }
 
     @GetMapping("/unassigned/{caseId}")
     public String getUnassignedCaseDetail(@PathVariable Long caseId, Model model) {
         model.addAttribute("case", casesService.getUnassignedCaseDetail(caseId));
-        return "case/unassigned-detail";
+        return "projects/cases/unassigned-detail";
+    }
+
+    @PostMapping("/unassigned/{caseId}/update")
+    public String updateUnassignedCase(
+            @PathVariable Long caseId, @ModelAttribute UpdateCaseRequest request) {
+        casesService.updateCaseInfo(caseId, request);
+        return "redirect:/cases/unassigned/" + caseId;
     }
 
     @PostMapping("/unassigned/{caseId}/assign")
@@ -44,7 +52,7 @@ public class CasesController {
     public String getRequestedCases(
             @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         model.addAttribute("cases", casesService.getRequestedCases(userDetails.getId()));
-        return "case/requested";
+        return "projects/cases/requested-list";
     }
 
     @GetMapping("/requested/{caseId}")
@@ -54,7 +62,7 @@ public class CasesController {
             Model model) {
         model.addAttribute(
                 "case", casesService.getRequestedCaseDetail(caseId, userDetails.getId()));
-        return "case/requested-detail";
+        return "projects/cases/requested-detail";
     }
 
     @PostMapping("/requested/{caseId}")
@@ -70,7 +78,7 @@ public class CasesController {
     public String getOngoingCases(
             @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         model.addAttribute("cases", casesService.getOngoingCases(userDetails.getId()));
-        return "case/ongoing";
+        return "projects/cases/ongoing";
     }
 
     @GetMapping("/ongoing/{caseId}")
@@ -79,7 +87,7 @@ public class CasesController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
         model.addAttribute("case", casesService.getOngoingCaseDetail(caseId, userDetails.getId()));
-        return "case/ongoing-detail";
+        return "projects/cases/ongoing-detail";
     }
 
     @PostMapping("/ongoing/{caseId}/petition")
@@ -97,7 +105,7 @@ public class CasesController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
         model.addAttribute("petition", casesService.getPetition(caseId, userDetails.getId()));
-        return "case/petition";
+        return "projects/cases/petition";
     }
 
     @PostMapping("/ongoing/{caseId}/petition/update")
@@ -136,7 +144,7 @@ public class CasesController {
             Model model) {
         model.addAttribute("documents", casesService.getCaseDocuments(caseId, userDetails.getId()));
         model.addAttribute("caseId", caseId);
-        return "case/documents";
+        return "projects/cases/documents";
     }
 
     @PostMapping("/ongoing/{caseId}/documents/{documentId}/delete")
@@ -160,7 +168,7 @@ public class CasesController {
     public String getCompletedCases(
             @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         model.addAttribute("cases", casesService.getCompletedCases(userDetails.getId()));
-        return "case/completed";
+        return "projects/cases/completed";
     }
 
     @GetMapping("/completed/{caseId}")
@@ -170,6 +178,6 @@ public class CasesController {
             Model model) {
         model.addAttribute(
                 "case", casesService.getCompletedCaseDetail(caseId, userDetails.getId()));
-        return "case/completed-detail";
+        return "projects/cases/completed-detail";
     }
 }

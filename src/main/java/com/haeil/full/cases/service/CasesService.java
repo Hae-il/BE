@@ -10,6 +10,7 @@ import com.haeil.full.cases.dto.request.AssignAttorneyRequest;
 import com.haeil.full.cases.dto.request.CaseDocumentRequest;
 import com.haeil.full.cases.dto.request.DecisionRequest;
 import com.haeil.full.cases.dto.request.PetitionRequest;
+import com.haeil.full.cases.dto.request.UpdateCaseRequest;
 import com.haeil.full.cases.dto.response.CaseDocumentResponse;
 import com.haeil.full.cases.dto.response.CaseInfoResponse;
 import com.haeil.full.cases.dto.response.CompletedCaseDetailResponse;
@@ -68,8 +69,9 @@ public class CasesService {
                         .content(consultation.getConsultationReservation().getDescription())
                         .caseStatus(CaseStatus.UNASSIGNED)
                         .caseType(consultation.getConsultationReservation().getCaseType())
-                        .attorney(consultation.getCounselor())
+                        // .attorney(consultation.getCounselor()) // 초기 생성 시 변호사 미배정
                         .consultation(consultation)
+                        .client(consultation.getClient())
                         .build();
 
         return casesRepository.save(newCase);
@@ -98,7 +100,23 @@ public class CasesService {
         return UnassignedCaseDetailResponse.from(foundCase);
     }
 
+    // 미배정 사건 정보 수정
+    @Transactional
+    public void updateCaseInfo(Long caseId, UpdateCaseRequest request) {
+        Cases foundCase = getCasesOrThrow(caseId);
+
+        foundCase.updateBasicInfo(
+                request.title(),
+                request.content(),
+                request.caseType(),
+                request.occurredDate(),
+                request.opponentName(),
+                request.opponentPhone(),
+                request.opponentInsurance());
+    }
+
     // 변호사 배정요청
+    @Transactional
     public void assignAttorney(Long caseId, AssignAttorneyRequest request) {
         Cases foundCase =
                 casesRepository
@@ -153,6 +171,7 @@ public class CasesService {
     }
 
     // 사건 배정 승인/거절
+    @Transactional
     public void decideCaseAssignment(Long caseId, DecisionRequest request, Long userId) {
         Cases foundCase =
                 casesRepository
