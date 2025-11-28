@@ -37,7 +37,7 @@
             position: fixed;
             right: 35px;
             bottom: 90px;
-            width: 420px;
+            width: 480px;
             background: #fff;
             border-radius: 15px;
             overflow: hidden;
@@ -76,7 +76,7 @@
         }
         .chatbot .chatbox {
             overflow-y: auto;
-            height: 400px; /* reduced height */
+            height: 500px; /* increased height */
             padding: 30px 20px 100px;
         }
         .chatbot :where(.chatbox, textarea)::-webkit-scrollbar {
@@ -452,7 +452,7 @@
             <ul class="chatbox list-unstyled mb-0">
                 <li class="chat incoming d-flex">
                     <span class="material-symbols-outlined"><i class="ti ti-smart-home"></i></span>
-                    <p>안녕하세요! 해일 법률사무소입니다. 👋<br>무엇을 도와드릴까요?<br><br>1. 상담 예약<br>2. 사건 진행 현황<br>3. 변호사 소개<br>4. 오시는 길</p>
+                    <p>안녕하세요! 해일 법률사무소입니다. 👋<br>궁금하신 법률 문제를 자유롭게 물어보세요.</p>
                 </li>
             </ul>
             <div class="chat-input">
@@ -519,8 +519,30 @@
                 })
                 .then(data => {
                     const messageElement = incomingChatLi.querySelector("p");
-                    if (data.isSuccess && data.results && data.results.answer) {
-                        messageElement.innerHTML = data.results.answer.replace(/\n/g, "<br>");
+                    if (data.isSuccess && data.results) {
+                        // 기본 답변 출력 (줄바꿈 처리)
+                        let answerHtml = data.results.answer ? data.results.answer.replace(/\n/g, "<br>") : "";
+
+                        // 히스토리가 있는 경우 (상담 횟수 초과 시)
+                        if (data.results.history && data.results.history.length > 0) {
+                            answerHtml += "<br><br><h3>📝 [지금까지의 상담 요약]</h3>";
+
+                            data.results.history.forEach(item => {
+                                const q = item.question.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                                const a = item.answer.replace(/\n/g, "<br>");
+
+                                answerHtml += `
+                                    <details style="margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; padding: 5px;">
+                                        <summary style="cursor: pointer; font-weight: bold; padding: 5px;">Q. ${q}</summary>
+                                        <div style="margin-top: 5px; padding: 10px; background-color: #f9f9f9; border-top: 1px solid #ddd; color: #333;">
+                                            A. ${a}
+                                        </div>
+                                    </details>
+                                `;
+                            });
+                        }
+
+                        messageElement.innerHTML = answerHtml;
                     } else {
                         messageElement.textContent = "죄송합니다. 오류가 발생했습니다.";
                         if (data.message) {

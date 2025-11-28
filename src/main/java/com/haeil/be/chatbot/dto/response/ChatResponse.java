@@ -1,3 +1,9 @@
 package com.haeil.be.chatbot.dto.response;
 
-public record ChatResponse(String answer) {}
+import java.util.List;
+
+public record ChatResponse(String answer, List<ChatHistoryItem> history) {
+    public ChatResponse(String answer) {
+        this(answer, null);
+    }
+}
