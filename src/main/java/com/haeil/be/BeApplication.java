@@ -15,15 +15,4 @@ public class BeApplication {
         SpringApplication.run(BeApplication.class, args);
     }
 
-    @Bean
-    public CommandLineRunner removeCheckConstraint(JdbcTemplate jdbcTemplate) {
-        return args -> {
-            try {
-                jdbcTemplate.execute("ALTER TABLE cases DROP CHECK cases_chk_1");
-                System.out.println("Successfully removed check constraint cases_chk_1");
-            } catch (Exception e) {
-                System.out.println("Check constraint might not exist or already removed: " + e.getMessage());
-            }
-        };
-    }
 }
