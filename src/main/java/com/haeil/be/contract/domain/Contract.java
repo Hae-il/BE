@@ -40,4 +40,8 @@ public abstract class Contract extends BaseEntity {
         this.cases = cases;
         this.expenseInfo = expenseInfo;
     }
+
+    public void updateStatus(ContractStatus newStatus) {
+        this.status = newStatus;
+    }
 }

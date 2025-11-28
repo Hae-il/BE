@@ -14,6 +14,7 @@ import com.haeil.be.contract.domain.type.ContractStatus;
 import com.haeil.be.contract.domain.type.FeeType;
 import com.haeil.be.contract.dto.request.ContractConditionRequest;
 import com.haeil.be.contract.dto.request.ContractCreateRequest;
+import com.haeil.be.contract.dto.request.ContractStatusUpdateRequest;
 import com.haeil.be.contract.dto.request.ExpenseInfoRequest;
 import com.haeil.be.contract.dto.response.ContractDetailResponse;
 import com.haeil.be.contract.dto.response.ContractItemResponse;
@@ -64,6 +65,17 @@ public class ContractService {
         return ContractDetailResponse.from(contract);
     }
 
+    @Transactional
+    public void updateStatus(Long contractId, ContractStatusUpdateRequest request) {
+        Contract contract = findContractOrThrow(contractId);
+        ContractStatus currentStatus = contract.getStatus();
+        ContractStatus targetStatus = ContractStatus.valueOf(request.contractStatus());
+        if (!isValidStatusTransition(currentStatus, targetStatus)) {
+            throw new ContractException(CAN_NOT_CHANGE_STATUS);
+        }
+        contract.updateStatus(targetStatus);
+    }
+
     private Cases findCasesOrThrow(Long caseId) {
         return casesRepository
                 .findById(caseId)
@@ -78,6 +90,14 @@ public class ContractService {
         return contractRepository
                 .findById(contractId)
                 .orElseThrow(() -> new ContractException(CONTRACT_NOT_FOUND));
+    }
+
+    private boolean isValidStatusTransition(
+            ContractStatus currentStatus, ContractStatus targetStatus) {
+        if (currentStatus == targetStatus) {
+            return false;
+        }
+        return true;
     }
 
     // 정액 계약 생성 로직
