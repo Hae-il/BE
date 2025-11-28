@@ -46,7 +46,8 @@ public class SecurityConfig {
                                                 // Public MVC pages
                                                 "/",
                                                 "/auth/**",
-                                                "/lawfirm/**")
+                                                "/lawfirm/**",
+                                                "/api/v1/chatbot/**")
                                         .permitAll()
                                         .requestMatchers("/cases/unassigned/**")
                                         .hasAnyRole("SECRETARY", "ADMIN")
