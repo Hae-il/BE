@@ -1,6 +1,3 @@
 package com.haeil.be.ai.dto.response;
 
-public record AiReviewResponse(
-    String reviewResult
-) {}
-
+public record AiReviewResponse(String reviewResult) {}
