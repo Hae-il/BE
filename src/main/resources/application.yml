@@ -19,13 +19,6 @@ spring:
       token:
         expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
 
-  ai:
-    openai:
-      api-key: ${OPEN_AI_KEY}
-      chat:
-        options:
-          model: gpt-4o
-
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

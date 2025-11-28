@@ -26,17 +26,6 @@ repositories {
 	mavenCentral()
 	maven { url 'https://repo.spring.io/milestone' }
 	maven { url 'https://repo.spring.io/snapshot' }
-	maven { url 'https://repo.spring.io/milestone' }
-}
-
-ext {
-	set('springAiVersion', '1.0.0-M6')
-}
-
-dependencyManagement {
-	imports {
-		mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
-	}
 }
 
 dependencies {
@@ -47,9 +36,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
-
-	// spring ai
-	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
 
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
