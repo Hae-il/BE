@@ -13,4 +13,3 @@ public class LawFirmController {
         return "lawfirm/index";
     }
 }
-
