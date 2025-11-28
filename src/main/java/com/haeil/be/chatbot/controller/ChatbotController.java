@@ -23,7 +23,7 @@ public class ChatbotController {
 
     @PostMapping("/ask")
     public ResponseEntity<ApiResponse<Object>> askQuestion(@RequestBody ChatRequest request) {
-        ChatResponse response = chatbotService.getResponse(request.question());
+        ChatResponse response = chatbotService.getResponse(request.sessionId(), request.question());
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.from(response));
     }
 }
