@@ -33,3 +33,10 @@ springdoc:
     tags_sorter: alpha
     operations_sorter: method
   use-fqn: true
+
+langchain4j:
+  open-ai:
+    chat-model:
+      api-key: ${OPENAI_API_KEY}
+      model-name: gpt-4o-mini
+      temperature: 0.7
