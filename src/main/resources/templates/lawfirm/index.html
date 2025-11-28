@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/base}">
+
+<head>
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('해일 법률사무소')}" />
+    <style>
+        .chatbot-toggler {
+            position: fixed;
+            bottom: 30px;
+            right: 35px;
+            outline: none;
+            border: none;
+            height: 50px;
+            width: 50px;
+            display: flex;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #724ae8;
+            transition: all 0.2s ease;
+            z-index: 9999;
+        }
+        .chatbot-toggler span {
+            color: #fff;
+            position: absolute;
+        }
+        .chatbot-toggler span:last-child,
+        body.show-chatbot .chatbot-toggler span:first-child  {
+            opacity: 0;
+        }
+        body.show-chatbot .chatbot-toggler span:last-child {
+            opacity: 1;
+        }
+        .chatbot {
+            position: fixed;
+            right: 35px;
+            bottom: 90px;
+            width: 420px;
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.5);
+            transform-origin: bottom right;
+            box-shadow: 0 0 128px 0 rgba(0,0,0,0.1),
+                        0 32px 64px -48px rgba(0,0,0,0.5);
+            transition: all 0.1s ease;
+            z-index: 9999;
+        }
+        body.show-chatbot .chatbot {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+        .chatbot header {
+            padding: 16px 0;
+            position: relative;
+            text-align: center;
+            color: #fff;
+            background: #724ae8;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .chatbot header span {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            display: none;
+            cursor: pointer;
+            transform: translateY(-50%);
+        }
+        header h2 {
+            font-size: 1.4rem;
+        }
+        .chatbot .chatbox {
+            overflow-y: auto;
+            height: 400px; /* reduced height */
+            padding: 30px 20px 100px;
+        }
+        .chatbot :where(.chatbox, textarea)::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chatbot :where(.chatbox, textarea)::-webkit-scrollbar-track {
+            background: #fff;
+            border-radius: 25px;
+        }
+        .chatbot :where(.chatbox, textarea)::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 25px;
+        }
+        .chatbox .chat {
+            display: flex;
+            list-style: none;
+        }
+        .chatbox .outgoing {
+            margin: 20px 0;
+            justify-content: flex-end;
+        }
+        .chatbox .incoming span {
+            width: 32px;
+            height: 32px;
+            color: #fff;
+            cursor: default;
+            text-align: center;
+            line-height: 32px;
+            align-self: flex-end;
+            background: #724ae8;
+            border-radius: 4px;
+            margin: 0 10px 7px 0;
+        }
+        .chatbox .chat p {
+            white-space: pre-wrap;
+            padding: 12px 16px;
+            border-radius: 10px 10px 0 10px;
+            max-width: 75%;
+            color: #fff;
+            font-size: 0.95rem;
+            background: #724ae8;
+        }
+        .chatbox .incoming p {
+            border-radius: 10px 10px 10px 0;
+            color: #000;
+            background: #f2f2f2;
+        }
+        .chatbot .chat-input {
+            display: flex;
+            gap: 5px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: #fff;
+            padding: 3px 20px;
+            border-top: 1px solid #ddd;
+        }
+        .chat-input textarea {
+            height: 55px;
+            width: 100%;
+            border: none;
+            outline: none;
+            resize: none;
+            max-height: 180px;
+            padding: 15px 15px 15px 0;
+            font-size: 0.95rem;
+        }
+        .chat-input span {
+            align-self: flex-end;
+            color: #724ae8;
+            cursor: pointer;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            visibility: hidden;
+            font-size: 1.35rem;
+        }
+        .chat-input textarea:valid ~ span {
+            visibility: visible;
+        }
+
+        @media (max-width: 490px) {
+            .chatbot-toggler {
+                right: 20px;
+                bottom: 20px;
+            }
+            .chatbot {
+                right: 0;
+                bottom: 0;
+                height: 100%;
+                border-radius: 0;
+                width: 100%;
+            }
+            .chatbot .chatbox {
+                height: 90%;
+                padding: 25px 15px 100px;
+            }
+            .chatbot .chat-input {
+                padding: 5px 15px;
+            }
+            .chatbot header span {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-body-secondary" data-bs-spy="scroll" data-bs-target="#navbar-example">
+
+    <th:block layout:fragment="content">
+
+        <!-- Header START -->
+        <header>
+            <nav class="navbar navbar-expand-lg py-3 sticky-top bg-white shadow-sm" id="landing-navbar">
+                <div class="container">
+                    <a class="navbar-brand fw-bold fs-3 text-primary" href="#">
+                        <i class="ti ti-scale me-2"></i>Haeil Law Firm
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav fw-medium gap-2 fs-sm mx-auto mt-2 mt-lg-0" id="navbar-example">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#home">홈</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#about">법인 소개</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#lawyers">변호사 소개</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#practice-areas">업무 분야</a>
+                            </li>
+                        </ul>
+
+                        <div>
+                            <a href="/auth-1/sign-in" class="btn btn-link fw-semibold text-body ps-2">로그인</a>
+                            <button class="btn btn-primary rounded-pill px-4" onclick="document.body.classList.toggle('show-chatbot')">
+                                <i class="ti ti-message-2 me-2"></i>법률 상담받기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <!-- Header END -->
+
+        <!-- Hero Section -->
+        <section class="py-5 bg-light position-relative" id="home">
+            <div class="container py-5">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <h1 class="display-4 fw-bold mb-4">당신의 든든한 법률 파트너,<br><span class="text-primary">해일 법률사무소</span></h1>
+                        <p class="lead text-muted mb-4">
+                            복잡하고 어려운 법률 문제, 해일과 함께라면 해결할 수 있습니다.<br>
+                            풍부한 경험과 전문성을 갖춘 변호사들이 최적의 솔루션을 제공합니다.
+                        </p>
+                        <div class="d-flex gap-3">
+                            <button class="btn btn-primary btn-lg rounded-pill px-4" onclick="document.body.classList.toggle('show-chatbot')">
+                                무료 상담 시작하기
+                            </button>
+                            <a href="#lawyers" class="btn btn-outline-secondary btn-lg rounded-pill px-4">변호사 보기</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mt-5 mt-lg-0">
+                        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80" class="img-fluid rounded-4 shadow-lg" alt="Law Firm Office">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="py-5" id="about">
+            <div class="container py-5">
+                <div class="row justify-content-center text-center mb-5">
+                    <div class="col-lg-8">
+                        <span class="badge bg-primary-subtle text-primary mb-2">About Us</span>
+                        <h2 class="fw-bold">신뢰와 정직을 최우선으로 생각합니다</h2>
+                        <p class="text-muted mt-3">
+                            해일 법률사무소는 의뢰인의 권익 보호를 위해 끊임없이 노력합니다.
+                            다양한 분야의 전문 변호사들이 팀을 이루어 종합적인 법률 서비스를 제공합니다.
+                        </p>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-4 text-center">
+                        <div class="p-4 rounded-4 bg-light h-100">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm mb-4" style="width: 70px; height: 70px;">
+                                <i class="ti ti-gavel fs-1 text-primary"></i>
+                            </div>
+                            <h4 class="mb-3">전문성</h4>
+                            <p class="text-muted">각 분야별 전문 변호사가 최신 판례와 법령을 바탕으로 최적의 전략을 수립합니다.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="p-4 rounded-4 bg-light h-100">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm mb-4" style="width: 70px; height: 70px;">
+                                <i class="ti ti-heart-handshake fs-1 text-primary"></i>
+                            </div>
+                            <h4 class="mb-3">신뢰</h4>
+                            <p class="text-muted">의뢰인과의 소통을 중시하며, 모든 과정에서 투명하고 정직하게 임합니다.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="p-4 rounded-4 bg-light h-100">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm mb-4" style="width: 70px; height: 70px;">
+                                <i class="ti ti-shield-check fs-1 text-primary"></i>
+                            </div>
+                            <h4 class="mb-3">성공</h4>
+                            <p class="text-muted">수많은 승소 사례가 증명하는 해일의 실력으로 당신의 권리를 지켜드립니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lawyers Section -->
+        <section class="py-5 bg-light" id="lawyers">
+            <div class="container py-5">
+                <div class="text-center mb-5">
+                    <span class="badge bg-primary-subtle text-primary mb-2">Our Lawyers</span>
+                    <h2 class="fw-bold">소속 변호사 소개</h2>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card border-0 shadow-sm h-100 text-center p-3">
+                            <div class="card-body">
+                                <img src="/images/users/user-1.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="Lawyer">
+                                <h4 class="card-title mb-1">김철수 변호사</h4>
+                                <p class="text-muted small mb-3">형사 소송 전문</p>
+                                <p class="card-text text-muted mb-4">10년 이상의 형사 사건 수임 경력으로 의뢰인의 억울함을 풀어드립니다.</p>
+                                <button class="btn btn-outline-primary btn-sm rounded-pill px-3">프로필 보기</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card border-0 shadow-sm h-100 text-center p-3">
+                            <div class="card-body">
+                                <img src="/images/users/user-2.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="Lawyer">
+                                <h4 class="card-title mb-1">이영희 변호사</h4>
+                                <p class="text-muted small mb-3">기업 자문 / M&A</p>
+                                <p class="card-text text-muted mb-4">국내 유수 기업들의 법률 자문을 담당하며 기업의 성장을 돕습니다.</p>
+                                <button class="btn btn-outline-primary btn-sm rounded-pill px-3">프로필 보기</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card border-0 shadow-sm h-100 text-center p-3">
+                            <div class="card-body">
+                                <img src="/images/users/user-3.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="Lawyer">
+                                <h4 class="card-title mb-1">박지성 변호사</h4>
+                                <p class="text-muted small mb-3">이혼 / 가사 소송</p>
+                                <p class="card-text text-muted mb-4">섬세한 상담과 전문적인 법률 지식으로 가정의 평화를 지키는 데 기여합니다.</p>
+                                <button class="btn btn-outline-primary btn-sm rounded-pill px-3">프로필 보기</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card border-0 shadow-sm h-100 text-center p-3">
+                            <div class="card-body">
+                                <img src="/images/users/user-7.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="Lawyer">
+                                <h4 class="card-title mb-1">최민지 변호사</h4>
+                                <p class="text-muted small mb-3">부동산 / 건설</p>
+                                <p class="card-text text-muted mb-4">복잡한 부동산 분쟁, 명쾌한 해결책을 제시해 드립니다.</p>
+                                <button class="btn btn-outline-primary btn-sm rounded-pill px-3">프로필 보기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practice Areas -->
+        <section class="py-5" id="practice-areas">
+            <div class="container py-5">
+                <div class="text-center mb-5">
+                    <span class="badge bg-primary-subtle text-primary mb-2">Practice Areas</span>
+                    <h2 class="fw-bold">주요 업무 분야</h2>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="d-flex align-items-start p-3 border rounded-3 hover-shadow transition-all">
+                            <div class="flex-shrink-0 me-3">
+                                <i class="ti ti-users fs-2 text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-2">민사 소송</h5>
+                                <p class="text-muted small mb-0">손해배상, 채권추심, 부동산 등 일반 민사 분쟁 해결</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="d-flex align-items-start p-3 border rounded-3 hover-shadow transition-all">
+                            <div class="flex-shrink-0 me-3">
+                                <i class="ti ti-gavel fs-2 text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-2">형사 변호</h5>
+                                <p class="text-muted small mb-0">수사 단계부터 공판까지 체계적인 방어권 행사 조력</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="d-flex align-items-start p-3 border rounded-3 hover-shadow transition-all">
+                            <div class="flex-shrink-0 me-3">
+                                <i class="ti ti-building-skyscraper fs-2 text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-2">기업 법무</h5>
+                                <p class="text-muted small mb-0">법률 자문, 계약 검토, 기업 회생 및 파산</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="d-flex align-items-start p-3 border rounded-3 hover-shadow transition-all">
+                            <div class="flex-shrink-0 me-3">
+                                <i class="ti ti-home fs-2 text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-2">가사 / 상속</h5>
+                                <p class="text-muted small mb-0">이혼, 재산분할, 유류분 반환 청구 등 가사 사건</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white py-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <h4 class="fw-bold mb-3">해일 법률사무소</h4>
+                        <p class="text-white-50">고객의 정당한 권리를 지키는<br>든든한 파트너가 되겠습니다.</p>
+                    </div>
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <h5 class="fw-bold mb-3">Contact</h5>
+                        <p class="text-white-50 mb-1"><i class="ti ti-phone me-2"></i>02-1234-5678</p>
+                        <p class="text-white-50 mb-1"><i class="ti ti-mail me-2"></i>contact@haeil.com</p>
+                        <p class="text-white-50"><i class="ti ti-map-pin me-2"></i>서울시 서초구 서초동 123-45</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold mb-3">Links</h5>
+                        <ul class="list-unstyled text-white-50">
+                            <li><a href="#" class="text-reset text-decoration-none">이용약관</a></li>
+                            <li><a href="#" class="text-reset text-decoration-none">개인정보처리방침</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <hr class="border-secondary my-4">
+                <div class="text-center text-white-50">
+                    <small>&copy; 2025 Haeil Law Firm. All rights reserved.</small>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Chatbot Structure -->
+        <button class="chatbot-toggler" onclick="document.body.classList.toggle('show-chatbot')">
+            <span class="material-symbols-rounded"><i class="ti ti-message-chatbot fs-3"></i></span>
+            <span class="material-symbols-outlined"><i class="ti ti-x fs-3"></i></span>
+        </button>
+        <div class="chatbot shadow-lg">
+            <header>
+                <h2>해일 챗봇 상담</h2>
+                <span class="close-btn material-symbols-outlined" onclick="document.body.classList.remove('show-chatbot')"><i class="ti ti-x"></i></span>
+            </header>
+            <ul class="chatbox list-unstyled mb-0">
+                <li class="chat incoming d-flex">
+                    <span class="material-symbols-outlined"><i class="ti ti-smart-home"></i></span>
+                    <p>안녕하세요! 해일 법률사무소입니다. 👋<br>무엇을 도와드릴까요?<br><br>1. 상담 예약<br>2. 사건 진행 현황<br>3. 변호사 소개<br>4. 오시는 길</p>
+                </li>
+            </ul>
+            <div class="chat-input">
+                <textarea placeholder="메시지를 입력하세요..." spellcheck="false" required></textarea>
+                <span id="send-btn" class="material-symbols-rounded"><i class="ti ti-send"></i></span>
+            </div>
+        </div>
+
+    </th:block>
+
+    <th:block layout:fragment="javascripts">
+        <script>
+            const chatInput = document.querySelector(".chat-input textarea");
+            const sendChatBtn = document.querySelector(".chat-input span");
+            const chatbox = document.querySelector(".chatbox");
+
+            let userMessage;
+
+            const createChatLi = (message, className) => {
+                // Create a chat <li> element with passed message and className
+                const chatLi = document.createElement("li");
+                chatLi.classList.add("chat", className);
+                chatLi.classList.add("d-flex");
+                
+                let chatContent = className === "outgoing" ? `<p></p>` : `<span class="material-symbols-outlined"><i class="ti ti-smart-home"></i></span><p></p>`;
+                chatLi.innerHTML = chatContent;
+                chatLi.querySelector("p").textContent = message;
+                return chatLi;
+            }
+
+            const handleChat = () => {
+                userMessage = chatInput.value.trim();
+                if(!userMessage) return;
+
+                // Append the user's message to the chatbox
+                chatbox.appendChild(createChatLi(userMessage, "outgoing"));
+                chatbox.scrollTo(0, chatbox.scrollHeight);
+                chatInput.value = "";
+
+                setTimeout(() => {
+                    // Display "Thinking..." message while waiting for the response
+                    const incomingChatLi = createChatLi("잠시만 기다려주세요...", "incoming");
+                    chatbox.appendChild(incomingChatLi);
+                    chatbox.scrollTo(0, chatbox.scrollHeight);
+                    
+                    // Simulate response after a delay
+                    setTimeout(() => {
+                        incomingChatLi.querySelector("p").textContent = "죄송합니다. 현재는 데모 버전이라 실제 상담원과 연결되지 않습니다. \n\n상담 예약을 원하시면 02-1234-5678로 연락 부탁드립니다.";
+                    }, 1000);
+                    
+                }, 600);
+            }
+
+            sendChatBtn.addEventListener("click", handleChat);
+            chatInput.addEventListener("keydown", (e) => {
+                if(e.key === "Enter" && !e.shiftKey && window.innerWidth > 800) {
+                    e.preventDefault();
+                    handleChat();
+                }
+            });
+        </script>
+    </th:block>
+
+</body>
+
+</html>
+
