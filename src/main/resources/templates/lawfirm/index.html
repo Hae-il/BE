@@ -520,16 +520,24 @@
                 .then(data => {
                     const messageElement = incomingChatLi.querySelector("p");
                     if (data.isSuccess && data.results) {
-                        // 기본 답변 출력 (줄바꿈 처리)
-                        let answerHtml = data.results.answer ? data.results.answer.replace(/\n/g, "<br>") : "";
+                        // 텍스트 포맷팅 함수 (마크다운 볼드 -> HTML strong, 줄바꿈 -> br)
+                        const formatText = (text) => {
+                            if (!text) return "";
+                            return text
+                                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **text** -> <strong>text</strong>
+                                .replace(/\n/g, "<br>");
+                        };
+
+                        // 기본 답변 출력
+                        let answerHtml = formatText(data.results.answer);
 
                         // 히스토리가 있는 경우 (상담 횟수 초과 시)
                         if (data.results.history && data.results.history.length > 0) {
                             answerHtml += "<br><br><h3>📝 [지금까지의 상담 요약]</h3>";
 
                             data.results.history.forEach(item => {
-                                const q = item.question.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                                const a = item.answer.replace(/\n/g, "<br>");
+                                const q = item.question.replace(/</g, "&lt;").replace(/>/g, "&gt;"); // HTML 이스케이프만
+                                const a = formatText(item.answer); // 포맷팅 적용
 
                                 answerHtml += `
                                     <details style="margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; padding: 5px;">

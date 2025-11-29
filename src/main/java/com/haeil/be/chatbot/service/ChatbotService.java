@@ -27,7 +27,6 @@ public class ChatbotService {
         ChatMemory sessionMemory = chatMemoryProvider.get(sessionId);
         List<ChatMessage> messages = sessionMemory.messages();
 
-        // 2. 이전까지의 사용자 질문 횟수 계산
         long previousQuestionCount =
                 messages.stream()
                         .filter(message -> message.type().equals(ChatMessageType.USER))
@@ -38,7 +37,6 @@ public class ChatbotService {
                 sessionId,
                 previousQuestionCount);
 
-        // 3. 6번째 질문(이미 5회 완료)부터는 답변 거부 및 예약 안내
         if (previousQuestionCount >= MAX_FREE_QUESTIONS) {
             List<ChatHistoryItem> history = getChatHistory(messages);
 
@@ -52,7 +50,6 @@ public class ChatbotService {
             return new ChatResponse(reservationGuidance, history);
         }
 
-        // 4. 5회 이내라면 정상적으로 AI 응답 생성
         String llmResponse = legalAssistant.getAdvice(sessionId, question);
 
         return new ChatResponse(llmResponse);
