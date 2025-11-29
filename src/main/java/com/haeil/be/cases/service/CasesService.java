@@ -489,6 +489,15 @@ public class CasesService {
 
         // 상태 변경
         foundCase.updateStatus(CaseStatus.COMPLETED);
+
+        // 알림 전송 (모든 사무관에게)
+        List<User> secretaries = userRepository.findAllByRole(Role.ROLE_SECRETARY);
+        String content = String.format("사건이 완료 처리되었습니다: %s", foundCase.getTitle());
+        String url = "/cases/completed/" + foundCase.getId();
+
+        for (User secretary : secretaries) {
+            notificationService.send(secretary, NotificationType.CASE_COMPLETED, content, url);
+        }
     }
 
     // 완료된 사건 목록조회
