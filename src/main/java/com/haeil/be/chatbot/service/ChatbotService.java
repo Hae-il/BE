@@ -25,7 +25,8 @@ public class ChatbotService {
     public ChatResponse getResponse(Long sessionId, String question) {
 
         if (question.contains("예약")) {
-            return new ChatResponse("상담 예약을 도와드리겠습니다.\n아래 양식을 작성해주시면 담당 변호사가 확인 후 연락드리겠습니다.", "RESERVATION_FORM");
+            return new ChatResponse(
+                    "상담 예약을 도와드리겠습니다.\n아래 양식을 작성해주시면 담당 변호사가 확인 후 연락드리겠습니다.", "RESERVATION_FORM");
         }
 
         ChatMemory sessionMemory = chatMemoryProvider.get(sessionId);
@@ -36,10 +37,7 @@ public class ChatbotService {
                         .filter(message -> message.type().equals(ChatMessageType.USER))
                         .count();
 
-        log.info(
-                "--- [챗봇 요청] --- 세션 ID: {}, 현재까지 질문 횟수: {}",
-                sessionId,
-                previousQuestionCount);
+        log.info("--- [챗봇 요청] --- 세션 ID: {}, 현재까지 질문 횟수: {}", sessionId, previousQuestionCount);
 
         if (previousQuestionCount >= MAX_FREE_QUESTIONS) {
             List<ChatHistoryItem> history = getChatHistory(messages);

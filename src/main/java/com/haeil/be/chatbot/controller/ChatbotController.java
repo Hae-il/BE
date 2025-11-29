@@ -4,6 +4,7 @@ import com.haeil.be.chatbot.dto.request.ChatRequest;
 import com.haeil.be.chatbot.dto.response.ChatResponse;
 import com.haeil.be.chatbot.service.ChatbotService;
 import com.haeil.be.global.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ public class ChatbotController {
 
     private final ChatbotService chatbotService;
 
+    @Operation(summary = "챗봇 질문 API", description = "챗봇에게 질문을 합니다.")
     @PostMapping("/ask")
     public ResponseEntity<ApiResponse<Object>> askQuestion(@RequestBody ChatRequest request) {
         ChatResponse response = chatbotService.getResponse(request.sessionId(), request.question());
