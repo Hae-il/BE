@@ -531,6 +531,93 @@
                         // 기본 답변 출력
                         let answerHtml = formatText(data.results.answer);
 
+                        // 예약 폼 액션 처리
+                        if (data.results.action === "RESERVATION_FORM") {
+                            const formId = 'resForm_' + Date.now();
+                            answerHtml += `
+                                <div class="reservation-form p-3 bg-white rounded shadow-sm mt-3 border" style="max-width: 100%;">
+                                    <h6 class="mb-3 text-primary fw-bold border-bottom pb-2"><i class="ti ti-calendar-time me-2"></i>상담 예약 신청</h6>
+                                    <form id="${formId}">
+                                        <div class="mb-2">
+                                            <label class="form-label small text-secondary mb-1 fw-semibold">이름</label>
+                                            <input type="text" name="name" class="form-control form-control-sm bg-light" placeholder="성함을 입력하세요" required>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small text-secondary mb-1 fw-semibold">연락처</label>
+                                            <input type="tel" name="phone" class="form-control form-control-sm bg-light" placeholder="010-XXXX-XXXX" pattern="01[0-9]-\\d{4}-\\d{4}" required>
+                                        </div>
+                                         <div class="mb-2">
+                                            <label class="form-label small text-secondary mb-1 fw-semibold">상담 유형</label>
+                                            <select name="caseType" class="form-select form-select-sm bg-light" required>
+                                                <option value="CIVIL">민사</option>
+                                                <option value="CRIMINAL">형사</option>
+                                                <option value="TRAFFIC_ACCIDENT">교통사고</option>
+                                                <option value="OTHER">기타</option>
+                                            </select>
+                                        </div>
+                                         <div class="mb-2">
+                                            <label class="form-label small text-secondary mb-1 fw-semibold">희망 일시</label>
+                                            <input type="datetime-local" name="requestedDate" class="form-control form-control-sm bg-light" required>
+                                        </div>
+                                         <div class="mb-3">
+                                            <label class="form-label small text-secondary mb-1 fw-semibold">상담 내용</label>
+                                            <textarea name="description" class="form-control form-control-sm bg-light" rows="2" placeholder="간단한 내용을 적어주세요"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold py-2">예약 신청하기</button>
+                                    </form>
+                                </div>
+                            `;
+                            
+                            // 폼 이벤트 리스너 등록 (비동기 처리)
+                            setTimeout(() => {
+                                const form = document.getElementById(formId);
+                                if(form) {
+                                    form.addEventListener('submit', function(e) {
+                                        e.preventDefault();
+                                        const formData = new FormData(this);
+                                        const jsonData = Object.fromEntries(formData.entries());
+                                        
+                                        // 날짜 포맷 변경 (T -> 공백)
+                                        if(jsonData.requestedDate) {
+                                            jsonData.requestedDate = jsonData.requestedDate.replace('T', ' ');
+                                        }
+
+                                        const btn = this.querySelector('button');
+                                        const originalText = btn.textContent;
+                                        btn.disabled = true;
+                                        btn.textContent = '처리중...';
+
+                                        fetch('/api/v1/consultations/reservations', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify(jsonData)
+                                        })
+                                        .then(res => {
+                                            if(!res.ok) throw new Error('Reservation failed');
+                                            return res.json();
+                                        })
+                                        .then(data => {
+                                            this.closest('.reservation-form').innerHTML = `
+                                                <div class="text-center py-4">
+                                                    <div class="mb-3">
+                                                        <i class="ti ti-circle-check text-success" style="font-size: 3rem;"></i>
+                                                    </div>
+                                                    <h5 class="fw-bold text-dark">예약이 접수되었습니다!</h5>
+                                                    <p class="small text-muted mb-0 mt-2">담당 변호사가 확인 후<br>빠른 시일 내에 연락드리겠습니다.</p>
+                                                </div>
+                                            `;
+                                        })
+                                        .catch(err => {
+                                            alert('예약 신청 중 오류가 발생했습니다. 입력 정보를 확인해주세요.');
+                                            console.error(err);
+                                            btn.disabled = false;
+                                            btn.textContent = originalText;
+                                        });
+                                    });
+                                }
+                            }, 0);
+                        }
+
                         // 히스토리가 있는 경우 (상담 횟수 초과 시)
                         if (data.results.history && data.results.history.length > 0) {
                             answerHtml += "<br><br><h3>📝 [지금까지의 상담 요약]</h3>";

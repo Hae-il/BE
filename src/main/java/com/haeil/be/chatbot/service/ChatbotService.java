@@ -24,6 +24,10 @@ public class ChatbotService {
 
     public ChatResponse getResponse(Long sessionId, String question) {
 
+        if (question.contains("예약")) {
+            return new ChatResponse("상담 예약을 도와드리겠습니다.\n아래 양식을 작성해주시면 담당 변호사가 확인 후 연락드리겠습니다.", "RESERVATION_FORM");
+        }
+
         ChatMemory sessionMemory = chatMemoryProvider.get(sessionId);
         List<ChatMessage> messages = sessionMemory.messages();
 
