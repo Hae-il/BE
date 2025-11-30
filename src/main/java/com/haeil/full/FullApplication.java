@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.haeil.full", "com.haeil.be.chatbot"})
+@ComponentScan(basePackages = {"com.haeil.full"})
 public class FullApplication {
 
     public static void main(String[] args) {

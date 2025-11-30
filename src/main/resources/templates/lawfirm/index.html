@@ -557,7 +557,7 @@
                                         </div>
                                          <div class="mb-2">
                                             <label class="form-label small text-secondary mb-1 fw-semibold">희망 일시</label>
-                                            <input type="datetime-local" name="requestedDate" class="form-control form-control-sm bg-light" required>
+                                            <input type="datetime-local" name="requestDate" class="form-control form-control-sm bg-light" required>
                                         </div>
                                          <div class="mb-3">
                                             <label class="form-label small text-secondary mb-1 fw-semibold">상담 내용</label>
@@ -577,17 +577,12 @@
                                         const formData = new FormData(this);
                                         const jsonData = Object.fromEntries(formData.entries());
                                         
-                                        // 날짜 포맷 변경 (T -> 공백)
-                                        if(jsonData.requestedDate) {
-                                            jsonData.requestedDate = jsonData.requestedDate.replace('T', ' ');
-                                        }
-
                                         const btn = this.querySelector('button');
                                         const originalText = btn.textContent;
                                         btn.disabled = true;
                                         btn.textContent = '처리중...';
 
-                                        fetch('/api/v1/consultations/reservations', {
+                                        fetch('/api/v1/chatbot/reservation', {
                                             method: 'POST',
                                             headers: { 'Content-Type': 'application/json' },
                                             body: JSON.stringify(jsonData)
