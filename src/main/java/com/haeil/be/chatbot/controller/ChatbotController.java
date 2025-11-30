@@ -1,6 +1,7 @@
 package com.haeil.be.chatbot.controller;
 
 import com.haeil.be.chatbot.dto.request.ChatRequest;
+import com.haeil.be.chatbot.dto.request.CreateChatReservationRequest;
 import com.haeil.be.chatbot.dto.response.ChatResponse;
 import com.haeil.be.chatbot.service.ChatbotService;
 import com.haeil.be.global.response.ApiResponse;
@@ -27,5 +28,13 @@ public class ChatbotController {
     public ResponseEntity<ApiResponse<Object>> askQuestion(@RequestBody ChatRequest request) {
         ChatResponse response = chatbotService.getResponse(request.sessionId(), request.question());
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.from(response));
+    }
+
+    @Operation(summary = "챗봇 내 상담 예약 API", description = "챗봇 내에서 상담 예약을 진행합니다.")
+    @PostMapping("/reservation")
+    public ResponseEntity<ApiResponse<Object>> addReservation(
+            @RequestBody CreateChatReservationRequest request) {
+        chatbotService.createConsultationReservation(request);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.EMPTY_RESPONSE);
     }
 }

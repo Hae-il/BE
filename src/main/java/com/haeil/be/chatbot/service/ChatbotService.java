@@ -1,11 +1,15 @@
 package com.haeil.be.chatbot.service;
 
+import com.haeil.be.chatbot.dto.request.CreateChatReservationRequest;
 import com.haeil.be.chatbot.dto.response.ChatHistoryItem;
 import com.haeil.be.chatbot.dto.response.ChatResponse;
+import com.haeil.be.consultation.domain.ConsultationReservation;
+import com.haeil.be.consultation.repository.ConsultationReservationRepository;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.ChatMessageType;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ public class ChatbotService {
     private final ChatMemoryProvider chatMemoryProvider;
 
     private static final int MAX_FREE_QUESTIONS = 5;
+    private final ConsultationReservationRepository consultationReservationRepository;
 
     public ChatResponse getResponse(Long sessionId, String question) {
 
@@ -72,5 +77,20 @@ public class ChatbotService {
             }
         }
         return history;
+    }
+
+    // 챗봇 진료 예약 진행
+    @Transactional
+    public void createConsultationReservation(CreateChatReservationRequest request) {
+        ConsultationReservation consultationReservation =
+                ConsultationReservation.builder()
+                        .name(request.name())
+                        .phone(request.phone())
+                        .requestedDate(request.requestDate())
+                        .caseType(request.caseType())
+                        .description(request.description())
+                        .build();
+
+        consultationReservationRepository.save(consultationReservation);
     }
 }
