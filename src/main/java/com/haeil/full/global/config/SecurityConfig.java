@@ -52,6 +52,8 @@ public class SecurityConfig {
                                         .hasAnyRole("ATTORNEY", "ADMIN")
                                         .requestMatchers("/consultations/**")
                                         .hasAnyRole("SECRETARY", "ATTORNEY", "COUNSEL", "ADMIN")
+                                        .requestMatchers("/api/v1/notifications/**")
+                                        .authenticated()
                                         .anyRequest()
                                         .authenticated())
                 .addFilterBefore(
