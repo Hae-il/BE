@@ -66,15 +66,16 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-4">
                                                     <label class="form-label text-muted text-uppercase fs-xs">이름</label>
-                                                    <input type="text" class="form-control-plaintext editable-input" name="opponentName" th:value="${case.opponentName}" placeholder="상대방 이름" readonly>
+                                                    <input type="text" class="form-control-plaintext editable-input" name="opponentName" th:value="${case.opponentName ?: '미입력'}" placeholder="상대방 이름" readonly>
                                                 </div>
                                                 <div class="col-md-4">
-                                                    <label class="form-label text-muted text-uppercase fs-xs">전화번호</label>
-                                                    <input type="text" class="form-control-plaintext editable-input" name="opponentPhone" th:value="${case.opponentPhone}" placeholder="상대방 전화번호" readonly>
+                                                    <label class="form-label text-muted text-uppercase fs-xs">연락처</label>
+                                                    <input type="text" class="form-control-plaintext editable-input" name="opponentPhone" th:value="${case.opponentPhone ?: '미입력'}" placeholder="010-0000-0000" readonly>
+                                                    <div class="form-text fs-xs text-muted mt-1">'-'를 포함하여 입력해주세요.</div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label class="form-label text-muted text-uppercase fs-xs">보험사</label>
-                                                    <input type="text" class="form-control-plaintext editable-input" name="opponentInsurance" th:value="${case.opponentInsurance}" placeholder="상대방 보험사" readonly>
+                                                    <input type="text" class="form-control-plaintext editable-input" name="opponentInsurance" th:value="${case.opponentInsurance ?: '미입력'}" placeholder="상대방 보험사" readonly>
                                                 </div>
                                             </div>
 
@@ -138,11 +139,12 @@
 
         <script>
             function enableEditMode() {
-                // Text inputs and textareas: remove plaintext class, add form-control, remove readonly
+                // Text inputs and textareas
                 document.querySelectorAll('.editable-input').forEach(el => {
                     el.readOnly = false;
                     el.classList.remove('form-control-plaintext');
                     el.classList.add('form-control');
+                    if (el.value === '미입력') el.value = '';
                 });
 
                 // Selects and specific inputs: remove disabled/readonly
