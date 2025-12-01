@@ -48,6 +48,7 @@ public class SecurityConfig {
                                                 "/auth/**",
                                                 "/lawfirm/**",
                                                 "/api/v1/chatbot/**")
+                                                "/auth/**")
                                         .permitAll()
                                         .requestMatchers("/cases/unassigned/**")
                                         .hasAnyRole("SECRETARY", "ADMIN")

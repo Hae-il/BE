@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 public class HomeController {
 
-    private final UserService userService;
-
     @GetMapping("/")
     public String home(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -26,7 +24,7 @@ public class HomeController {
                 || authentication.getPrincipal().equals("anonymousUser")) {
             return "redirect:/auth/login";
         }
-
+      
         // 인증된 사용자 정보 가져오기
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -57,5 +55,7 @@ public class HomeController {
             default:
                 return "사용자";
         }
+    }
+        return "pages/index";
     }
 }
