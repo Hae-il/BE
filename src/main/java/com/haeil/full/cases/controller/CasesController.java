@@ -2,6 +2,7 @@ package com.haeil.full.cases.controller;
 
 import com.haeil.full.cases.dto.request.AssignAttorneyRequest;
 import com.haeil.full.cases.dto.request.CaseDocumentRequest;
+import com.haeil.full.cases.dto.request.CaseEventRequest;
 import com.haeil.full.cases.dto.request.CaseNumberRequest;
 import com.haeil.full.cases.dto.request.DecisionRequest;
 import com.haeil.full.cases.dto.request.PetitionRequest;
@@ -65,6 +66,13 @@ public class CasesController {
         return "projects/cases/requested-detail";
     }
 
+    @PostMapping("/requested/{caseId}/update")
+    public String updateRequestedCase(
+            @PathVariable Long caseId, @ModelAttribute UpdateCaseRequest request) {
+        casesService.updateCaseInfo(caseId, request);
+        return "redirect:/cases/requested/" + caseId;
+    }
+
     @PostMapping("/requested/{caseId}")
     public String decideCaseAssignment(
             @PathVariable Long caseId,
@@ -78,7 +86,7 @@ public class CasesController {
     public String getOngoingCases(
             @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         model.addAttribute("cases", casesService.getOngoingCases(userDetails.getId()));
-        return "projects/cases/ongoing";
+        return "projects/cases/ongoing-list";
     }
 
     @GetMapping("/ongoing/{caseId}")
@@ -88,6 +96,13 @@ public class CasesController {
             Model model) {
         model.addAttribute("case", casesService.getOngoingCaseDetail(caseId, userDetails.getId()));
         return "projects/cases/ongoing-detail";
+    }
+
+    @PostMapping("/ongoing/{caseId}/update")
+    public String updateOngoingCase(
+            @PathVariable Long caseId, @ModelAttribute UpdateCaseRequest request) {
+        casesService.updateCaseInfo(caseId, request);
+        return "redirect:/cases/ongoing/" + caseId;
     }
 
     @PostMapping("/ongoing/{caseId}/petition")
@@ -126,6 +141,15 @@ public class CasesController {
         return "redirect:/cases/ongoing/" + caseId;
     }
 
+    @PostMapping("/ongoing/{caseId}/events")
+    public String createCaseEvent(
+            @PathVariable Long caseId,
+            @ModelAttribute CaseEventRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        casesService.createCaseEvent(caseId, request, userDetails.getId());
+        return "redirect:/cases/ongoing/" + caseId;
+    }
+
     @PostMapping("/ongoing/{caseId}/documents")
     public String uploadCaseDocument(
             @PathVariable Long caseId,
@@ -134,7 +158,7 @@ public class CasesController {
             @AuthenticationPrincipal CustomUserDetails userDetails)
             throws java.io.IOException {
         casesService.uploadCaseDocument(caseId, file, request, userDetails.getId());
-        return "redirect:/cases/ongoing/" + caseId + "/documents";
+        return "redirect:/cases/ongoing/" + caseId;
     }
 
     @GetMapping("/ongoing/{caseId}/documents")
@@ -154,7 +178,7 @@ public class CasesController {
             @AuthenticationPrincipal CustomUserDetails userDetails)
             throws java.io.IOException {
         casesService.deleteCaseDocument(caseId, documentId, userDetails.getId());
-        return "redirect:/cases/ongoing/" + caseId + "/documents";
+        return "redirect:/cases/ongoing/" + caseId;
     }
 
     @PostMapping("/ongoing/{caseId}/complete")
@@ -168,7 +192,7 @@ public class CasesController {
     public String getCompletedCases(
             @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         model.addAttribute("cases", casesService.getCompletedCases(userDetails.getId()));
-        return "projects/cases/completed";
+        return "projects/cases/completed-list";
     }
 
     @GetMapping("/completed/{caseId}")

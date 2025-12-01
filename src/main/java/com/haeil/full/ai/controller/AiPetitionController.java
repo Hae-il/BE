@@ -9,7 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/ai")
@@ -24,5 +26,11 @@ public class AiPetitionController {
         PetitionResponse response = aiPetitionService.generatePetitionDraft(request.getCaseId());
         model.addAttribute("petition", response);
         return "case/petition";
+    }
+
+    @PostMapping("/api/petition/draft")
+    @ResponseBody
+    public PetitionResponse generatePetitionDraftApi(@RequestBody AiPetitionRequest request) {
+        return aiPetitionService.generatePetitionDraft(request.getCaseId());
     }
 }

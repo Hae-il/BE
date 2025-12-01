@@ -3,11 +3,13 @@ package com.haeil.full.cases.service;
 import static com.haeil.full.cases.exception.errorcode.CasesErrorCode.CASE_NOT_FOUND;
 
 import com.haeil.full.cases.domain.CaseDocument;
+import com.haeil.full.cases.domain.CaseEvent;
 import com.haeil.full.cases.domain.Cases;
 import com.haeil.full.cases.domain.Petition;
 import com.haeil.full.cases.domain.type.CaseStatus;
 import com.haeil.full.cases.dto.request.AssignAttorneyRequest;
 import com.haeil.full.cases.dto.request.CaseDocumentRequest;
+import com.haeil.full.cases.dto.request.CaseEventRequest;
 import com.haeil.full.cases.dto.request.DecisionRequest;
 import com.haeil.full.cases.dto.request.PetitionRequest;
 import com.haeil.full.cases.dto.request.UpdateCaseRequest;
@@ -25,6 +27,7 @@ import com.haeil.full.cases.dto.response.UnassignedCaseResponse;
 import com.haeil.full.cases.exception.CasesException;
 import com.haeil.full.cases.exception.errorcode.CasesErrorCode;
 import com.haeil.full.cases.repository.CaseDocumentRepository;
+import com.haeil.full.cases.repository.CaseEventRepository;
 import com.haeil.full.cases.repository.CasesRepository;
 import com.haeil.full.cases.repository.PetitionRepository;
 import com.haeil.full.consultation.domain.Consultation;
@@ -51,6 +54,7 @@ public class CasesService {
     private final CasesRepository casesRepository;
     private final PetitionRepository petitionRepository;
     private final CaseDocumentRepository caseDocumentRepository;
+    private final CaseEventRepository caseEventRepository;
     private final FileService fileService;
     private final FileRepository fileRepository;
 
@@ -80,6 +84,7 @@ public class CasesService {
     private final UserRepository userRepository;
 
     // 미배정 사건 목록조회
+    @Transactional(readOnly = true)
     public List<UnassignedCaseResponse> getUnassignedCases() {
         return casesRepository.findByCaseStatus(CaseStatus.UNASSIGNED).stream()
                 .map(UnassignedCaseResponse::from)
@@ -87,6 +92,7 @@ public class CasesService {
     }
 
     // 미배정사건 상세보기
+    @Transactional(readOnly = true)
     public UnassignedCaseDetailResponse getUnassignedCaseDetail(Long caseId) {
         Cases foundCase =
                 casesRepository
@@ -140,6 +146,7 @@ public class CasesService {
     }
 
     // 요청된 사건 목록조회
+    @Transactional(readOnly = true)
     public List<RequestedCaseResponse> getRequestedCases(Long userId) {
         User attorney =
                 userRepository
@@ -152,6 +159,7 @@ public class CasesService {
     }
 
     // 요청된 사건 상세보기
+    @Transactional(readOnly = true)
     public RequestedCaseDetailResponse getRequestedCaseDetail(Long caseId, Long userId) {
         Cases foundCase =
                 casesRepository
@@ -190,6 +198,10 @@ public class CasesService {
         if (request.isApproved()) {
             // 승인 시 진행중 사건목록으로 사건이동
             foundCase.updateStatus(CaseStatus.IN_PROGRESS);
+            // 사건번호 부여 (Year-Type-ID)
+            String caseNumber =
+                    java.time.Year.now() + "-" + foundCase.getCaseType() + "-" + foundCase.getId();
+            foundCase.updateCaseNumber(caseNumber);
         } else {
             // 거절 시 미배정 사건목록으로 반환
             foundCase.removeAttorney();
@@ -197,7 +209,33 @@ public class CasesService {
         }
     }
 
+    // 사건 진행사항 추가
+    @Transactional
+    public void createCaseEvent(Long caseId, CaseEventRequest request, Long userId) {
+        Cases foundCase = getCasesOrThrow(caseId);
+
+        if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
+        }
+
+        // 변호사는 본인 담당 사건만 추가 가능
+        if (foundCase.getAttorney() == null || !foundCase.getAttorney().getId().equals(userId)) {
+            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+        }
+
+        CaseEvent event =
+                CaseEvent.builder()
+                        .cases(foundCase)
+                        .type(request.eventType())
+                        .location(request.location())
+                        .date(request.date())
+                        .build();
+
+        caseEventRepository.save(event);
+    }
+
     // 진행중인 사건 목록조회
+    @Transactional(readOnly = true)
     public List<OngoingCaseResponse> getOngoingCases(Long userId) {
         User attorney =
                 userRepository
@@ -212,6 +250,7 @@ public class CasesService {
     }
 
     // 진행중인 사건 상세보기
+    @Transactional(readOnly = true)
     public OngoingCaseDetailResponse getOngoingCaseDetail(Long caseId, Long userId) {
         Cases foundCase =
                 casesRepository
