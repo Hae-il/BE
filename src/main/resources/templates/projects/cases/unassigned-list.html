@@ -77,23 +77,23 @@
                                                 <div>
                                                 <a th:href="@{/cases/unassigned/{id}(id=${case.caseId})}" class="fw-bold text-primary" th:text="'C' + ${case.caseId}"></a>
                                                 <br>
-                                                <small class="text-muted" th:text="'등록: ' + ${#temporals.format(case.createdDate, 'yyyy-MM-dd')}"></small>
+                                                <small class="text-muted" th:text="'등록: ' + (${case.createdDate != null} ? ${#temporals.format(case.createdDate, 'yyyy-MM-dd')} : '-')"></small>
                                             </div>
                                         </td>
                                         <td th:text="${case.clientName}"></td>
                                         <td>
                                             <h5 class="mb-0 fs-14" th:text="${case.title}"></h5>
                                         </td>
-                                        <td th:text="${case.caseType.label}"></td>
+                                        <td th:text="${case.caseType != null ? case.caseType.label : '-'}"></td>
                                         <td class="text-muted">-</td>
                                         <td>
                                             <span class="badge fs-xxs badge-label" 
-                                                  th:text="${case.caseStatus.label}"
-                                                  th:classappend="${case.caseStatus.name() == 'IN_PROGRESS' ? 'badge-soft-success' : 
-                                                                   case.caseStatus.name() == 'COMPLETED' ? 'badge-soft-primary' :
+                                                  th:text="${case.caseStatus != null ? case.caseStatus.label : '-'}"
+                                                  th:classappend="${case.caseStatus != null && case.caseStatus.name() == 'IN_PROGRESS' ? 'badge-soft-success' : 
+                                                                   case.caseStatus != null && case.caseStatus.name() == 'COMPLETED' ? 'badge-soft-primary' :
                                                                    'badge-soft-secondary'}"></span>
                                         </td>
-                                        <td th:text="${#temporals.format(case.occurredDate, 'yyyy-MM-dd HH:mm')}"></td>
+                                        <td th:text="${case.occurredDate != null ? #temporals.format(case.occurredDate, 'yyyy-MM-dd HH:mm') : '-'}"></td>
                                         <td>
                                             <div class="d-flex justify-content-center gap-1">
                                                 <a th:href="@{/cases/unassigned/{id}(id=${case.caseId})}" class="btn btn-light btn-icon btn-sm rounded-circle"><i

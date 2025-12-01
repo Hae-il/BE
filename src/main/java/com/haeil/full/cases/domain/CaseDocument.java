@@ -41,4 +41,12 @@ public class CaseDocument extends BaseEntity {
         this.file = file;
         this.description = description;
     }
+
+    public void removeFile() {
+        this.file = null;
+    }
+
+    public void setFile(FileEntity file) {
+        this.file = file;
+    }
 }

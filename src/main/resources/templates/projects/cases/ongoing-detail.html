@@ -86,6 +86,50 @@
                                             <hr class="my-4">
 
                                             <div class="d-flex align-items-center justify-content-between mb-3">
+                                                <h5 class="fs-base mb-0">소송 문서</h5>
+                                                <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#documentUploadModal">
+                                                    <i class="ti ti-upload me-1"></i> 업로드
+                                                </button>
+                                            </div>
+                                            <div class="table-responsive mb-4">
+                                                <table class="table table-sm table-centered table-nowrap mb-0">
+                                                    <thead class="bg-light">
+                                                        <tr>
+                                                            <th scope="col" style="width: 15%;">구분</th>
+                                                            <th scope="col">파일명</th>
+                                                            <th scope="col">설명</th>
+                                                            <th scope="col" style="width: 10%;">관리</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr th:each="doc : ${case.documents}">
+                                                            <td><span class="badge badge-soft-info" th:text="${doc.documentType.label}"></span></td>
+                                                            <td>
+                                                                <a th:href="${doc.fileUrl}" target="_blank" class="text-reset text-decoration-underline">
+                                                                    <i class="ti ti-file me-1"></i>
+                                                                    <span th:text="${doc.originalFilename}"></span>
+                                                                </a>
+                                                            </td>
+                                                            <td th:text="${doc.description}"></td>
+                                                            <td>
+                                                                <button type="button" class="btn btn-sm btn-ghost-danger btn-icon" 
+                                                                        th:onclick="|deleteDocument(${case.caseId}, ${doc.documentId})|">
+                                                                    <i class="ti ti-trash"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <tr th:if="${#lists.isEmpty(case.documents)}">
+                                                            <td colspan="4" class="text-center text-muted py-3">
+                                                                등록된 소송 문서가 없습니다.
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <hr class="my-4">
+
+                                            <div class="d-flex align-items-center justify-content-between mb-3">
                                                 <h5 class="fs-base mb-0">사건 진행사항</h5>
                                                 <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#eventModal">
                                                     <i class="ti ti-plus me-1"></i> 추가
@@ -316,7 +360,18 @@
             </div>
         </div>
 
+        <!-- 문서 삭제용 히든 폼 -->
+        <form id="deleteDocumentForm" method="post"></form>
+
         <script th:inline="javascript">
+            function deleteDocument(caseId, docId) {
+                if (confirm('정말 삭제하시겠습니까?')) {
+                    const form = document.getElementById('deleteDocumentForm');
+                    form.action = '/cases/ongoing/' + caseId + '/documents/' + docId + '/delete';
+                    form.submit();
+                }
+            }
+
             document.addEventListener('DOMContentLoaded', function() {
                 const btnAiDraft = document.getElementById('btn-ai-draft');
                 const caseId = [[${case.caseId}]];

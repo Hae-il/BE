@@ -57,6 +57,7 @@ public class CasesService {
     private final CaseEventRepository caseEventRepository;
     private final FileService fileService;
     private final FileRepository fileRepository;
+    private final jakarta.persistence.EntityManager entityManager;
 
     @Transactional
     public Cases createCaseFromConsultation(Consultation consultation) {
@@ -476,6 +477,11 @@ public class CasesService {
             throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
         }
 
+        // 중요: Cases 엔티티가 영속성 컨텍스트에 있으면, 자식 엔티티(CaseDocument) 삭제 시
+        // 연관관계 처리를 위해 Cases 엔티티의 변경사항이 감지되어 예기치 않은 UPDATE가 발생할 수 있음.
+        // 이를 방지하기 위해 Cases 엔티티를 영속성 컨텍스트에서 분리함.
+        entityManager.detach(foundCase);
+
         CaseDocument caseDocument =
                 caseDocumentRepository
                         .findById(documentId)
@@ -487,8 +493,13 @@ public class CasesService {
             throw new CasesException(CasesErrorCode.CASE_DOCUMENT_NOT_FOUND);
         }
 
-        // 파일 삭제
         FileEntity file = caseDocument.getFile();
+
+        // 1. 문서 삭제 (JPQL을 사용하여 직접 삭제)
+        // 엔티티 매니저를 거치지 않고 DB에서 직접 삭제하여 영속성 컨텍스트 문제 회피
+        caseDocumentRepository.deleteByIdDirect(documentId);
+
+        // 2. 파일 삭제
         if (file != null) {
             try {
                 Path filePath = Paths.get(file.getFileUrl());
@@ -500,9 +511,6 @@ public class CasesService {
                 throw new CasesException(CasesErrorCode.FILE_DELETE_FAILED);
             }
         }
-
-        // 소송문서 삭제
-        caseDocumentRepository.delete(caseDocument);
     }
 
     // 사건 완료처리
