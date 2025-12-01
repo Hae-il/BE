@@ -11,14 +11,16 @@ public record UnassignedCaseResponse(
         String title,
         CaseType caseType,
         CaseStatus caseStatus,
-        LocalDateTime occurredDate) {
+        LocalDateTime occurredDate,
+        LocalDateTime createdDate) {
     public static UnassignedCaseResponse from(Cases cases) {
         return new UnassignedCaseResponse(
                 cases.getId(),
-                cases.getClient().getName(),
+                cases.getClient() != null ? cases.getClient().getName() : "미지정",
                 cases.getTitle(),
                 cases.getCaseType(),
                 cases.getCaseStatus(),
-                cases.getOccurredDate());
+                cases.getOccurredDate(),
+                cases.getCreatedDate());
     }
 }

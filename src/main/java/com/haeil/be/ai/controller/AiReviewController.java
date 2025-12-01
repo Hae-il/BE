@@ -22,4 +22,3 @@ public class AiReviewController {
         return ApiResponse.from(result);
     }
 }
-

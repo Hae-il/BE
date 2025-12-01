@@ -1,10 +1,10 @@
-package com.haeil.be.ai.service;
+package com.haeil.full.ai.service;
 
-import com.haeil.be.cases.domain.Cases;
-import com.haeil.be.cases.domain.Petition;
-import com.haeil.be.cases.exception.CasesException;
-import com.haeil.be.cases.exception.errorcode.CasesErrorCode;
-import com.haeil.be.cases.repository.CasesRepository;
+import com.haeil.full.cases.domain.Cases;
+import com.haeil.full.cases.domain.Petition;
+import com.haeil.full.cases.exception.CasesException;
+import com.haeil.full.cases.exception.errorcode.CasesErrorCode;
+import com.haeil.full.cases.repository.CasesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
