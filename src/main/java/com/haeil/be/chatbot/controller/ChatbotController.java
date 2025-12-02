@@ -1,15 +1,19 @@
 package com.haeil.be.chatbot.controller;
 
+import com.haeil.be.chatbot.dto.request.ChatAgentRequest;
 import com.haeil.be.chatbot.dto.request.ChatRequest;
 import com.haeil.be.chatbot.dto.request.CreateChatReservationRequest;
 import com.haeil.be.chatbot.dto.response.ChatResponse;
 import com.haeil.be.chatbot.service.ChatbotService;
+import com.haeil.be.chatbot.service.ScheduleAgent;
 import com.haeil.be.global.response.ApiResponse;
+import com.haeil.be.user.service.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatbotController {
 
     private final ChatbotService chatbotService;
+    private final ScheduleAgent scheduleAgent;
 
     @Operation(summary = "챗봇 질문 API", description = "챗봇에게 질문을 합니다.")
     @PostMapping("/ask")
@@ -36,5 +41,16 @@ public class ChatbotController {
             @RequestBody CreateChatReservationRequest request) {
         chatbotService.createConsultationReservation(request);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.EMPTY_RESPONSE);
+    }
+
+    @Operation(summary = "챗봇 질문 - Agent 형태 API")
+    @PostMapping("/schedule")
+    public ResponseEntity<ApiResponse<Object>> askSchedule(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody ChatAgentRequest request) {
+        String userQuery = request.question();
+        Long clientId = userDetails.getId();
+        String agentResponse = scheduleAgent.chat(clientId, userQuery);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.from(agentResponse));
     }
 }
