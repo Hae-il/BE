@@ -18,8 +18,10 @@ public class AiReviewService {
 
     @Transactional(readOnly = true)
     public String reviewPetition(Long caseId) {
-        Cases cases = casesRepository.findById(caseId)
-                .orElseThrow(() -> new CasesException(CasesErrorCode.CASE_NOT_FOUND));
+        Cases cases =
+                casesRepository
+                        .findById(caseId)
+                        .orElseThrow(() -> new CasesException(CasesErrorCode.CASE_NOT_FOUND));
 
         Petition petition = cases.getPetition();
         if (petition == null) {
@@ -33,7 +35,8 @@ public class AiReviewService {
     }
 
     private String createReviewPrompt(Cases cases, Petition petition) {
-        return String.format("""
+        return String.format(
+                """
                 [사건 개요]
                 사건명: %s
                 사건 유형: %s
@@ -62,8 +65,6 @@ public class AiReviewService {
                 petition.getDamageItems(),
                 petition.getDamageCalculation(),
                 petition.getLiabilityBasis(),
-                petition.getProofMethod()
-        );
+                petition.getProofMethod());
     }
 }
-

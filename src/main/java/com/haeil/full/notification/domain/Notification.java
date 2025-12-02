@@ -36,7 +36,8 @@ public class Notification extends BaseEntity {
     private boolean isRead;
 
     @Builder
-    public Notification(User receiver, NotificationType notificationType, String content, String relatedUrl) {
+    public Notification(
+            User receiver, NotificationType notificationType, String content, String relatedUrl) {
         this.receiver = receiver;
         this.notificationType = notificationType;
         this.content = content;
@@ -48,4 +49,3 @@ public class Notification extends BaseEntity {
         this.isRead = true;
     }
 }
-

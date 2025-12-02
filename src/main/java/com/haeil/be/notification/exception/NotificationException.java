@@ -9,4 +9,3 @@ import lombok.RequiredArgsConstructor;
 public class NotificationException extends RuntimeException {
     private final ErrorCode errorCode;
 }
-

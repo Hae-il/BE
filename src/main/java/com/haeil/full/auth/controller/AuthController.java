@@ -46,18 +46,20 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@Valid @ModelAttribute LoginRequest request, 
-                       Model model, HttpServletResponse response) {
+    public String login(
+            @Valid @ModelAttribute LoginRequest request,
+            Model model,
+            HttpServletResponse response) {
         try {
             LoginResponse loginResponse = authService.login(request.email(), request.password());
-            
+
             // JWT 토큰을 쿠키에 설정 (Bearer 프리픽스 제외)
             Cookie cookie = new Cookie("Authorization", loginResponse.accessToken());
             cookie.setHttpOnly(true);
             cookie.setPath("/");
             cookie.setMaxAge(7 * 24 * 60 * 60); // 7일
             response.addCookie(cookie);
-            
+
             return "redirect:/";
         } catch (Exception e) {
             model.addAttribute("error", "로그인 중 오류가 발생했습니다: " + e.getMessage());
@@ -73,7 +75,7 @@ public class AuthController {
         cookie.setPath("/");
         cookie.setMaxAge(0); // 즉시 만료
         response.addCookie(cookie);
-        
+
         return "redirect:/auth/login?logout";
     }
 }

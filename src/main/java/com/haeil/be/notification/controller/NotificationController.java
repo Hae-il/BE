@@ -31,4 +31,3 @@ public class NotificationController {
         return notificationService.subscribe(userDetails.getId());
     }
 }
-

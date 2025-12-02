@@ -14,4 +14,3 @@ public enum NotificationType {
 
     private final String description;
 }
-

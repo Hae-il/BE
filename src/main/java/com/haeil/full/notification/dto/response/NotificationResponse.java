@@ -10,8 +10,7 @@ public record NotificationResponse(
         String url,
         boolean isRead,
         NotificationType type,
-        LocalDateTime createdAt
-) {
+        LocalDateTime createdAt) {
     public static NotificationResponse from(Notification notification) {
         return new NotificationResponse(
                 notification.getId(),
@@ -19,8 +18,6 @@ public record NotificationResponse(
                 notification.getRelatedUrl(),
                 notification.isRead(),
                 notification.getNotificationType(),
-                notification.getCreatedDate()
-        );
+                notification.getCreatedDate());
     }
 }
-

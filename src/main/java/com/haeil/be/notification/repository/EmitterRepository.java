@@ -1,10 +1,9 @@
 package com.haeil.be.notification.repository;
 
-import org.springframework.stereotype.Repository;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Repository;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Repository
 public class EmitterRepository {
@@ -21,12 +20,12 @@ public class EmitterRepository {
 
     public Map<String, SseEmitter> findAllStartWithById(String id) {
         Map<String, SseEmitter> result = new ConcurrentHashMap<>();
-        emitters.forEach((key, emitter) -> {
-            if (key.startsWith(id)) {
-                result.put(key, emitter);
-            }
-        });
+        emitters.forEach(
+                (key, emitter) -> {
+                    if (key.startsWith(id)) {
+                        result.put(key, emitter);
+                    }
+                });
         return result;
     }
 }
-

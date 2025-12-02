@@ -193,9 +193,7 @@ public class CasesService {
     private void sendNotificationToSecretaries(Cases cases, NotificationType type) {
         List<User> secretaries = userRepository.findAllByRole(Role.ROLE_SECRETARY);
         String statusText = type == NotificationType.CASE_ASSIGNMENT_APPROVED ? "승인" : "거절";
-        String content = String.format("[%s] 사건 배정이 %s되었습니다.",
-                cases.getTitle(),
-                statusText);
+        String content = String.format("[%s] 사건 배정이 %s되었습니다.", cases.getTitle(), statusText);
         String url = "/cases/unassigned/" + cases.getId();
 
         for (User secretary : secretaries) {
