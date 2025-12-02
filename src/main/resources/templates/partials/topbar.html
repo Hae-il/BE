@@ -230,7 +230,7 @@
                     <div class="dropdown">
                         <button class="topbar-link dropdown-toggle drop-arrow-none" data-bs-toggle="dropdown" data-bs-offset="0,22" type="button" data-bs-auto-close="outside" aria-haspopup="false" aria-expanded="false">
                             <i data-lucide="bell" class="fs-xxl"></i>
-                            <span class="badge badge-square text-bg-warning topbar-badge">14</span>
+                            <span class="badge badge-square text-bg-warning topbar-badge" id="notification-badge" style="display: none;">0</span>
                         </button>
 
                         <div class="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg">
@@ -240,50 +240,13 @@
                                         <h6 class="m-0 fs-md fw-semibold">Notifications</h6>
                                     </div>
                                     <div class="col text-end">
-                                        <a href="#!" class="badge text-bg-light badge-label py-1">14 Alerts</a>
+                                        <a href="#!" class="badge text-bg-light badge-label py-1" id="notification-count">0 Alerts</a>
                                     </div>
                                 </div>
                             </div>
 
-                            <div style="max-height: 300px;" data-simplebar>
-                                <!-- item 1 -->
-                                <div class="dropdown-item notification-item py-2 text-wrap" id="notification-1">
-                                <span class="d-flex gap-2">
-                                    <span class="avatar-md flex-shrink-0">
-                                        <span class="avatar-title bg-danger-subtle text-danger rounded fs-22">
-                                            <i data-lucide="server-crash" class="fs-xl fill-danger"></i>
-                                        </span>
-                                    </span>
-                                    <span class="flex-grow-1 text-muted">
-                                        <span class="fw-medium text-body">Critical alert: Server crash detected</span>
-                                        <br>
-                                        <span class="fs-xs">30 minutes ago</span>
-                                    </span>
-                                    <button type="button" class="flex-shrink-0 text-muted btn btn-link p-0" data-dismissible="#notification-1">
-                                        <i class="ti ti-xbox-x-filled fs-xxl"></i>
-                                    </button>
-                                </span>
-                                </div>
-
-                                <!-- item 2 -->
-                                <div class="dropdown-item notification-item py-2 text-wrap" id="notification-2">
-                                <span class="d-flex gap-2">
-                                    <span class="avatar-md flex-shrink-0">
-                                        <span class="avatar-title bg-warning-subtle text-warning rounded fs-22">
-                                            <i data-lucide="alert-triangle" class="fs-xl fill-warning"></i>
-                                        </span>
-                                    </span>
-                                    <span class="flex-grow-1 text-muted">
-                                        <span class="fw-medium text-body">High memory usage on Node A</span>
-                                        <br>
-                                        <span class="fs-xs">10 minutes ago</span>
-                                    </span>
-                                    <button type="button" class="flex-shrink-0 text-muted btn btn-link p-0" data-dismissible="#notification-2">
-                                        <i class="ti ti-xbox-x-filled fs-xxl"></i>
-                                    </button>
-                                </span>
-                                </div>
-
+                            <div style="max-height: 300px;" data-simplebar id="notification-list">
+                                <!-- Notifications will be inserted here -->
                             </div> <!-- end dropdown-->
 
                             <!-- All-->
