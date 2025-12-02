@@ -465,6 +465,9 @@
             </div>
         </footer>
 
+        <!-- 로그인 여부 플래그 (내부 JS용) -->
+        <div id="chat-auth-flag" sec:authorize="isAuthenticated()" style="display:none;"></div>
+
         <!-- Chatbot Structure -->
         <button class="chatbot-toggler" onclick="document.body.classList.toggle('show-chatbot')">
             <span class="material-symbols-rounded"><i class="ti ti-message-chatbot fs-3"></i></span>
@@ -645,6 +648,9 @@
             const sendChatBtn = document.querySelector(".chat-input span");
             const chatbox = document.querySelector(".chatbox");
 
+            // 로그인 여부 체크 (서버가 삽입한 숨겨진 요소 기반)
+            const isAuthenticated = !!document.getElementById("chat-auth-flag");
+
             // Generate a random session ID for the current page session
             const sessionId = Math.floor(Math.random() * 1000000);
 
@@ -677,15 +683,25 @@
                 chatbox.scrollTo(0, chatbox.scrollHeight);
 
                 // Call the API
-                fetch('/api/v1/chatbot/ask', {
+                const endpoint = isAuthenticated
+                    ? '/api/v1/chatbot/schedule'
+                    : '/api/v1/chatbot/ask';
+
+                const payload = isAuthenticated
+                    ? {
+                        question: userMessage
+                    }
+                    : {
+                        sessionId: sessionId,
+                        question: userMessage
+                    };
+
+                fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        sessionId: sessionId,
-                        question: userMessage
-                    })
+                    body: JSON.stringify(payload)
                 })
                 .then(response => {
                     if (!response.ok) {
