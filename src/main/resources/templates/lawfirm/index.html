@@ -479,9 +479,15 @@
                 <span class="close-btn material-symbols-outlined" onclick="document.body.classList.remove('show-chatbot')"><i class="ti ti-x"></i></span>
             </header>
             <ul class="chatbox list-unstyled mb-0">
-                <li class="chat incoming d-flex">
+                <!-- 비로그인: 일반 법률 상담 안내 -->
+                <li class="chat incoming d-flex" sec:authorize="isAnonymous()">
                     <span class="material-symbols-outlined"><i class="ti ti-smart-home"></i></span>
                     <p>안녕하세요! 해일 법률사무소입니다. 👋<br>궁금하신 법률 문제를 자유롭게 물어보세요.</p>
+                </li>
+                <!-- 로그인: 내 사건 일정 안내 -->
+                <li class="chat incoming d-flex" sec:authorize="isAuthenticated()">
+                    <span class="material-symbols-outlined"><i class="ti ti-smart-home"></i></span>
+                    <p>안녕하세요! 해일 법률사무소 내 사건 일정 챗봇입니다. 👋<br>고객님의 사건 일정과 관련된 내용을 물어보시면 안내해 드릴게요.<br>예) "다가오는 일정 알려줘", "다음 재판 언제야?", "오늘 예정된 일정 있어?"</p>
                 </li>
             </ul>
             <div class="chat-input">
