@@ -8,14 +8,17 @@ import com.haeil.full.notification.exception.errorcode.NotificationErrorCode;
 import com.haeil.full.notification.repository.EmitterRepository;
 import com.haeil.full.notification.repository.NotificationRepository;
 import com.haeil.full.user.domain.User;
+import com.haeil.full.user.exception.UserException;
+import com.haeil.full.user.exception.errorcode.UserErrorCode;
+import com.haeil.full.user.repository.UserRepository;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.io.IOException;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -26,6 +29,7 @@ public class NotificationService {
 
     private final EmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
 
     public SseEmitter subscribe(Long userId) {
         log.info("Subscribing user {}", userId);
@@ -44,7 +48,9 @@ public class NotificationService {
     @Transactional
     public void send(User receiver, NotificationType notificationType, String content, String url) {
         log.info("Attempting to send notification. Receiver ID: {}", receiver.getId());
-        Notification notification = notificationRepository.save(createNotification(receiver, notificationType, content, url));
+        Notification notification =
+                notificationRepository.save(
+                        createNotification(receiver, notificationType, content, url));
         String receiverId = String.valueOf(receiver.getId());
 
         Map<String, SseEmitter> emitters = emitterRepository.findAllStartWithById(receiverId);
@@ -64,11 +70,52 @@ public class NotificationService {
                         emitterRepository.deleteById(key);
                         log.error("Failed to send notification to client.", e);
                     }
-                }
-        );
+                });
     }
 
-    private Notification createNotification(User receiver, NotificationType notificationType, String content, String url) {
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> getNotifications(Long userId) {
+        User user =
+                userRepository
+                        .findUserById(userId)
+                        .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+        return notificationRepository.findAllByReceiverAndIsReadFalseOrderByIdDesc(user).stream()
+                .map(NotificationResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public void readNotification(Long notificationId, Long userId) {
+        Notification notification =
+                notificationRepository
+                        .findById(notificationId)
+                        .orElseThrow(
+                                () ->
+                                        new NotificationException(
+                                                NotificationErrorCode.NOTIFICATION_NOT_FOUND));
+
+        if (!notification.getReceiver().getId().equals(userId)) {
+            throw new NotificationException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
+        }
+
+        notification.read();
+    }
+
+    @Transactional
+    public void readAllNotifications(Long userId) {
+        User user =
+                userRepository
+                        .findUserById(userId)
+                        .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+        List<Notification> notifications =
+                notificationRepository.findAllByReceiverAndIsReadFalseOrderByIdDesc(user);
+        notifications.forEach(Notification::read);
+    }
+
+    private Notification createNotification(
+            User receiver, NotificationType notificationType, String content, String url) {
         return Notification.builder()
                 .receiver(receiver)
                 .notificationType(notificationType)
@@ -79,10 +126,7 @@ public class NotificationService {
 
     private void sendToClient(SseEmitter emitter, String id, Object data) {
         try {
-            emitter.send(SseEmitter.event()
-                    .id(id)
-                    .name("sse")
-                    .data(data));
+            emitter.send(SseEmitter.event().id(id).name("sse").data(data));
         } catch (IOException e) {
             emitterRepository.deleteById(id);
             log.error("SSE Connection Failed", e);
@@ -90,4 +134,3 @@ public class NotificationService {
         }
     }
 }
-
