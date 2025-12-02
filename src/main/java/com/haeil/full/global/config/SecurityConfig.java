@@ -45,6 +45,9 @@ public class SecurityConfig {
                                                 "/webjars/**",
                                                 // Public MVC pages
                                                 "/",
+                                                "/auth/**",
+                                                "/lawfirm/**",
+                                                "/api/v1/chatbot/**",
                                                 "/auth/**")
                                         .permitAll()
                                         .requestMatchers("/cases/unassigned/**")
@@ -56,8 +59,6 @@ public class SecurityConfig {
                                         .hasAnyRole("ATTORNEY", "ADMIN")
                                         .requestMatchers("/consultations/**")
                                         .hasAnyRole("SECRETARY", "ATTORNEY", "COUNSEL", "ADMIN")
-                                        .requestMatchers("/api/v1/notifications/**")
-                                        .authenticated()
                                         .anyRequest()
                                         .authenticated())
                 .addFilterBefore(

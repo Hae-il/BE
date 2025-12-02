@@ -13,17 +13,33 @@
 
             <th:block th:replace="~{partials/page-title :: page-title('대시보드','홈')}" />
 
-            <div class="row">
+            <div class="row mt-4">
                 <div class="col-12">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h4 class="card-title mb-4">환영합니다!</h4>
-                            <p class="card-text fs-lg mb-4">
-                                <span th:text="${username}">사용자</span>님, 해일 법률 사무소 시스템에 오신 것을 환영합니다.
-                            </p>
-                            <p class="text-muted">
-                                좌측 메뉴를 통해 상담관리, 사건관리, 정산관리 등의 업무를 수행하실 수 있습니다.
-                            </p>
+                    <div class="outlook-box">
+                        <div class="card h-100 mb-0 rounded-start-0 flex-grow-1 border-start-0">
+                            <div class="card-body border-bottom">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterConsultation" value="CONSULTATION" checked>
+                                        <label class="form-check-label text-primary" for="filterConsultation">상담</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterCase" value="CASE_EVENT" checked>
+                                        <label class="form-check-label text-danger" for="filterCase">사건(재판)</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterContract" value="CONTRACT" checked>
+                                        <label class="form-check-label text-warning" for="filterContract">계약</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterSettlement" value="SETTLEMENT" checked>
+                                        <label class="form-check-label text-success" for="filterSettlement">정산</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body" style="height: calc(100% - 400px);" data-simplebar data-simplebar-md>
+                                <div id="calendar"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -31,6 +47,13 @@
 
         </div>
         
+    </th:block>
+
+    <th:block layout:fragment="javascripts">
+        <!-- Fullcalendar js -->
+        <script src="/plugins/fullcalendar/index.global.min.js"></script>
+        <!-- Calendar App Demo js -->
+        <script src="/js/pages/apps-calendar.js"></script>
     </th:block>
 
 </body>

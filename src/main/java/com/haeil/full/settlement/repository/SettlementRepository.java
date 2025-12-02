@@ -2,6 +2,8 @@ package com.haeil.full.settlement.repository;
 
 import com.haeil.full.cases.domain.type.CaseStatus;
 import com.haeil.full.settlement.domain.Settlement;
+import com.haeil.full.user.domain.User;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,4 +23,14 @@ public interface SettlementRepository extends JpaRepository<Settlement, Long> {
                     + "ORDER BY c.createdDate DESC")
     List<Object[]> findSettlementsByCaseStatuses(
             @Param("caseStatuses") List<CaseStatus> caseStatuses);
+
+    @Query(
+            "SELECT s FROM Settlement s "
+                    + "JOIN s.cases c "
+                    + "WHERE s.paymentDueDate BETWEEN :start AND :end "
+                    + "AND c.attorney = :attorney")
+    List<Settlement> findAllByPaymentDueDateBetweenAndAttorney(
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end,
+            @Param("attorney") User attorney);
 }
