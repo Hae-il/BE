@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping("/auth")
 @Controller
@@ -68,7 +69,8 @@ public class AuthController {
     }
 
     @GetMapping("/logout")
-    public String logout(HttpServletResponse response) {
+    public String logout(
+            HttpServletResponse response, @RequestParam(required = false) String redirect) {
         // JWT 쿠키 삭제
         Cookie cookie = new Cookie("Authorization", "");
         cookie.setHttpOnly(true);
@@ -76,6 +78,9 @@ public class AuthController {
         cookie.setMaxAge(0); // 즉시 만료
         response.addCookie(cookie);
 
+        if (redirect != null && !redirect.isEmpty()) {
+            return "redirect:" + redirect;
+        }
         return "redirect:/auth/login?logout";
     }
 }

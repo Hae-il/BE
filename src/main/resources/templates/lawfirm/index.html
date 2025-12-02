@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html data-bs-theme="light" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
     layout:decorate="~{layouts/base}">
 
 <head>
@@ -217,9 +218,18 @@
                             </li>
                         </ul>
 
-                        <div>
-                            <button type="button" class="btn btn-link fw-semibold text-body ps-2" data-bs-toggle="modal" data-bs-target="#signupModal">회원가입</button>
-                            <a href="/auth-1/sign-in" class="btn btn-link fw-semibold text-body ps-2">로그인</a>
+                        <div id="auth-buttons" class="d-flex align-items-center gap-2">
+                            <!-- 로그인 전 (익명 사용자) -->
+                            <div sec:authorize="isAnonymous()">
+                                <button type="button" class="btn btn-link fw-semibold text-body ps-2" data-bs-toggle="modal" data-bs-target="#signupModal">회원가입</button>
+                                <button type="button" class="btn btn-link fw-semibold text-body ps-2" data-bs-toggle="modal" data-bs-target="#loginModal">로그인</button>
+                            </div>
+                            
+                            <!-- 로그인 후 (인증된 사용자) -->
+                            <div sec:authorize="isAuthenticated()">
+                                <a href="/auth/logout?redirect=/lawfirm" class="btn btn-link fw-semibold text-body ps-2">로그아웃</a>
+                            </div>
+
                             <button class="btn btn-primary rounded-pill px-4" onclick="document.body.classList.toggle('show-chatbot')">
                                 <i class="ti ti-message-2 me-2"></i>법률 상담받기
                             </button>
@@ -462,6 +472,34 @@
             </div>
         </div>
 
+        <!-- Login Modal -->
+        <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="loginModalLabel">의뢰인 간편 로그인</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <p class="text-muted mb-4 small">가입하신 이메일과 비밀번호로 로그인하세요.</p>
+                        <form id="clientLoginForm">
+                            <div class="mb-3">
+                                <label for="loginEmail" class="form-label small fw-bold">이메일</label>
+                                <input type="email" class="form-control bg-light border-0" id="loginEmail" name="email" required placeholder="name@example.com">
+                            </div>
+                            <div class="mb-4">
+                                <label for="loginPassword" class="form-label small fw-bold">비밀번호</label>
+                                <input type="password" class="form-control bg-light border-0" id="loginPassword" name="password" required placeholder="비밀번호 입력">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary rounded-pill fw-bold py-2">로그인</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Signup Modal -->
         <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -498,6 +536,49 @@
 
     <th:block layout:fragment="javascripts">
         <script>
+            // Client Login Logic
+            document.getElementById('clientLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const jsonData = Object.fromEntries(formData.entries());
+                
+                const btn = this.querySelector('button[type="submit"]');
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = '로그인 중...';
+
+                fetch('/auth/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.message || 'Login failed'); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if(data.results && data.results.accessToken) {
+                        // Set Cookie for login
+                        document.cookie = `Authorization=${data.results.accessToken}; path=/; max-age=${7 * 24 * 60 * 60};`; // 7 days
+                        
+                        // Reload to update UI
+                        window.location.reload();
+                    } else {
+                        throw new Error('Invalid response from server');
+                    }
+                })
+                .catch(error => {
+                    alert('로그인 실패: ' + error.message);
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                });
+            });
+
             // Client Signup Logic
             document.getElementById('clientSignupForm').addEventListener('submit', function(e) {
                 e.preventDefault();

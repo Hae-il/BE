@@ -1,5 +1,6 @@
 package com.haeil.full.auth.controller;
 
+import com.haeil.full.auth.dto.request.LoginRequest;
 import com.haeil.full.auth.dto.request.SignupRequest;
 import com.haeil.full.auth.dto.response.LoginResponse;
 import com.haeil.full.auth.service.AuthService;
@@ -24,6 +25,12 @@ public class AuthApiController {
     public ResponseEntity<ApiResponse<Object>> apiSignup(
             @Valid @RequestBody SignupRequest request) {
         authService.signup(request.name(), request.email(), request.password(), request.role());
+        LoginResponse loginResponse = authService.login(request.email(), request.password());
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.from(loginResponse));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<Object>> apiLogin(@Valid @RequestBody LoginRequest request) {
         LoginResponse loginResponse = authService.login(request.email(), request.password());
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.from(loginResponse));
     }
