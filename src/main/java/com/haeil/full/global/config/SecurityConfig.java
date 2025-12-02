@@ -47,7 +47,7 @@ public class SecurityConfig {
                                                 "/",
                                                 "/auth/**",
                                                 "/lawfirm/**",
-                                                "/api/v1/chatbot/**")
+                                                "/api/v1/chatbot/**",
                                                 "/auth/**")
                                         .permitAll()
                                         .requestMatchers("/cases/unassigned/**")
