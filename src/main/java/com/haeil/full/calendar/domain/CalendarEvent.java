@@ -17,3 +17,4 @@ public class CalendarEvent {
     private boolean allDay;
     private Map<String, Object> extendedProps;
 }
+
