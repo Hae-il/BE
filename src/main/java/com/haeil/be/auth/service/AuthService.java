@@ -29,7 +29,7 @@ public class AuthService {
     private final ClientRepository clientRepository;
 
     @Transactional
-    public void signup(SignupRequest request) {
+    public LoginResponse signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new UserException(USER_ALREADY_EXISTS);
         }
@@ -49,6 +49,8 @@ public class AuthService {
                             .email(request.email())
                             .build());
         }
+
+        return login(request.email(), request.password());
     }
 
     public LoginResponse login(String email, String password) {

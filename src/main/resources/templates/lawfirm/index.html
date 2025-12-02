@@ -218,6 +218,7 @@
                         </ul>
 
                         <div>
+                            <button type="button" class="btn btn-link fw-semibold text-body ps-2" data-bs-toggle="modal" data-bs-target="#signupModal">회원가입</button>
                             <a href="/auth-1/sign-in" class="btn btn-link fw-semibold text-body ps-2">로그인</a>
                             <button class="btn btn-primary rounded-pill px-4" onclick="document.body.classList.toggle('show-chatbot')">
                                 <i class="ti ti-message-2 me-2"></i>법률 상담받기
@@ -461,10 +462,89 @@
             </div>
         </div>
 
+        <!-- Signup Modal -->
+        <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="signupModalLabel">의뢰인 간편 회원가입</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <p class="text-muted mb-4 small">해일 법률사무소의 의뢰인이 되어 최적의 법률 서비스를 경험해보세요.</p>
+                        <form id="clientSignupForm">
+                            <div class="mb-3">
+                                <label for="signupName" class="form-label small fw-bold">이름</label>
+                                <input type="text" class="form-control bg-light border-0" id="signupName" name="name" required placeholder="이름을 입력하세요">
+                            </div>
+                            <div class="mb-3">
+                                <label for="signupEmail" class="form-label small fw-bold">이메일</label>
+                                <input type="email" class="form-control bg-light border-0" id="signupEmail" name="email" required placeholder="name@example.com">
+                            </div>
+                            <div class="mb-4">
+                                <label for="signupPassword" class="form-label small fw-bold">비밀번호</label>
+                                <input type="password" class="form-control bg-light border-0" id="signupPassword" name="password" required placeholder="8자 이상 입력하세요">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary rounded-pill fw-bold py-2">가입하고 시작하기</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </th:block>
 
     <th:block layout:fragment="javascripts">
         <script>
+            // Client Signup Logic
+            document.getElementById('clientSignupForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const jsonData = Object.fromEntries(formData.entries());
+                
+                // Add ROLE_CLIENT explicitly
+                jsonData.role = 'ROLE_CLIENT';
+
+                const btn = this.querySelector('button[type="submit"]');
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = '처리중...';
+
+                fetch('/auth/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.message || 'Signup failed'); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if(data.results && data.results.accessToken) {
+                        // Set Cookie for auto-login
+                        document.cookie = `Authorization=${data.results.accessToken}; path=/; max-age=${7 * 24 * 60 * 60};`; // 7 days
+                        
+                        // Show success and reload
+                        alert('회원가입이 완료되었습니다! 자동으로 로그인됩니다.');
+                        window.location.reload();
+                    } else {
+                        throw new Error('Invalid response from server');
+                    }
+                })
+                .catch(error => {
+                    alert('회원가입 실패: ' + error.message);
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                });
+            });
+
             const chatInput = document.querySelector(".chat-input textarea");
             const sendChatBtn = document.querySelector(".chat-input span");
             const chatbox = document.querySelector(".chatbox");
