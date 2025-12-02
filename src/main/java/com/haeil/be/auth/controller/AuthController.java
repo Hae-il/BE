@@ -31,7 +31,7 @@ public class AuthController {
                             + "임의로 개발한 API로, Role을 선택하여 회원가입을 진행합니다. ROLE에는 `ROLE_ATTORNEY`, `ROLE_COUNSEL`, `ROLE_ACCOUNT`, `ROLE_ADMIN`, `ROLE_SECRETARY`가 있습니다. 하나를 작성해주세요.")
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Object>> signUp(@Valid @RequestBody SignupRequest request) {
-        authService.signup(request.name(), request.email(), request.password(), request.role());
+        authService.signup(request);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.EMPTY_RESPONSE);
     }
 
