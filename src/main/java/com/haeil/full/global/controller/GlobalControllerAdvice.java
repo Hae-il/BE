@@ -21,12 +21,13 @@ public class GlobalControllerAdvice {
     public void addAttributes(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.isAuthenticated()
+        if (authentication != null
+                && authentication.isAuthenticated()
                 && !authentication.getPrincipal().equals("anonymousUser")) {
-            
+
             try {
                 Object principal = authentication.getPrincipal();
-                
+
                 if (principal instanceof CustomUserDetails) {
                     CustomUserDetails userDetails = (CustomUserDetails) principal;
                     User user = userService.getUser(userDetails.getId());
