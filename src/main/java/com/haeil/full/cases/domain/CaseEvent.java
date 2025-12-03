@@ -30,4 +30,12 @@ public class CaseEvent extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "case_id")
     private Cases cases;
+
+    @lombok.Builder
+    public CaseEvent(Cases cases, EventType type, String location, LocalDateTime date) {
+        this.cases = cases;
+        this.type = type;
+        this.location = location;
+        this.date = date;
+    }
 }

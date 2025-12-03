@@ -127,4 +127,21 @@ public class Cases extends BaseEntity {
     public void updateCaseNumber(String caseNumber) {
         this.caseNumber = caseNumber;
     }
+
+    public void updateBasicInfo(
+            String title,
+            String content,
+            CaseType caseType,
+            LocalDateTime occurredDate,
+            String opponentName,
+            String opponentPhone,
+            String opponentInsurance) {
+        this.title = title;
+        this.content = content;
+        this.caseType = caseType;
+        this.occurredDate = occurredDate;
+        this.opponentName = opponentName;
+        this.opponentPhone = opponentPhone;
+        this.opponentInsurance = opponentInsurance;
+    }
 }

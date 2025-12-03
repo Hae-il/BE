@@ -17,9 +17,17 @@ public record OngoingCaseDetailResponse(
         CaseType caseType,
         CaseStatus caseStatus,
         LocalDateTime occurredDate,
+        LocalDateTime modifiedDate,
+        String opponentName,
+        String opponentPhone,
+        String opponentInsurance,
         String attorneyName,
+        String attorneyEmail,
+        PetitionResponse petition,
         // 사건진행결과
-        List<CaseEventResponse> caseProgress) {
+        List<CaseEventResponse> caseProgress,
+        // 소송문서
+        List<CaseDocumentResponse> documents) {
     public static OngoingCaseDetailResponse from(Cases cases) {
         return new OngoingCaseDetailResponse(
                 CaseManagementResponse.createDefault(),
@@ -30,7 +38,14 @@ public record OngoingCaseDetailResponse(
                 cases.getCaseType(),
                 cases.getCaseStatus(),
                 cases.getOccurredDate(),
+                cases.getModifiedDate(),
+                cases.getOpponentName(),
+                cases.getOpponentPhone(),
+                cases.getOpponentInsurance(),
                 cases.getAttorney() != null ? cases.getAttorney().getName() : null,
-                cases.getCaseEventList().stream().map(CaseEventResponse::from).toList());
+                cases.getAttorney() != null ? cases.getAttorney().getEmail() : null,
+                cases.getPetition() != null ? PetitionResponse.from(cases.getPetition()) : null,
+                cases.getCaseEventList().stream().map(CaseEventResponse::from).toList(),
+                cases.getCaseDocumentList().stream().map(CaseDocumentResponse::from).toList());
     }
 }

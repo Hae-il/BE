@@ -34,8 +34,7 @@ public class CaseEventAdapter implements CalendarEventAdapter {
     private CalendarEvent toCalendarEvent(CaseEvent caseEvent) {
         String caseTitle =
                 caseEvent.getCases() != null ? caseEvent.getCases().getTitle() : "Unknown Case";
-        String eventTypeLabel =
-                caseEvent.getType() != null ? caseEvent.getType().getLabel() : "기일";
+        String eventTypeLabel = caseEvent.getType() != null ? caseEvent.getType().getLabel() : "기일";
         String title = String.format("[%s] %s", eventTypeLabel, caseTitle);
 
         Long caseId = null;

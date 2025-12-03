@@ -1,0 +1,118 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+<head>
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('수임계약서 상세')}" />
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="container-fluid">
+            <th:block th:replace="~{partials/page-title :: page-title('수임계약서 상세', '계약 관리')}" />
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0">수임계약서 상세</h4>
+                            <div>
+                                <span th:if="${contract.status.name() == 'AWAITING'}" class="badge bg-light text-secondary">수임대기</span>
+                                <span th:if="${contract.status.name() == 'PENDING'}" class="badge bg-warning-subtle text-warning">입금확인중</span>
+                                <span th:if="${contract.status.name() == 'COMPLETED'}" class="badge bg-success-subtle text-success">수임완료</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            
+                            <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-file-text me-1"></i> 계약 기본 정보</h5>
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">사건 번호</label>
+                                    <p class="fw-bold" th:text="${contract.caseNumber != null ? contract.caseNumber : '미발급'}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">의뢰인</label>
+                                    <p class="fw-bold" th:text="${contract.clientName}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">담당 변호사</label>
+                                    <p class="fw-bold" th:text="${contract.attorneyName}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">입금 기한</label>
+                                    <p class="fw-bold" th:text="${contract.dueDate != null ? #temporals.format(contract.dueDate, 'yyyy-MM-dd') : '-'}"></p>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-coin me-1"></i> 수임료 정보</h5>
+                            <div class="row mb-4">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label text-muted">수임료 유형</label>
+                                    <p class="fw-bold">
+                                        <span th:if="${contract.feeType.name() == 'FIXED'}">정액 (Fixed Fee)</span>
+                                        <span th:if="${contract.feeType.name() == 'PERCENTAGE'}">정률 (Percentage Fee)</span>
+                                    </p>
+                                </div>
+
+                                <!-- Fixed Fee Details -->
+                                <div class="col-md-12" th:if="${contract.feeType.name() == 'FIXED'}">
+                                    <label class="form-label text-muted mb-2">계약 조건 및 금액</label>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-sm">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>조건 내용</th>
+                                                    <th style="width: 200px; text-align: right;">금액</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="condition : ${contract.fixedConditionList}">
+                                                    <td th:text="${condition.conditionDetail}"></td>
+                                                    <td class="text-end" th:text="${#numbers.formatInteger(condition.amount, 3, 'COMMA') + ' 원'}"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Percentage Fee Details -->
+                                <div class="col-md-12" th:if="${contract.feeType.name() == 'PERCENTAGE'}">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">목표 금액 (소송가액)</label>
+                                            <p class="fw-bold" th:text="${#numbers.formatInteger(contract.targetAmount, 3, 'COMMA') + ' 원'}"></p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">수임 비율</label>
+                                            <p class="fw-bold" th:text="${contract.feePercentage + ' %'}"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-receipt me-1"></i> 비용 처리</h5>
+                            <div class="row mb-4">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label text-muted">비용 처리 방식</label>
+                                    <p class="fw-bold">
+                                        <span th:if="${contract.expenseInfoResponse.expenseHandling.name() == 'BILLED_SEPARATELY'}">별도 정산</span>
+                                        <span th:if="${contract.expenseInfoResponse.expenseHandling.name() == 'INCLUDED_IN_RETAINER'}">착수금에 포함</span>
+                                    </p>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label text-muted">비용 상세 내용</label>
+                                    <div class="p-3 bg-light rounded border">
+                                        <p class="mb-0" th:text="${contract.expenseInfoResponse.expenseDetail != null && !contract.expenseInfoResponse.expenseDetail.isEmpty() ? contract.expenseInfoResponse.expenseDetail : '내용 없음'}"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <a href="/contracts" class="btn btn-light">목록으로</a>
+                                <a th:href="@{/contracts/{id}/edit(id=${contract.contractId})}" class="btn btn-primary">수정</a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+
+<head>
+
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('대시보드')}" />
+
+</head>
+
+<body>
+    <th:block layout:fragment="content">
+
+        <div class="container-fluid">
+
+            <th:block th:replace="~{partials/page-title :: page-title('대시보드','홈')}" />
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="outlook-box">
+                        <div class="card h-100 mb-0 rounded-start-0 flex-grow-1 border-start-0">
+                            <div class="card-body" style="height: calc(100% - 350px);" data-simplebar data-simplebar-md>
+                                <div id="calendar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+    </th:block>
+
+    <th:block layout:fragment="javascripts">
+        <!-- Fullcalendar js -->
+        <script src="/plugins/fullcalendar/index.global.min.js"></script>
+        <!-- Calendar App Demo js -->
+        <script src="/js/pages/apps-calendar.js"></script>
+    </th:block>
+
+</body>
+
+</html>

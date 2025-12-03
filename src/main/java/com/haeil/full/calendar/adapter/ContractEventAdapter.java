@@ -34,7 +34,7 @@ public class ContractEventAdapter implements CalendarEventAdapter {
         String caseTitle =
                 contract.getCases() != null ? contract.getCases().getTitle() : "Unknown Case";
         String title = String.format("[계약] %s", caseTitle);
-        
+
         // 계약 기한은 자정으로 설정
         LocalDateTime dueDate = contract.getDueDate().atStartOfDay();
 
@@ -50,4 +50,3 @@ public class ContractEventAdapter implements CalendarEventAdapter {
                 .build();
     }
 }
-
