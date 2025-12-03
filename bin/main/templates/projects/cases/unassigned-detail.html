@@ -1,0 +1,169 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+<head>
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('미배정 사건 상세')}" />
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="container-fluid">
+            <th:block th:replace="~{partials/page-title :: page-title('미배정 사건 상세','사건 관리')}" />
+
+            <div class="row justify-content-center">
+                <div class="col-xxl-10">
+                    <form id="caseForm" th:action="@{/cases/unassigned/{id}/update(id=${case.caseId})}" method="post">
+                        <div class="row g-0">
+                            <div class="col-xl-9">
+                                <div class="card card-h-100 rounded-0 rounded-start">
+                                    <div class="card-header align-items-start p-4">
+                                        <div class="d-flex align-items-start w-100">
+                                            <div class="avatar-xxl me-3">
+                                                <span class="avatar-title text-bg-light rounded">
+                                                    <i class="ti ti-briefcase fs-36 text-primary"></i>
+                                                </span>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <input type="text" class="form-control-plaintext fs-xl fw-bold mb-2 editable-input" name="title" th:value="${case.title}" placeholder="사건명" readonly>
+                                                <p class="text-muted mb-2 fs-xxs" th:text="'마지막 수정: ' + ${#temporals.format(case.modifiedDate, 'MM월 dd일 HH:mm')}"></p>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge badge-soft-secondary fs-xxs badge-label" th:text="${case.caseStatus.label}">상태</span>
+                                                </div>
+                                            </div>
+                                            <div class="ms-auto">
+                                                <button type="button" id="btn-edit" class="btn btn-light" onclick="enableEditMode()">
+                                                    <i class="ti ti-pencil me-1"></i> 수정
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body px-4">
+                                        <div class="mb-4">
+                                            <h5 class="fs-base mb-3">사건 기본 정보</h5>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label text-muted text-uppercase fs-xs">사건 번호</label>
+                                                    <p class="fw-medium mb-0 text-danger">미발급(변호사 배정 시 자동 생성)</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label text-muted text-uppercase fs-xs">발생 일시</label>
+                                                    <input type="datetime-local" class="form-control editable-field" name="occurredDate" 
+                                                           th:value="${case.occurredDate != null ? #temporals.format(case.occurredDate, 'yyyy-MM-dd''T''HH:mm') : ''}" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label text-muted text-uppercase fs-xs">사건 유형</label>
+                                                    <select class="form-select editable-field" name="caseType" disabled>
+                                                        <option value="CIVIL" th:selected="${case.caseType.name() == 'CIVIL'}">민사</option>
+                                                        <option value="CRIMINAL" th:selected="${case.caseType.name() == 'CRIMINAL'}">형사</option>
+                                                        <option value="TRAFFIC_ACCIDENT" th:selected="${case.caseType.name() == 'TRAFFIC_ACCIDENT'}">교통사고</option>
+                                                        <option value="OTHER" th:selected="${case.caseType.name() == 'OTHER'}">기타</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <hr class="my-4">
+
+                                            <h5 class="fs-base mb-3">상대방 정보</h5>
+                                            <div class="row mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label text-muted text-uppercase fs-xs">이름</label>
+                                                    <input type="text" class="form-control-plaintext editable-input" name="opponentName" th:value="${case.opponentName ?: '미입력'}" placeholder="상대방 이름" readonly>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label text-muted text-uppercase fs-xs">연락처</label>
+                                                    <input type="text" class="form-control-plaintext editable-input" name="opponentPhone" th:value="${case.opponentPhone ?: '미입력'}" placeholder="010-0000-0000" readonly>
+                                                    <div class="form-text fs-xs text-muted mt-1">'-'를 포함하여 입력해주세요.</div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label text-muted text-uppercase fs-xs">보험사</label>
+                                                    <input type="text" class="form-control-plaintext editable-input" name="opponentInsurance" th:value="${case.opponentInsurance ?: '미입력'}" placeholder="상대방 보험사" readonly>
+                                                </div>
+                                            </div>
+
+                                            <hr class="my-4">
+
+                                            <h5 class="fs-base mb-2">사건 내용</h5>
+                                            <textarea class="form-control-plaintext editable-input" name="content" rows="5" th:text="${case.content}" readonly></textarea>
+                                        </div>
+                                    </div> 
+                                </div> 
+                            </div> 
+
+                            <div class="col-xl-3">
+                                <div class="card card-h-100 rounded-0 rounded-end">
+                                    <div class="card-body p-0">
+                                        <div class="p-3 border-bottom border-dashed">
+                                            <h5 class="mb-3">관리</h5>
+                                            <div class="d-grid gap-2">
+                                                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#assignModal">
+                                                    <i class="ti ti-user-plus me-1"></i> 변호사 배정
+                                                </button>
+                                                <a href="/cases/unassigned" class="btn btn-light">
+                                                    <i class="ti ti-arrow-left me-1"></i> 목록으로
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div> 
+                        </div> 
+                    </form>
+                </div> 
+            </div> 
+        </div>
+
+        <!-- Assign Attorney Modal -->
+        <div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="assignModalLabel">변호사 배정</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form th:action="@{/cases/unassigned/{id}/assign(id=${case.caseId})}" method="post">
+                        <div class="modal-body">
+                            <p>해당 사건에 변호사를 배정하시겠습니까?</p>
+                            <div class="mb-3">
+                                <label for="attorneyId" class="form-label">담당 변호사 ID</label>
+                                <input type="number" class="form-control" id="attorneyId" name="attorneyId" required placeholder="변호사 ID 입력">
+                                <div class="form-text">임시: 변호사 ID를 직접 입력해주세요.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <button type="submit" class="btn btn-primary">배정 요청</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function enableEditMode() {
+                // Text inputs and textareas
+                document.querySelectorAll('.editable-input').forEach(el => {
+                    el.readOnly = false;
+                    el.classList.remove('form-control-plaintext');
+                    el.classList.add('form-control');
+                    if (el.value === '미입력') el.value = '';
+                });
+
+                // Selects and specific inputs: remove disabled/readonly
+                document.querySelectorAll('.editable-field').forEach(el => {
+                    el.disabled = false;
+                    el.readOnly = false;
+                });
+
+                // Button
+                const btn = document.getElementById('btn-edit');
+                btn.className = 'btn btn-success';
+                btn.innerHTML = '<i class="ti ti-device-floppy me-1"></i> 저장';
+                btn.onclick = submitForm;
+            }
+
+            function submitForm() {
+                document.getElementById('caseForm').submit();
+            }
+        </script>
+    </th:block>
+</body>
+</html>

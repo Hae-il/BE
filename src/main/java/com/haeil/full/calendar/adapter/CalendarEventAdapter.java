@@ -8,4 +8,3 @@ import java.util.List;
 public interface CalendarEventAdapter {
     List<CalendarEvent> getEvents(LocalDateTime start, LocalDateTime end, User user);
 }
-

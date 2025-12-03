@@ -20,4 +20,3 @@ public interface CaseEventRepository extends JpaRepository<CaseEvent, Long> {
             @Param("end") LocalDateTime end,
             @Param("attorney") User attorney);
 }
-

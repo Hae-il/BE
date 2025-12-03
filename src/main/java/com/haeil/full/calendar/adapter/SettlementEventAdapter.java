@@ -49,4 +49,3 @@ public class SettlementEventAdapter implements CalendarEventAdapter {
                 .build();
     }
 }
-
