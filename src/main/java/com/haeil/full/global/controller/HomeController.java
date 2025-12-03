@@ -21,7 +21,6 @@ public class HomeController {
                 || authentication.getPrincipal().equals("anonymousUser")) {
             return "redirect:/auth/login";
         }
-
         return "pages/index";
     }
 }

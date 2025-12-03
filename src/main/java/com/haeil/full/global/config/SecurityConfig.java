@@ -45,6 +45,9 @@ public class SecurityConfig {
                                                 "/webjars/**",
                                                 // Public MVC pages
                                                 "/",
+                                                "/auth/**",
+                                                "/lawfirm/**",
+                                                "/api/v1/chatbot/**",
                                                 "/auth/**")
                                         .permitAll()
                                         .requestMatchers("/cases/unassigned/**")
