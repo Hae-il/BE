@@ -3,12 +3,17 @@ package com.haeil.full.settlement.dto.request;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CreateSettlementRequest {
 
     private BigDecimal attorneyFee;
@@ -17,7 +22,7 @@ public class CreateSettlementRequest {
 
     private BigDecimal expenses;
 
-    private Boolean isVatIncluded = false;
+    @Builder.Default private Boolean isVatIncluded = false;
 
     private LocalDate settlementDate;
 
@@ -27,24 +32,4 @@ public class CreateSettlementRequest {
 
     @NotNull(message = "사건 ID는 필수 입력 항목입니다.")
     private Long caseId;
-
-    @Builder
-    public CreateSettlementRequest(
-            BigDecimal attorneyFee,
-            BigDecimal agreementAmount,
-            BigDecimal expenses,
-            Boolean isVatIncluded,
-            LocalDate settlementDate,
-            LocalDate paymentDueDate,
-            String note,
-            Long caseId) {
-        this.attorneyFee = attorneyFee;
-        this.agreementAmount = agreementAmount;
-        this.expenses = expenses;
-        this.isVatIncluded = isVatIncluded;
-        this.settlementDate = settlementDate;
-        this.paymentDueDate = paymentDueDate;
-        this.note = note;
-        this.caseId = caseId;
-    }
 }
