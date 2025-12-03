@@ -1,5 +1,6 @@
 package com.haeil.full.consultation.service;
 
+import com.haeil.full.cases.domain.Cases;
 import com.haeil.full.cases.service.CasesService;
 import com.haeil.full.client.domain.Client;
 import com.haeil.full.client.service.ClientService;
@@ -23,7 +24,11 @@ import com.haeil.full.consultation.repository.ConsultationRepository;
 import com.haeil.full.consultation.repository.ConsultationReservationRepository;
 import com.haeil.full.file.domain.FileEntity;
 import com.haeil.full.file.service.FileService;
+import com.haeil.full.notification.domain.type.NotificationType;
+import com.haeil.full.notification.service.NotificationService;
 import com.haeil.full.user.domain.User;
+import com.haeil.full.user.domain.type.Role;
+import com.haeil.full.user.repository.UserRepository;
 import com.haeil.full.user.service.UserService;
 import java.io.IOException;
 import java.util.List;
@@ -46,6 +51,8 @@ public class ConsultationService {
     private final FileService fileService;
     private final ConsultationFileRepository consultationFileRepository;
     private final CasesService casesService;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     // Consultation Reservation Management Methods
     @Transactional
@@ -185,7 +192,16 @@ public class ConsultationService {
                                                 ConsultationErrorCode.CONSULTATION_NOT_FOUND));
 
         consultation.completeConsultation();
-        casesService.createCaseFromConsultation(consultation);
+        Cases createdCase = casesService.createCaseFromConsultation(consultation);
+
+        // 알림 전송 (모든 사무관에게)
+        List<User> secretaries = userRepository.findAllByRole(Role.ROLE_SECRETARY);
+        String content = String.format("새로운 사건(미배정)이 생성되었습니다: %s", createdCase.getTitle());
+        String url = "/cases/unassigned/" + createdCase.getId();
+
+        for (User secretary : secretaries) {
+            notificationService.send(secretary, NotificationType.CASE_CREATED, content, url);
+        }
 
         return ConsultationResponse.from(consultation);
     }
