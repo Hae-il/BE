@@ -1,5 +1,6 @@
 package com.haeil.be.consultation.service;
 
+import com.haeil.be.cases.domain.Cases;
 import com.haeil.be.cases.service.CasesService;
 import com.haeil.be.client.domain.Client;
 import com.haeil.be.client.service.ClientService;
@@ -23,7 +24,10 @@ import com.haeil.be.consultation.repository.ConsultationRepository;
 import com.haeil.be.consultation.repository.ConsultationReservationRepository;
 import com.haeil.be.file.domain.FileEntity;
 import com.haeil.be.file.service.FileService;
+import com.haeil.be.notification.domain.type.NotificationType;
+import com.haeil.be.notification.service.NotificationService;
 import com.haeil.be.user.domain.User;
+import com.haeil.be.user.domain.type.Role;
 import com.haeil.be.user.service.UserService;
 import java.io.IOException;
 import java.util.List;
@@ -46,6 +50,8 @@ public class ConsultationService {
     private final FileService fileService;
     private final ConsultationFileRepository consultationFileRepository;
     private final CasesService casesService;
+    private final NotificationService notificationService;
+    private final com.haeil.be.user.repository.UserRepository userRepository;
 
     // Consultation Reservation Management Methods
     @Transactional
@@ -185,7 +191,16 @@ public class ConsultationService {
                                                 ConsultationErrorCode.CONSULTATION_NOT_FOUND));
 
         consultation.completeConsultation();
-        casesService.createCaseFromConsultation(consultation);
+        Cases createdCase = casesService.createCaseFromConsultation(consultation);
+
+        // 알림 전송 (모든 사무관에게)
+        List<User> secretaries = userRepository.findAllByRole(Role.ROLE_SECRETARY);
+        String content = String.format("새로운 사건(미배정)이 생성되었습니다: %s", createdCase.getTitle());
+        String url = "/cases/unassigned/" + createdCase.getId();
+
+        for (User secretary : secretaries) {
+            notificationService.send(secretary, NotificationType.CASE_CREATED, content, url);
+        }
 
         return ConsultationResponse.from(consultation);
     }
