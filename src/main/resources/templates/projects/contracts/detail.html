@@ -13,9 +13,9 @@
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4 class="card-title mb-0">수임계약서 상세</h4>
                             <div>
-                                <span th:if="${contract.status.name() == 'AWAITING'}" class="badge bg-light text-secondary">수임대기</span>
-                                <span th:if="${contract.status.name() == 'PENDING'}" class="badge bg-warning-subtle text-warning">입금확인중</span>
-                                <span th:if="${contract.status.name() == 'COMPLETED'}" class="badge bg-success-subtle text-success">수임완료</span>
+                                <span th:if="${contract.status.name() == 'AWAITING'}" class="badge bg-warning-subtle text-warning fs-6">수임대기</span>
+                                <span th:if="${contract.status.name() == 'PENDING'}" class="badge bg-light text-secondary fs-6">입금대기</span>
+                                <span th:if="${contract.status.name() == 'COMPLETED'}" class="badge bg-success-subtle text-success fs-6">입금완료</span>
                             </div>
                         </div>
                         <div class="card-body">
@@ -105,7 +105,6 @@
 
                             <div class="d-flex justify-content-end gap-2 mt-4">
                                 <a href="/contracts" class="btn btn-light">목록으로</a>
-                                <a th:href="@{/contracts/{id}/edit(id=${contract.contractId})}" class="btn btn-primary">수정</a>
                             </div>
 
                         </div>
