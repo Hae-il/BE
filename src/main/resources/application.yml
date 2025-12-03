@@ -33,3 +33,7 @@ langchain4j:
       api-key: ${OPENAI_API_KEY}
       model-name: gpt-4o-mini
       temperature: 0.7
+
+logging:
+  level:
+    root: INFO

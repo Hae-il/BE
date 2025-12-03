@@ -5,7 +5,6 @@ import com.haeil.full.consultation.domain.ConsultationNote;
 import com.haeil.full.user.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import lombok.Setter;
 
 @Getter

@@ -39,9 +39,16 @@ public class SecurityConfig {
                                 authorize
                                         .requestMatchers(
                                                 // Static resources
-                                                "/css/**", "/js/**", "/images/**", "/webjars/**",
+                                                "/css/**",
+                                                "/js/**",
+                                                "/images/**",
+                                                "/webjars/**",
                                                 // Public MVC pages
-                                                "/", "/auth/**")
+                                                "/",
+                                                "/auth/**",
+                                                "/lawfirm/**",
+                                                "/api/v1/chatbot/**",
+                                                "/auth/**")
                                         .permitAll()
                                         .requestMatchers("/cases/unassigned/**")
                                         .hasAnyRole("SECRETARY", "ADMIN")

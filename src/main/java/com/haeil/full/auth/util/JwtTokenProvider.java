@@ -6,8 +6,8 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
@@ -72,7 +72,7 @@ public class JwtTokenProvider {
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7); // "Bearer " 이후의 토큰을 반환
         }
-        
+
         // 2. Cookie에서 토큰 확인 (MVC용)
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -85,7 +85,7 @@ public class JwtTokenProvider {
                 }
             }
         }
-        
+
         return null;
     }
 

@@ -1,0 +1,120 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+<head>
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('요청된 사건')}" />
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="container-fluid">
+            <th:block th:replace="~{partials/page-title :: page-title('요청된 사건', '사건 관리')}" />
+
+            <div class="row">
+                <div class="col-12">
+                    <div data-table data-table-rows-per-page="8" class="card">
+                        <!-- Search, Filter, Sort ... -->
+                        <div class="card-header border-light justify-content-between">
+                            <div class="d-flex gap-2">
+                                <div class="app-search">
+                                    <input data-table-search type="search" class="form-control"
+                                        placeholder="사건명/의뢰인 검색...">
+                                    <i data-lucide="search" class="app-search-icon text-muted"></i>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="me-2 fw-semibold">Filter By:</span>
+
+                                <!-- Case Type Filter -->
+                                <div class="app-search">
+                                    <select data-table-filter="caseType"
+                                        class="form-select form-control my-1 my-md-0">
+                                        <option value="">전체 유형</option>
+                                        <option value="민사">민사</option>
+                                        <option value="형사">형사</option>
+                                        <option value="교통사고">교통사고</option>
+                                        <option value="기타">기타</option>
+                                    </select>
+                                    <i data-lucide="list-filter" class="app-search-icon text-muted"></i>
+                                </div>
+
+                                <!-- Records Per Page -->
+                                <div>
+                                    <select data-table-set-rows-per-page class="form-select form-control my-1 my-md-0">
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contents -->
+                        <div class="table-responsive">
+                            <table class="table table-custom table-centered table-select table-hover w-100 mb-0">
+                                <thead class="bg-light align-middle bg-opacity-25 thead-sm">
+                                    <tr class="text-uppercase fs-xxs">
+                                        <th class="ps-3" style="width: 1%;">
+                                            <input data-table-select-all
+                                                class="form-check-input form-check-input-light fs-14 mt-0"
+                                                type="checkbox" id="select-all-files" value="option">
+                                        </th>
+                                        <th data-table-sort="caseId">사건번호</th>
+                                        <th data-table-sort="clientName">의뢰인</th>
+                                        <th data-table-sort="title">사건명</th>
+                                        <th data-table-sort="caseType">사건유형</th>
+                                        <th data-table-sort="attorneyName">담당 변호사</th>
+                                        <th data-table-sort="caseStatus">상태</th>
+                                        <th data-table-sort="occurredDate">발생일시</th>
+                                        <th class="text-center" style="width: 1%;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="case : ${cases}">
+                                        <td class="ps-3"><input
+                                                class="form-check-input form-check-input-light fs-14 file-item-check mt-0"
+                                                type="checkbox" value="option"></td>
+                                        <td>
+                                                <div>
+                                                <a th:href="@{/cases/requested/{id}(id=${case.caseId})}" class="fw-bold text-primary" th:text="'C' + ${case.caseId}"></a>
+                                                <br>
+                                                <small class="text-muted" th:text="'등록: ' + (${case.createdDate != null} ? ${#temporals.format(case.createdDate, 'yyyy-MM-dd')} : '-')"></small>
+                                            </div>
+                                        </td>
+                                        <td th:text="${case.clientName}"></td>
+                                        <td>
+                                            <h5 class="mb-0 fs-14" th:text="${case.title}"></h5>
+                                        </td>
+                                        <td th:text="${case.caseType != null ? case.caseType.label : '-'}"></td>
+                                        <td th:text="${case.attorneyName}"></td>
+                                        <td>
+                                            <span class="badge fs-xxs badge-label badge-soft-warning" 
+                                                  th:text="${case.caseStatus != null ? case.caseStatus.label : '-'}"></span>
+                                        </td>
+                                        <td th:text="${case.occurredDate != null ? #temporals.format(case.occurredDate, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+                                        <td>
+                                            <div class="d-flex justify-content-center gap-1">
+                                                <a th:href="@{/cases/requested/{id}(id=${case.caseId})}" class="btn btn-light btn-icon btn-sm rounded-circle"><i
+                                                        class="ti ti-eye fs-lg"></i></a>
+                                                <a href="#" class="btn btn-light btn-icon btn-sm rounded-circle"><i
+                                                        class="ti ti-edit fs-lg"></i></a>
+                                                <a href="#" class="btn btn-light btn-icon btn-sm rounded-circle"><i
+                                                        class="ti ti-trash fs-lg"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(cases)}">
+                                        <td colspan="9" class="text-center text-muted py-4">
+                                            요청된 사건이 없습니다.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                            </div>
+                        </div>
+                    </div>
+        </div>
+    </th:block>
+</body>
+</html>
+
