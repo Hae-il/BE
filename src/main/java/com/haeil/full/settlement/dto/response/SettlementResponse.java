@@ -25,6 +25,7 @@ public class SettlementResponse {
     private LocalDate paymentDueDate;
     private String note;
     private Long caseId;
+    private String caseNumber;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
 
@@ -42,6 +43,8 @@ public class SettlementResponse {
                 .paymentDueDate(settlement.getPaymentDueDate())
                 .note(settlement.getNote())
                 .caseId(settlement.getCases() != null ? settlement.getCases().getId() : null)
+                .caseNumber(
+                        settlement.getCases() != null ? "C" + settlement.getCases().getId() : null)
                 .createdDate(settlement.getCreatedDate())
                 .modifiedDate(settlement.getModifiedDate())
                 .build();

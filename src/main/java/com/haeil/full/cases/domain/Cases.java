@@ -6,6 +6,7 @@ import com.haeil.full.client.domain.Client;
 import com.haeil.full.consultation.domain.Consultation;
 import com.haeil.full.contract.domain.Contract;
 import com.haeil.full.global.entity.BaseEntity;
+import com.haeil.full.settlement.domain.Settlement;
 import com.haeil.full.user.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -93,6 +94,13 @@ public class Cases extends BaseEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private Contract contract;
+
+    @OneToOne(
+            mappedBy = "cases",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private Settlement settlement;
 
     @Builder
     public Cases(
