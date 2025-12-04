@@ -3,13 +3,16 @@ package com.haeil.full.cases.service;
 import static com.haeil.full.cases.exception.errorcode.CasesErrorCode.CASE_NOT_FOUND;
 
 import com.haeil.full.cases.domain.CaseDocument;
+import com.haeil.full.cases.domain.CaseEvent;
 import com.haeil.full.cases.domain.Cases;
 import com.haeil.full.cases.domain.Petition;
 import com.haeil.full.cases.domain.type.CaseStatus;
 import com.haeil.full.cases.dto.request.AssignAttorneyRequest;
 import com.haeil.full.cases.dto.request.CaseDocumentRequest;
+import com.haeil.full.cases.dto.request.CaseEventRequest;
 import com.haeil.full.cases.dto.request.DecisionRequest;
 import com.haeil.full.cases.dto.request.PetitionRequest;
+import com.haeil.full.cases.dto.request.UpdateCaseRequest;
 import com.haeil.full.cases.dto.response.CaseDocumentResponse;
 import com.haeil.full.cases.dto.response.CaseInfoResponse;
 import com.haeil.full.cases.dto.response.CompletedCaseDetailResponse;
@@ -24,13 +27,17 @@ import com.haeil.full.cases.dto.response.UnassignedCaseResponse;
 import com.haeil.full.cases.exception.CasesException;
 import com.haeil.full.cases.exception.errorcode.CasesErrorCode;
 import com.haeil.full.cases.repository.CaseDocumentRepository;
+import com.haeil.full.cases.repository.CaseEventRepository;
 import com.haeil.full.cases.repository.CasesRepository;
 import com.haeil.full.cases.repository.PetitionRepository;
 import com.haeil.full.consultation.domain.Consultation;
 import com.haeil.full.file.domain.FileEntity;
 import com.haeil.full.file.repository.FileRepository;
 import com.haeil.full.file.service.FileService;
+import com.haeil.full.notification.domain.type.NotificationType;
+import com.haeil.full.notification.service.NotificationService;
 import com.haeil.full.user.domain.User;
+import com.haeil.full.user.domain.type.Role;
 import com.haeil.full.user.repository.UserRepository;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -50,8 +57,12 @@ public class CasesService {
     private final CasesRepository casesRepository;
     private final PetitionRepository petitionRepository;
     private final CaseDocumentRepository caseDocumentRepository;
+    private final CaseEventRepository caseEventRepository;
     private final FileService fileService;
     private final FileRepository fileRepository;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final jakarta.persistence.EntityManager entityManager;
 
     @Transactional
     public Cases createCaseFromConsultation(Consultation consultation) {
@@ -68,16 +79,16 @@ public class CasesService {
                         .content(consultation.getConsultationReservation().getDescription())
                         .caseStatus(CaseStatus.UNASSIGNED)
                         .caseType(consultation.getConsultationReservation().getCaseType())
-                        .attorney(consultation.getCounselor())
+                        // .attorney(consultation.getCounselor()) // 초기 생성 시 변호사 미배정
                         .consultation(consultation)
+                        .client(consultation.getClient())
                         .build();
 
         return casesRepository.save(newCase);
     }
 
-    private final UserRepository userRepository;
-
     // 미배정 사건 목록조회
+    @Transactional(readOnly = true)
     public List<UnassignedCaseResponse> getUnassignedCases() {
         return casesRepository.findByCaseStatus(CaseStatus.UNASSIGNED).stream()
                 .map(UnassignedCaseResponse::from)
@@ -85,6 +96,7 @@ public class CasesService {
     }
 
     // 미배정사건 상세보기
+    @Transactional(readOnly = true)
     public UnassignedCaseDetailResponse getUnassignedCaseDetail(Long caseId) {
         Cases foundCase =
                 casesRepository
@@ -98,7 +110,23 @@ public class CasesService {
         return UnassignedCaseDetailResponse.from(foundCase);
     }
 
+    // 미배정 사건 정보 수정
+    @Transactional
+    public void updateCaseInfo(Long caseId, UpdateCaseRequest request) {
+        Cases foundCase = getCasesOrThrow(caseId);
+
+        foundCase.updateBasicInfo(
+                request.title(),
+                request.content(),
+                request.caseType(),
+                request.occurredDate(),
+                request.opponentName(),
+                request.opponentPhone(),
+                request.opponentInsurance());
+    }
+
     // 변호사 배정요청
+    @Transactional
     public void assignAttorney(Long caseId, AssignAttorneyRequest request) {
         Cases foundCase =
                 casesRepository
@@ -119,9 +147,15 @@ public class CasesService {
 
         // 배정요청으로 상태변경
         foundCase.updateStatus(CaseStatus.PENDING);
+
+        // 알림 전송 (해당 변호사에게)
+        String content = String.format("[%s] 사건 배정 요청이 도착했습니다.", foundCase.getTitle());
+        String url = "/cases/requested/" + foundCase.getId();
+        notificationService.send(attorney, NotificationType.CASE_ASSIGNED, content, url);
     }
 
     // 요청된 사건 목록조회
+    @Transactional(readOnly = true)
     public List<RequestedCaseResponse> getRequestedCases(Long userId) {
         User attorney =
                 userRepository
@@ -134,6 +168,7 @@ public class CasesService {
     }
 
     // 요청된 사건 상세보기
+    @Transactional(readOnly = true)
     public RequestedCaseDetailResponse getRequestedCaseDetail(Long caseId, Long userId) {
         Cases foundCase =
                 casesRepository
@@ -153,6 +188,7 @@ public class CasesService {
     }
 
     // 사건 배정 승인/거절
+    @Transactional
     public void decideCaseAssignment(Long caseId, DecisionRequest request, Long userId) {
         Cases foundCase =
                 casesRepository
@@ -171,14 +207,57 @@ public class CasesService {
         if (request.isApproved()) {
             // 승인 시 진행중 사건목록으로 사건이동
             foundCase.updateStatus(CaseStatus.IN_PROGRESS);
+            sendNotificationToSecretaries(foundCase, NotificationType.CASE_ASSIGNMENT_APPROVED);
+            // 사건번호 부여 (Year-Type-ID)
+            String caseNumber =
+                    java.time.Year.now() + "-" + foundCase.getCaseType() + "-" + foundCase.getId();
+            foundCase.updateCaseNumber(caseNumber);
         } else {
             // 거절 시 미배정 사건목록으로 반환
             foundCase.removeAttorney();
             foundCase.updateStatus(CaseStatus.UNASSIGNED);
+            sendNotificationToSecretaries(foundCase, NotificationType.CASE_ASSIGNMENT_REJECTED);
         }
     }
 
+    private void sendNotificationToSecretaries(Cases cases, NotificationType type) {
+        List<User> secretaries = userRepository.findAllByRole(Role.ROLE_SECRETARY);
+        String statusText = type == NotificationType.CASE_ASSIGNMENT_APPROVED ? "승인" : "거절";
+        String content = String.format("[%s] 사건 배정이 %s되었습니다.", cases.getTitle(), statusText);
+        String url = "/cases/unassigned/" + cases.getId();
+
+        for (User secretary : secretaries) {
+            notificationService.send(secretary, type, content, url);
+        }
+    }
+
+    // 사건 진행사항 추가
+    @Transactional
+    public void createCaseEvent(Long caseId, CaseEventRequest request, Long userId) {
+        Cases foundCase = getCasesOrThrow(caseId);
+
+        if (foundCase.getCaseStatus() != CaseStatus.IN_PROGRESS) {
+            throw new CasesException(CasesErrorCode.INVALID_CASE_STATUS);
+        }
+
+        // 변호사는 본인 담당 사건만 추가 가능
+        if (foundCase.getAttorney() == null || !foundCase.getAttorney().getId().equals(userId)) {
+            throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
+        }
+
+        CaseEvent event =
+                CaseEvent.builder()
+                        .cases(foundCase)
+                        .type(request.eventType())
+                        .location(request.location())
+                        .date(request.date())
+                        .build();
+
+        caseEventRepository.save(event);
+    }
+
     // 진행중인 사건 목록조회
+    @Transactional(readOnly = true)
     public List<OngoingCaseResponse> getOngoingCases(Long userId) {
         User attorney =
                 userRepository
@@ -193,6 +272,7 @@ public class CasesService {
     }
 
     // 진행중인 사건 상세보기
+    @Transactional(readOnly = true)
     public OngoingCaseDetailResponse getOngoingCaseDetail(Long caseId, Long userId) {
         Cases foundCase =
                 casesRepository
@@ -418,6 +498,11 @@ public class CasesService {
             throw new CasesException(CasesErrorCode.INVALID_ATTORNEY_ASSIGN);
         }
 
+        // 중요: Cases 엔티티가 영속성 컨텍스트에 있으면, 자식 엔티티(CaseDocument) 삭제 시
+        // 연관관계 처리를 위해 Cases 엔티티의 변경사항이 감지되어 예기치 않은 UPDATE가 발생할 수 있음.
+        // 이를 방지하기 위해 Cases 엔티티를 영속성 컨텍스트에서 분리함.
+        entityManager.detach(foundCase);
+
         CaseDocument caseDocument =
                 caseDocumentRepository
                         .findById(documentId)
@@ -429,8 +514,13 @@ public class CasesService {
             throw new CasesException(CasesErrorCode.CASE_DOCUMENT_NOT_FOUND);
         }
 
-        // 파일 삭제
         FileEntity file = caseDocument.getFile();
+
+        // 1. 문서 삭제 (JPQL을 사용하여 직접 삭제)
+        // 엔티티 매니저를 거치지 않고 DB에서 직접 삭제하여 영속성 컨텍스트 문제 회피
+        caseDocumentRepository.deleteByIdDirect(documentId);
+
+        // 2. 파일 삭제
         if (file != null) {
             try {
                 Path filePath = Paths.get(file.getFileUrl());
@@ -442,9 +532,6 @@ public class CasesService {
                 throw new CasesException(CasesErrorCode.FILE_DELETE_FAILED);
             }
         }
-
-        // 소송문서 삭제
-        caseDocumentRepository.delete(caseDocument);
     }
 
     // 사건 완료처리
@@ -464,6 +551,15 @@ public class CasesService {
 
         // 상태 변경
         foundCase.updateStatus(CaseStatus.COMPLETED);
+
+        // 알림 전송 (모든 사무관에게)
+        List<User> secretaries = userRepository.findAllByRole(Role.ROLE_SECRETARY);
+        String content = String.format("사건이 완료 처리되었습니다: %s", foundCase.getTitle());
+        String url = "/cases/completed/" + foundCase.getId();
+
+        for (User secretary : secretaries) {
+            notificationService.send(secretary, NotificationType.CASE_COMPLETED, content, url);
+        }
     }
 
     // 완료된 사건 목록조회

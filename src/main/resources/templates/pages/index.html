@@ -17,7 +17,27 @@
                 <div class="col-12">
                     <div class="outlook-box">
                         <div class="card h-100 mb-0 rounded-start-0 flex-grow-1 border-start-0">
-                            <div class="card-body" style="height: calc(100% - 350px);" data-simplebar data-simplebar-md>
+                            <div class="card-body border-bottom">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterConsultation" value="CONSULTATION" checked>
+                                        <label class="form-check-label text-primary" for="filterConsultation">상담</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterCase" value="CASE_EVENT" checked>
+                                        <label class="form-check-label text-danger" for="filterCase">사건(재판)</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterContract" value="CONTRACT" checked>
+                                        <label class="form-check-label text-warning" for="filterContract">계약</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterSettlement" value="SETTLEMENT" checked>
+                                        <label class="form-check-label text-success" for="filterSettlement">정산</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body" style="height: calc(100% - 400px);" data-simplebar data-simplebar-md>
                                 <div id="calendar"></div>
                             </div>
                         </div>

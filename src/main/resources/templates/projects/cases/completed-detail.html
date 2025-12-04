@@ -1,0 +1,206 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+<head>
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('사건 상세정보')}" />
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="container-fluid">
+            <th:block th:replace="~{partials/page-title :: page-title('사건 상세정보', '사건 관리')}" />
+
+            <div class="row">
+                <div class="col-xl-9 col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <h4 class="mb-0" th:text="${case.title}">사건 제목</h4>
+                                    <div class="d-flex align-items-center mt-1">
+                                        <small class="text-muted me-2" th:text="'최종 수정: ' + ${#temporals.format(case.modifiedDate, 'yyyy-MM-dd HH:mm')}"></small>
+                                        <span class="badge bg-secondary" th:text="${case.caseStatus.label}"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 사건 기본 정보 -->
+                            <h5 class="text-uppercase fs-13 fw-bold text-muted mb-3">사건 기본 정보</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">사건번호</label>
+                                    <p class="fw-semibold" th:text="${case.caseNumber != null ? case.caseNumber : '미발급'}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">발생 일시</label>
+                                    <p class="fw-semibold" th:text="${#temporals.format(case.occurredDate, 'yyyy-MM-dd HH:mm')}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">사건 유형</label>
+                                    <p class="fw-semibold" th:text="${case.caseType.label}"></p>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <!-- 상대방 정보 -->
+                            <h5 class="text-uppercase fs-13 fw-bold text-muted mb-3">상대방 정보</h5>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label text-muted">이름</label>
+                                    <p class="fw-semibold" th:text="${case.opponentName != null ? case.opponentName : '-'}"></p>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label text-muted">전화번호</label>
+                                    <p class="fw-semibold" th:text="${case.opponentPhone != null ? case.opponentPhone : '-'}"></p>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label text-muted">보험사</label>
+                                    <p class="fw-semibold" th:text="${case.opponentInsurance != null ? case.opponentInsurance : '-'}"></p>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <!-- 사건 내용 -->
+                            <h5 class="text-uppercase fs-13 fw-bold text-muted mb-3">사건 내용</h5>
+                            <div class="p-3 bg-light rounded">
+                                <p class="mb-0" th:text="${case.content}" style="white-space: pre-wrap;"></p>
+                            </div>
+                            
+                            <hr class="my-4">
+
+                             <!-- 사건 진행사항 -->
+                             <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h5 class="text-uppercase fs-13 fw-bold text-muted mb-0">사건 진행사항</h5>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-centered table-nowrap mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th scope="col">날짜</th>
+                                            <th scope="col">구분</th>
+                                            <th scope="col">장소</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="event : ${case.caseProgress}">
+                                            <td th:text="${#temporals.format(event.date, 'yyyy-MM-dd HH:mm')}"></td>
+                                            <td th:text="${event.eventType.label}"></td>
+                                            <td th:text="${event.location}"></td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(case.caseProgress)}">
+                                            <td colspan="3" class="text-center text-muted py-3">
+                                                등록된 진행사항이 없습니다.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-lg-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">사건 정보</h5>
+                            
+                            <div class="d-grid gap-2">
+                                <!-- 소장 보기 -->
+                                <button type="button" class="btn btn-outline-primary" 
+                                        th:if="${case.petition != null}"
+                                        data-bs-toggle="modal" data-bs-target="#petitionModal">
+                                    <i class="ti ti-file-text me-1"></i> 소장 보기
+                                </button>
+                                <button type="button" class="btn btn-secondary" disabled th:if="${case.petition == null}">
+                                     <i class="ti ti-file-off me-1"></i> 소장 없음
+                                </button>
+                                
+                                <!-- 소송문서 보기 (Not Implemented fully for view-only list, but let's show list if possible) -->
+                                <!-- Actually, documents are in the response. Let's show them in a modal or section? -->
+                                <!-- For simplicity, I'll omit document browsing here unless requested, or just list them in main area? -->
+                                <!-- Ongoing detail didn't list documents in main area, only via 'documents' endpoint/page? -->
+                                <!-- Wait, ongoing detail has "소송문서 업로드" modal. -->
+                                <!-- Let's skip document viewing for now as it wasn't explicitly requested for completed detail, 
+                                     but the DTO has it. -->
+                            </div>
+                            
+                            <hr class="my-3">
+                            
+                            <h5 class="card-title mb-3">담당 변호사</h5>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="avatar-sm me-3">
+                                    <span class="avatar-title rounded-circle bg-primary text-white">
+                                        <i class="ti ti-gavel fs-4"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h5 class="font-size-14 mb-1" th:text="${case.attorneyName}">변호사 이름</h5>
+                                    <p class="text-muted mb-0" th:text="${case.attorneyEmail}">email@example.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 소장 보기 모달 -->
+        <div class="modal fade" id="petitionModal" tabindex="-1" aria-labelledby="petitionModalLabel" aria-hidden="true" th:if="${case.petition != null}">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="petitionModalLabel">소장 상세</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">청구 금액</label>
+                                <input type="text" class="form-control" th:value="${case.petition.claimAmount}" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">청구 취지</label>
+                            <textarea class="form-control" rows="3" th:text="${case.petition.claimContent}" readonly></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">사고 경위 (청구 원인)</label>
+                            <textarea class="form-control" rows="3" th:text="${case.petition.accidentCircumstances}" readonly></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">손해 항목</label>
+                            <textarea class="form-control" rows="2" th:text="${case.petition.damageItems}" readonly></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">손해액 산정</label>
+                            <textarea class="form-control" rows="2" th:text="${case.petition.damageCalculation}" readonly></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">책임 인정 근거</label>
+                            <textarea class="form-control" rows="2" th:text="${case.petition.liabilityBasis}" readonly></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">입증 방법</label>
+                            <textarea class="form-control" rows="2" th:text="${case.petition.proofMethod}" readonly></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">첨부 서류</label>
+                            <textarea class="form-control" rows="2" th:text="${case.petition.attachedDocuments}" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">닫기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

@@ -30,7 +30,10 @@ import com.haeil.be.consultation.domain.Consultation;
 import com.haeil.be.file.domain.FileEntity;
 import com.haeil.be.file.repository.FileRepository;
 import com.haeil.be.file.service.FileService;
+import com.haeil.be.notification.domain.type.NotificationType;
+import com.haeil.be.notification.service.NotificationService;
 import com.haeil.be.user.domain.User;
+import com.haeil.be.user.domain.type.Role;
 import com.haeil.be.user.repository.UserRepository;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,6 +55,7 @@ public class CasesService {
     private final CaseDocumentRepository caseDocumentRepository;
     private final FileService fileService;
     private final FileRepository fileRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public Cases createCaseFromConsultation(Consultation consultation) {
@@ -121,6 +125,11 @@ public class CasesService {
 
         // 배정요청으로 상태변경
         foundCase.updateStatus(CaseStatus.PENDING);
+
+        // 알림 전송
+        String content = String.format("새로운 사건이 배정 요청되었습니다: %s", foundCase.getTitle());
+        String url = "/cases/requested/" + foundCase.getId();
+        notificationService.send(attorney, NotificationType.CASE_ASSIGNED, content, url);
     }
 
     // 요청된 사건 목록조회
@@ -174,10 +183,23 @@ public class CasesService {
         if (request.isApproved()) {
             // 승인 시 진행중 사건목록으로 사건이동
             foundCase.updateStatus(CaseStatus.IN_PROGRESS);
+            sendNotificationToSecretaries(foundCase, NotificationType.CASE_ASSIGNMENT_APPROVED);
         } else {
             // 거절 시 미배정 사건목록으로 반환
             foundCase.removeAttorney();
             foundCase.updateStatus(CaseStatus.UNASSIGNED);
+            sendNotificationToSecretaries(foundCase, NotificationType.CASE_ASSIGNMENT_REJECTED);
+        }
+    }
+
+    private void sendNotificationToSecretaries(Cases cases, NotificationType type) {
+        List<User> secretaries = userRepository.findAllByRole(Role.ROLE_SECRETARY);
+        String statusText = type == NotificationType.CASE_ASSIGNMENT_APPROVED ? "승인" : "거절";
+        String content = String.format("[%s] 사건 배정이 %s되었습니다.", cases.getTitle(), statusText);
+        String url = "/cases/unassigned/" + cases.getId();
+
+        for (User secretary : secretaries) {
+            notificationService.send(secretary, type, content, url);
         }
     }
 
@@ -467,6 +489,15 @@ public class CasesService {
 
         // 상태 변경
         foundCase.updateStatus(CaseStatus.COMPLETED);
+
+        // 알림 전송 (모든 사무관에게)
+        List<User> secretaries = userRepository.findAllByRole(Role.ROLE_SECRETARY);
+        String content = String.format("사건이 완료 처리되었습니다: %s", foundCase.getTitle());
+        String url = "/cases/completed/" + foundCase.getId();
+
+        for (User secretary : secretaries) {
+            notificationService.send(secretary, NotificationType.CASE_COMPLETED, content, url);
+        }
     }
 
     // 완료된 사건 목록조회

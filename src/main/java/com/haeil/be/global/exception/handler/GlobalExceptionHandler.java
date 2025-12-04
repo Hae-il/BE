@@ -8,6 +8,7 @@ import com.haeil.be.contract.exception.ContractException;
 import com.haeil.be.global.exception.errorcode.ErrorCode;
 import com.haeil.be.global.exception.errorcode.GlobalErrorCode;
 import com.haeil.be.global.exception.response.ErrorResponse;
+import com.haeil.be.notification.exception.NotificationException;
 import com.haeil.be.user.exception.UserException;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.http.HttpServletRequest;
@@ -74,6 +75,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ContractException.class)
     public ResponseEntity<Object> handleContractException(
             final ContractException e, HttpServletRequest request) {
+        logInfo(e.getErrorCode(), e, request);
+        return handleExceptionInternal(e.getErrorCode());
+    }
+
+    @ExceptionHandler(NotificationException.class)
+    public ResponseEntity<Object> handleNotificationException(
+            final NotificationException e, HttpServletRequest request) {
         logInfo(e.getErrorCode(), e, request);
         return handleExceptionInternal(e.getErrorCode());
     }
