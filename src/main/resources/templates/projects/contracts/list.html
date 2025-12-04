@@ -25,24 +25,24 @@
     <th:block layout:fragment="content">
         <div class="container-fluid">
             <th:block th:replace="~{partials/page-title :: page-title('수임 관리','Projects')}" />
-            
+
             <div class="row">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header border-0 justify-content-between pb-0">
-                             <div class="d-flex align-items-center gap-2">
+                            <div class="d-flex align-items-center gap-2">
                                 <!-- Status Filter -->
                                 <form action="/contracts" method="get" id="filterForm">
-                                    <div class="app-search">
+                                <div class="app-search">
                                         <select name="status" class="form-select form-control" onchange="this.form.submit()">
                                             <option value="">전체 상태</option>
                                                 <option value="AWAITING" th:selected="${param.status != null and param.status[0] == 'AWAITING'}">수임대기</option>
                                             <option value="PENDING" th:selected="${param.status != null and param.status[0] == 'PENDING'}">입금대기</option>
                                             <option value="COMPLETED" th:selected="${param.status != null and param.status[0] == 'COMPLETED'}">입금완료</option>
-                                        </select>
-                                    </div>
+                                    </select>
+                                </div>
                                 </form>
-                             </div>
+                            </div>
                         </div>
 
                         <div class="table-responsive mt-3">
@@ -115,12 +115,12 @@
                                 </li>
                            </ul>
                         </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
         </div>
     </th:block>
-    
+
     <th:block layout:fragment="javascripts">
         <script>
             function updateContractStatus(selectElement) {
