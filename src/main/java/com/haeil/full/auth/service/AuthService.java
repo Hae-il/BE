@@ -7,6 +7,8 @@ import static com.haeil.full.user.exception.errorcode.UserErrorCode.USER_NOT_FOU
 import com.haeil.full.auth.dto.response.LoginResponse;
 import com.haeil.full.auth.exception.AuthException;
 import com.haeil.full.auth.util.JwtTokenProvider;
+import com.haeil.full.client.domain.Client;
+import com.haeil.full.client.repository.ClientRepository;
 import com.haeil.full.user.domain.User;
 import com.haeil.full.user.domain.type.Role;
 import com.haeil.full.user.exception.UserException;
@@ -23,6 +25,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final ClientRepository clientRepository;
 
     @Transactional
     public void signup(String name, String email, String password, Role role) {
@@ -37,6 +40,10 @@ public class AuthService {
                         .password(passwordEncoder.encode(password))
                         .role(role)
                         .build());
+
+        if (role == Role.ROLE_CLIENT) {
+            clientRepository.save(Client.clientSignupBuilder().name(name).email(email).build());
+        }
     }
 
     public LoginResponse login(String email, String password) {

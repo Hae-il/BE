@@ -67,4 +67,10 @@ public class Client extends BaseEntity {
         this.gender = gender;
         this.jobTitle = jobTitle;
     }
+
+    @Builder(builderMethodName = "clientSignupBuilder")
+    public Client(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
 }
