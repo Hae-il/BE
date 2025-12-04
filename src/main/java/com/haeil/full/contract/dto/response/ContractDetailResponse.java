@@ -36,15 +36,18 @@ public class ContractDetailResponse {
 
     // 정률 (PERCENTAGE) 일 때만 사용되는 필드
     private BigDecimal targetAmount;
-    private Long feePercentage;
+    private BigDecimal feePercentage;
 
     public static ContractDetailResponse from(Contract contract) {
+
+        // caseNumber를 C+ID 형식으로 변환
+        String caseNumber = "C" + contract.getCases().getId();
 
         ContractDetailResponseBuilder builder =
                 ContractDetailResponse.builder()
                         .contractId(contract.getId())
                         .caseId(contract.getCases().getId())
-                        .caseNumber(contract.getCases().getCaseNumber())
+                        .caseNumber(caseNumber)
                         .clientName(contract.getCases().getClient().getName())
                         .attorneyName(contract.getCases().getAttorney().getName())
                         .dueDate(contract.getDueDate())
@@ -64,7 +67,10 @@ public class ContractDetailResponse {
 
             return builder.feeType(FeeType.PERCENTAGE)
                     .targetAmount(percContract.getTargetAmount())
-                    .feePercentage(percContract.getFeePercentage())
+                    .feePercentage(
+                            percContract.getFeePercentage() != null
+                                    ? BigDecimal.valueOf(percContract.getFeePercentage())
+                                    : null)
                     .build();
         }
         throw new ContractException(INVALID_FEE_TYPE);

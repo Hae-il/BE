@@ -2,6 +2,7 @@ package com.haeil.full.contract.service;
 
 import static com.haeil.full.cases.exception.errorcode.CasesErrorCode.CASE_NOT_FOUND;
 import static com.haeil.full.contract.exception.errorcode.ContractErrorCode.*;
+import static com.haeil.full.contract.exception.errorcode.ContractErrorCode.CAN_NOT_CHANGE_STATUS;
 
 import com.haeil.full.cases.domain.Cases;
 import com.haeil.full.cases.exception.CasesException;
@@ -14,6 +15,7 @@ import com.haeil.full.contract.domain.type.ContractStatus;
 import com.haeil.full.contract.domain.type.FeeType;
 import com.haeil.full.contract.dto.request.ContractConditionRequest;
 import com.haeil.full.contract.dto.request.ContractCreateRequest;
+import com.haeil.full.contract.dto.request.ContractStatusUpdateRequest;
 import com.haeil.full.contract.dto.request.ExpenseInfoRequest;
 import com.haeil.full.contract.dto.response.ContractDetailResponse;
 import com.haeil.full.contract.dto.response.ContractItemResponse;
@@ -53,15 +55,36 @@ public class ContractService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ContractItemResponse> getContractList(Pageable pageable) {
-        Page<Contract> contractPage = contractRepository.findAll(pageable);
-        return contractPage.map(ContractItemResponse::from);
+    public Page<ContractItemResponse> getContractList(ContractStatus status, Pageable pageable) {
+        Pageable sortedPageable = pageable;
+        if (pageable.getSort().isUnsorted()) {
+            sortedPageable =
+                    org.springframework.data.domain.PageRequest.of(
+                            pageable.getPageNumber(),
+                            pageable.getPageSize(),
+                            org.springframework.data.domain.Sort.by(
+                                    org.springframework.data.domain.Sort.Order.asc("id")));
+        }
+
+        Page<Cases> casesPage = casesRepository.findByContractStatus(status, sortedPageable);
+        return casesPage.map(ContractItemResponse::from);
     }
 
     @Transactional(readOnly = true)
     public ContractDetailResponse getContractDetail(Long contractId) {
         Contract contract = findContractOrThrow(contractId);
         return ContractDetailResponse.from(contract);
+    }
+
+    @Transactional
+    public void updateStatus(Long contractId, ContractStatusUpdateRequest request) {
+        Contract contract = findContractOrThrow(contractId);
+        ContractStatus currentStatus = contract.getStatus();
+        ContractStatus targetStatus = ContractStatus.valueOf(request.contractStatus());
+        if (!isValidStatusTransition(currentStatus, targetStatus)) {
+            throw new ContractException(CAN_NOT_CHANGE_STATUS);
+        }
+        contract.updateStatus(targetStatus);
     }
 
     private Cases findCasesOrThrow(Long caseId) {
@@ -78,6 +101,14 @@ public class ContractService {
         return contractRepository
                 .findById(contractId)
                 .orElseThrow(() -> new ContractException(CONTRACT_NOT_FOUND));
+    }
+
+    private boolean isValidStatusTransition(
+            ContractStatus currentStatus, ContractStatus targetStatus) {
+        if (currentStatus == targetStatus) {
+            return false;
+        }
+        return true;
     }
 
     // 정액 계약 생성 로직

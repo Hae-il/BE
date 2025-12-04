@@ -4,6 +4,7 @@ import com.haeil.full.cases.domain.type.CaseStatus;
 import com.haeil.full.cases.domain.type.CaseType;
 import com.haeil.full.client.domain.Client;
 import com.haeil.full.consultation.domain.Consultation;
+import com.haeil.full.contract.domain.Contract;
 import com.haeil.full.global.entity.BaseEntity;
 import com.haeil.full.user.domain.User;
 import jakarta.persistence.*;
@@ -85,6 +86,13 @@ public class Cases extends BaseEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private Petition petition;
+
+    @OneToOne(
+            mappedBy = "cases",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private Contract contract;
 
     @Builder
     public Cases(
