@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html data-bs-theme="light" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
     layout:decorate="~{layouts/base}">
 
 <head>
@@ -217,11 +218,27 @@
                             </li>
                         </ul>
 
-                        <div>
-                            <a href="/auth-1/sign-in" class="btn btn-link fw-semibold text-body ps-2">로그인</a>
-                            <button class="btn btn-primary rounded-pill px-4" onclick="document.body.classList.toggle('show-chatbot')">
-                                <i class="ti ti-message-2 me-2"></i>법률 상담받기
-                            </button>
+                        <div id="auth-buttons" class="d-flex align-items-center gap-2">
+                            <!-- 로그인 전 (익명 사용자) -->
+                            <div sec:authorize="isAnonymous()" class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-link fw-semibold text-body ps-2"
+                                        data-bs-toggle="modal" data-bs-target="#signupModal">회원가입</button>
+                                <button type="button" class="btn btn-link fw-semibold text-body ps-2"
+                                        data-bs-toggle="modal" data-bs-target="#loginModal">로그인</button>
+                                <button class="btn btn-primary rounded-pill px-4"
+                                        onclick="document.body.classList.toggle('show-chatbot')">
+                                    <i class="ti ti-message-2 me-2"></i>무료 상담 챗봇
+                                </button>
+                            </div>
+                            
+                            <!-- 로그인 후 (인증된 사용자) -->
+                            <div sec:authorize="isAuthenticated()" class="d-flex align-items-center gap-2">
+                                <a href="/auth/logout?redirect=/lawfirm" class="btn btn-link fw-semibold text-body ps-2">로그아웃</a>
+                                <button class="btn btn-primary rounded-pill px-4"
+                                        onclick="document.body.classList.toggle('show-chatbot')">
+                                    <i class="ti ti-message-2 me-2"></i>내 사건 일정 챗봇
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -240,8 +257,17 @@
                             풍부한 경험과 전문성을 갖춘 변호사들이 최적의 솔루션을 제공합니다.
                         </p>
                         <div class="d-flex gap-3">
-                            <button class="btn btn-primary btn-lg rounded-pill px-4" onclick="document.body.classList.toggle('show-chatbot')">
-                                무료 상담 시작하기
+                            <!-- 비로그인 상태: 무료 상담 챗봇 -->
+                            <button class="btn btn-primary btn-lg rounded-pill px-4"
+                                    onclick="document.body.classList.toggle('show-chatbot')"
+                                    sec:authorize="isAnonymous()">
+                                무료 상담 챗봇 열기
+                            </button>
+                            <!-- 로그인 상태: 내 사건 일정 챗봇 -->
+                            <button class="btn btn-primary btn-lg rounded-pill px-4"
+                                    onclick="document.body.classList.toggle('show-chatbot')"
+                                    sec:authorize="isAuthenticated()">
+                                내 사건 일정 챗봇 열기
                             </button>
                             <a href="#lawyers" class="btn btn-outline-secondary btn-lg rounded-pill px-4">변호사 보기</a>
                         </div>
@@ -303,16 +329,16 @@
             <div class="container py-5">
                 <div class="text-center mb-5">
                     <span class="badge bg-primary-subtle text-primary mb-2">Our Lawyers</span>
-                    <h2 class="fw-bold">소속 변호사 소개</h2>
+                    <h2 class="fw-bold">교통사고 전문 변호사 소개</h2>
                 </div>
                 <div class="row g-4">
                     <div class="col-lg-3 col-md-6">
                         <div class="card border-0 shadow-sm h-100 text-center p-3">
                             <div class="card-body">
-                                <img src="/images/users/user-1.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="Lawyer">
-                                <h4 class="card-title mb-1">김철수 변호사</h4>
-                                <p class="text-muted small mb-3">형사 소송 전문</p>
-                                <p class="card-text text-muted mb-4">10년 이상의 형사 사건 수임 경력으로 의뢰인의 억울함을 풀어드립니다.</p>
+                                <img src="/images/users/user-1.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="교통사고 전문 변호사">
+                                <h4 class="card-title mb-1">김해일 변호사</h4>
+                                <p class="text-muted small mb-3">교통사고 · 중상해 전담</p>
+                                <p class="card-text text-muted mb-4">15년 이상 교통사고 사건만을 다뤄 온 경험으로, 억울한 피해자의 손해를 끝까지 회복합니다.</p>
                                 <button class="btn btn-outline-primary btn-sm rounded-pill px-3">프로필 보기</button>
                             </div>
                         </div>
@@ -320,10 +346,10 @@
                     <div class="col-lg-3 col-md-6">
                         <div class="card border-0 shadow-sm h-100 text-center p-3">
                             <div class="card-body">
-                                <img src="/images/users/user-2.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="Lawyer">
-                                <h4 class="card-title mb-1">이영희 변호사</h4>
-                                <p class="text-muted small mb-3">기업 자문 / M&A</p>
-                                <p class="card-text text-muted mb-4">국내 유수 기업들의 법률 자문을 담당하며 기업의 성장을 돕습니다.</p>
+                                <img src="/images/users/user-2.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="보험 분쟁 전문 변호사">
+                                <h4 class="card-title mb-1">이서준 변호사</h4>
+                                <p class="text-muted small mb-3">보험사 분쟁 · 합의 전략</p>
+                                <p class="card-text text-muted mb-4">보험사의 낮은 합의 제안에 맞서 의뢰인에게 유리한 보상 결과를 이끌어냅니다.</p>
                                 <button class="btn btn-outline-primary btn-sm rounded-pill px-3">프로필 보기</button>
                             </div>
                         </div>
@@ -331,10 +357,10 @@
                     <div class="col-lg-3 col-md-6">
                         <div class="card border-0 shadow-sm h-100 text-center p-3">
                             <div class="card-body">
-                                <img src="/images/users/user-3.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="Lawyer">
-                                <h4 class="card-title mb-1">박지성 변호사</h4>
-                                <p class="text-muted small mb-3">이혼 / 가사 소송</p>
-                                <p class="card-text text-muted mb-4">섬세한 상담과 전문적인 법률 지식으로 가정의 평화를 지키는 데 기여합니다.</p>
+                                <img src="/images/users/user-3.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="형사 교통사고 전문 변호사">
+                                <h4 class="card-title mb-1">박지민 변호사</h4>
+                                <p class="text-muted small mb-3">음주 · 뺑소니 · 형사 사건</p>
+                                <p class="card-text text-muted mb-4">운전자 형사 책임이 걸린 중대한 교통사고에서 최선의 방어 전략을 제시합니다.</p>
                                 <button class="btn btn-outline-primary btn-sm rounded-pill px-3">프로필 보기</button>
                             </div>
                         </div>
@@ -342,10 +368,10 @@
                     <div class="col-lg-3 col-md-6">
                         <div class="card border-0 shadow-sm h-100 text-center p-3">
                             <div class="card-body">
-                                <img src="/images/users/user-7.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="Lawyer">
-                                <h4 class="card-title mb-1">최민지 변호사</h4>
-                                <p class="text-muted small mb-3">부동산 / 건설</p>
-                                <p class="card-text text-muted mb-4">복잡한 부동산 분쟁, 명쾌한 해결책을 제시해 드립니다.</p>
+                                <img src="/images/users/user-7.jpg" class="rounded-circle mb-3 shadow-sm" width="120" height="120" alt="손해배상 전문 변호사">
+                                <h4 class="card-title mb-1">최다은 변호사</h4>
+                                <p class="text-muted small mb-3">손해배상 · 후유장해</p>
+                                <p class="card-text text-muted mb-4">후유장해 평가와 장기 소득 손실까지 고려해, 현실적인 보상 기준을 제시합니다.</p>
                                 <button class="btn btn-outline-primary btn-sm rounded-pill px-3">프로필 보기</button>
                             </div>
                         </div>
@@ -359,7 +385,7 @@
             <div class="container py-5">
                 <div class="text-center mb-5">
                     <span class="badge bg-primary-subtle text-primary mb-2">Practice Areas</span>
-                    <h2 class="fw-bold">주요 업무 분야</h2>
+                    <h2 class="fw-bold">교통사고 전문 업무 분야</h2>
                 </div>
                 <div class="row g-4">
                     <div class="col-md-6 col-lg-3">
@@ -368,8 +394,8 @@
                                 <i class="ti ti-users fs-2 text-primary"></i>
                             </div>
                             <div>
-                                <h5 class="fw-bold mb-2">민사 소송</h5>
-                                <p class="text-muted small mb-0">손해배상, 채권추심, 부동산 등 일반 민사 분쟁 해결</p>
+                                <h5 class="fw-bold mb-2">교통사고 손해배상</h5>
+                                <p class="text-muted small mb-0">대인·대물 손해배상, 과실비율 다툼, 합의금 증액 등 전 과정 대응</p>
                             </div>
                         </div>
                     </div>
@@ -379,8 +405,8 @@
                                 <i class="ti ti-gavel fs-2 text-primary"></i>
                             </div>
                             <div>
-                                <h5 class="fw-bold mb-2">형사 변호</h5>
-                                <p class="text-muted small mb-0">수사 단계부터 공판까지 체계적인 방어권 행사 조력</p>
+                                <h5 class="fw-bold mb-2">중상해 · 사망사고</h5>
+                                <p class="text-muted small mb-0">중대한 인명 피해 사고에 대한 형사책임 및 민·형사 병행 전략 수립</p>
                             </div>
                         </div>
                     </div>
@@ -390,8 +416,8 @@
                                 <i class="ti ti-building-skyscraper fs-2 text-primary"></i>
                             </div>
                             <div>
-                                <h5 class="fw-bold mb-2">기업 법무</h5>
-                                <p class="text-muted small mb-0">법률 자문, 계약 검토, 기업 회생 및 파산</p>
+                                <h5 class="fw-bold mb-2">보험사 분쟁</h5>
+                                <p class="text-muted small mb-0">보험금 지급 거절, 지급 지연, 저평가 분쟁에 대한 전문적 대응</p>
                             </div>
                         </div>
                     </div>
@@ -401,8 +427,8 @@
                                 <i class="ti ti-home fs-2 text-primary"></i>
                             </div>
                             <div>
-                                <h5 class="fw-bold mb-2">가사 / 상속</h5>
-                                <p class="text-muted small mb-0">이혼, 재산분할, 유류분 반환 청구 등 가사 사건</p>
+                                <h5 class="fw-bold mb-2">후유장해 · 산재 연계</h5>
+                                <p class="text-muted small mb-0">후유장해 평가, 장해급수 산정, 산재·산재보험과의 연계 전략 수립</p>
                             </div>
                         </div>
                     </div>
@@ -439,6 +465,9 @@
             </div>
         </footer>
 
+        <!-- 로그인 여부 플래그 (내부 JS용) -->
+        <div id="chat-auth-flag" sec:authorize="isAuthenticated()" style="display:none;"></div>
+
         <!-- Chatbot Structure -->
         <button class="chatbot-toggler" onclick="document.body.classList.toggle('show-chatbot')">
             <span class="material-symbols-rounded"><i class="ti ti-message-chatbot fs-3"></i></span>
@@ -450,9 +479,15 @@
                 <span class="close-btn material-symbols-outlined" onclick="document.body.classList.remove('show-chatbot')"><i class="ti ti-x"></i></span>
             </header>
             <ul class="chatbox list-unstyled mb-0">
-                <li class="chat incoming d-flex">
+                <!-- 비로그인: 일반 법률 상담 안내 -->
+                <li class="chat incoming d-flex" sec:authorize="isAnonymous()">
                     <span class="material-symbols-outlined"><i class="ti ti-smart-home"></i></span>
                     <p>안녕하세요! 해일 법률사무소입니다. 👋<br>궁금하신 법률 문제를 자유롭게 물어보세요.</p>
+                </li>
+                <!-- 로그인: 내 사건 일정 안내 -->
+                <li class="chat incoming d-flex" sec:authorize="isAuthenticated()">
+                    <span class="material-symbols-outlined"><i class="ti ti-smart-home"></i></span>
+                    <p>안녕하세요! 해일 법률사무소 내 사건 일정 챗봇입니다. 👋<br>고객님의 사건 일정과 관련된 내용을 물어보시면 안내해 드릴게요.<br>예) "다가오는 일정 알려줘", "다음 재판 언제야?", "오늘 예정된 일정 있어?"</p>
                 </li>
             </ul>
             <div class="chat-input">
@@ -461,13 +496,166 @@
             </div>
         </div>
 
+        <!-- Login Modal -->
+        <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="loginModalLabel">의뢰인 간편 로그인</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <p class="text-muted mb-4 small">가입하신 이메일과 비밀번호로 로그인하세요.</p>
+                        <form id="clientLoginForm">
+                            <div class="mb-3">
+                                <label for="loginEmail" class="form-label small fw-bold">이메일</label>
+                                <input type="email" class="form-control bg-light border-0" id="loginEmail" name="email" required placeholder="name@example.com">
+                            </div>
+                            <div class="mb-4">
+                                <label for="loginPassword" class="form-label small fw-bold">비밀번호</label>
+                                <input type="password" class="form-control bg-light border-0" id="loginPassword" name="password" required placeholder="비밀번호 입력">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary rounded-pill fw-bold py-2">로그인</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signup Modal -->
+        <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="signupModalLabel">의뢰인 간편 회원가입</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <p class="text-muted mb-4 small">해일 법률사무소의 의뢰인이 되어 최적의 법률 서비스를 경험해보세요.</p>
+                        <form id="clientSignupForm">
+                            <div class="mb-3">
+                                <label for="signupName" class="form-label small fw-bold">이름</label>
+                                <input type="text" class="form-control bg-light border-0" id="signupName" name="name" required placeholder="이름을 입력하세요">
+                            </div>
+                            <div class="mb-3">
+                                <label for="signupEmail" class="form-label small fw-bold">이메일</label>
+                                <input type="email" class="form-control bg-light border-0" id="signupEmail" name="email" required placeholder="name@example.com">
+                            </div>
+                            <div class="mb-4">
+                                <label for="signupPassword" class="form-label small fw-bold">비밀번호</label>
+                                <input type="password" class="form-control bg-light border-0" id="signupPassword" name="password" required placeholder="8자 이상 입력하세요">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary rounded-pill fw-bold py-2">가입하고 시작하기</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </th:block>
 
     <th:block layout:fragment="javascripts">
         <script>
+            // Client Login Logic
+            document.getElementById('clientLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const jsonData = Object.fromEntries(formData.entries());
+                
+                const btn = this.querySelector('button[type="submit"]');
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = '로그인 중...';
+
+                fetch('/auth/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.message || 'Login failed'); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if(data.results && data.results.accessToken) {
+                        // Set Cookie for login
+                        document.cookie = `Authorization=${data.results.accessToken}; path=/; max-age=${7 * 24 * 60 * 60};`; // 7 days
+                        
+                        // Reload to update UI
+                        window.location.reload();
+                    } else {
+                        throw new Error('Invalid response from server');
+                    }
+                })
+                .catch(error => {
+                    alert('로그인 실패: ' + error.message);
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                });
+            });
+
+            // Client Signup Logic
+            document.getElementById('clientSignupForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const jsonData = Object.fromEntries(formData.entries());
+                
+                // Add ROLE_CLIENT explicitly
+                jsonData.role = 'ROLE_CLIENT';
+
+                const btn = this.querySelector('button[type="submit"]');
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = '처리중...';
+
+                fetch('/auth/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.message || 'Signup failed'); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if(data.results && data.results.accessToken) {
+                        // Set Cookie for auto-login
+                        document.cookie = `Authorization=${data.results.accessToken}; path=/; max-age=${7 * 24 * 60 * 60};`; // 7 days
+                        
+                        // Show success and reload
+                        alert('회원가입이 완료되었습니다! 자동으로 로그인됩니다.');
+                        window.location.reload();
+                    } else {
+                        throw new Error('Invalid response from server');
+                    }
+                })
+                .catch(error => {
+                    alert('회원가입 실패: ' + error.message);
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                });
+            });
+
             const chatInput = document.querySelector(".chat-input textarea");
             const sendChatBtn = document.querySelector(".chat-input span");
             const chatbox = document.querySelector(".chatbox");
+
+            // 로그인 여부 체크 (서버가 삽입한 숨겨진 요소 기반)
+            const isAuthenticated = !!document.getElementById("chat-auth-flag");
 
             // Generate a random session ID for the current page session
             const sessionId = Math.floor(Math.random() * 1000000);
@@ -501,15 +689,25 @@
                 chatbox.scrollTo(0, chatbox.scrollHeight);
 
                 // Call the API
-                fetch('/api/v1/chatbot/ask', {
+                const endpoint = isAuthenticated
+                    ? '/api/v1/chatbot/schedule'
+                    : '/api/v1/chatbot/ask';
+
+                const payload = isAuthenticated
+                    ? {
+                        question: userMessage
+                    }
+                    : {
+                        sessionId: sessionId,
+                        question: userMessage
+                    };
+
+                fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        sessionId: sessionId,
-                        question: userMessage
-                    })
+                    body: JSON.stringify(payload)
                 })
                 .then(response => {
                     if (!response.ok) {

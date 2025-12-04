@@ -6,4 +6,5 @@ public enum Role {
     ROLE_COUNSEL,
     ROLE_ACCOUNT,
     ROLE_ADMIN,
+    ROLE_CLIENT,
 }

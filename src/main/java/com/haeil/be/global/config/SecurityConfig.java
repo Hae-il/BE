@@ -55,10 +55,9 @@ public class SecurityConfig {
                                                 "/swagger-ui.html",
                                                 "/v3/api-docs/swagger-config")
                                         .permitAll()
-                                        .requestMatchers(
-                                                HttpMethod.POST,
-                                                "/api/v1/auth/signup",
-                                                "/api/v1/auth/login")
+                                        .requestMatchers("/api/v1/chatbot/schedule")
+                                        .hasRole("CLIENT")
+                                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/**")
                                         .permitAll()
                                         .requestMatchers(
                                                 "/api/v1/contract/**", "/api/v1/settlements/**")
