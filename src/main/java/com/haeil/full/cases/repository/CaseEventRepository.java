@@ -10,13 +10,15 @@ import org.springframework.data.repository.query.Param;
 
 public interface CaseEventRepository extends JpaRepository<CaseEvent, Long> {
 
-    @Query("SELECT ce FROM CaseEvent ce JOIN ce.cases c "
+    @Query(
+            "SELECT ce FROM CaseEvent ce JOIN ce.cases c "
                     + "WHERE c.client.id = :clientId "
                     + "AND ce.date >= CURRENT_TIMESTAMP "
                     + "ORDER BY ce.date ASC")
     List<CaseEvent> findUpcomingEventByClientId(@Param("clientId") Long clientId);
-  
-    @Query("SELECT ce FROM CaseEvent ce "
+
+    @Query(
+            "SELECT ce FROM CaseEvent ce "
                     + "JOIN ce.cases c "
                     + "WHERE ce.date BETWEEN :start AND :end "
                     + "AND c.attorney = :attorney")

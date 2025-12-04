@@ -57,36 +57,22 @@
                         </div>
 
                         <!-- Contents -->
-                        <div class="table-responsive">
-                            <table class="table table-custom table-centered table-select table-hover w-100 mb-0">
-                                <thead class="bg-light align-middle bg-opacity-25 thead-sm">
-                                    <tr class="text-uppercase fs-xxs">
-                                        <th class="ps-3" style="width: 1%;">
-                                            <input data-table-select-all
-                                                class="form-check-input form-check-input-light fs-14 mt-0"
-                                                type="checkbox" id="select-all-files" value="option">
-                                        </th>
-                                        <th data-table-sort="id">상담번호</th>
-                                        <th data-table-sort="clientName">의뢰인</th>
-                                        <th data-table-sort data-column="status">상태</th>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-custom table-centered table-hover w-100 mb-0">
+                                <thead class="bg-light bg-opacity-50">
+                                    <tr>
+                                        <th>상담번호</th>
+                                        <th>의뢰인</th>
+                                        <th>상태</th>
                                         <th>담당변호사</th>
-                                        <th data-table-sort data-column="date">상담일시</th>
-                                        <th class="text-center" style="width: 1%;">Actions</th>
+                                        <th>상담일시</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <!-- Dynamic Rows -->
                                     <tr th:each="consultation : ${consultations}">
-                                        <td class="ps-3"><input
-                                                class="form-check-input form-check-input-light fs-14 file-item-check mt-0"
-                                                type="checkbox" value="option"></td>
                                         <td>
                                             <div class="d-flex">
-                                                <div class="avatar-md me-3">
-                                                    <span class="avatar-title text-bg-light rounded">
-                                                        <i class="ti ti-user fs-24 text-primary"></i>
-                                                    </span>
-                                                </div>
                                                 <div>
                                                     <h5 class="mb-1 d-flex align-items-center">
                                                         <a th:text="'C' + ${consultation.id}" 
@@ -109,22 +95,11 @@
                                         </td>
                                         <td th:text="${consultation.counselorName}"></td>
                                         <td th:text="${#temporals.format(consultation.consultationDate, 'yyyy-MM-dd HH:mm')}"></td>
-                                        <td>
-                                            <div class="d-flex justify-content-center gap-1">
-                                                <a href="#" class="btn btn-light btn-icon btn-sm rounded-circle"><i
-                                                        class="ti ti-eye fs-lg"></i></a>
-                                                <a href="#" class="btn btn-light btn-icon btn-sm rounded-circle"><i
-                                                        class="ti ti-edit fs-lg"></i></a>
-                                                <a href="#" data-table-delete-row
-                                                    class="btn btn-light btn-icon btn-sm rounded-circle"><i
-                                                        class="ti ti-trash fs-lg"></i></a>
-                                            </div>
-                                        </td>
                                     </tr>
                                     
                                     <!-- Empty State -->
                                     <tr th:if="${#lists.isEmpty(consultations)}">
-                                        <td colspan="6" class="text-center text-muted py-4">
+                                        <td colspan="5" class="text-center text-muted py-4">
                                             상담 데이터가 없습니다.
                                         </td>
                                     </tr>

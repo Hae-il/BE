@@ -49,30 +49,21 @@
                         </div>
 
                         <!-- Contents -->
-                        <div class="table-responsive">
-                            <table class="table table-custom table-centered table-select table-hover w-100 mb-0">
-                                <thead class="bg-light align-middle bg-opacity-25 thead-sm">
-                                    <tr class="text-uppercase fs-xxs">
-                                        <th class="ps-3" style="width: 1%;">
-                                            <input data-table-select-all
-                                                class="form-check-input form-check-input-light fs-14 mt-0"
-                                                type="checkbox" id="select-all-files" value="option">
-                                        </th>
-                                        <th data-table-sort="caseId">사건번호</th>
-                                        <th data-table-sort="clientName">의뢰인</th>
-                                        <th data-table-sort="title">사건명</th>
-                                        <th data-table-sort="caseType">사건유형</th>
-                                        <th data-table-sort="attorneyName">담당 변호사</th>
-                                        <th data-table-sort="caseStatus">상태</th>
-                                        <th data-table-sort="occurredDate">발생일시</th>
-                                        <th class="text-center" style="width: 1%;">Actions</th>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-custom table-centered table-hover w-100 mb-0">
+                                <thead class="bg-light bg-opacity-50">
+                                    <tr>
+                                        <th>사건번호</th>
+                                        <th>의뢰인</th>
+                                        <th>사건명</th>
+                                        <th>사건유형</th>
+                                        <th>담당 변호사</th>
+                                        <th>상태</th>
+                                        <th>발생일시</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="case : ${cases}">
-                                        <td class="ps-3"><input
-                                                class="form-check-input form-check-input-light fs-14 file-item-check mt-0"
-                                                type="checkbox" value="option"></td>
                                         <td>
                                                 <div>
                                                 <a th:href="@{/cases/requested/{id}(id=${case.caseId})}" class="fw-bold text-primary" th:text="'C' + ${case.caseId}"></a>
@@ -91,19 +82,9 @@
                                                   th:text="${case.caseStatus != null ? case.caseStatus.label : '-'}"></span>
                                         </td>
                                         <td th:text="${case.occurredDate != null ? #temporals.format(case.occurredDate, 'yyyy-MM-dd HH:mm') : '-'}"></td>
-                                        <td>
-                                            <div class="d-flex justify-content-center gap-1">
-                                                <a th:href="@{/cases/requested/{id}(id=${case.caseId})}" class="btn btn-light btn-icon btn-sm rounded-circle"><i
-                                                        class="ti ti-eye fs-lg"></i></a>
-                                                <a href="#" class="btn btn-light btn-icon btn-sm rounded-circle"><i
-                                                        class="ti ti-edit fs-lg"></i></a>
-                                                <a href="#" class="btn btn-light btn-icon btn-sm rounded-circle"><i
-                                                        class="ti ti-trash fs-lg"></i></a>
-                                            </div>
-                                        </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(cases)}">
-                                        <td colspan="9" class="text-center text-muted py-4">
+                                        <td colspan="7" class="text-center text-muted py-4">
                                             요청된 사건이 없습니다.
                                         </td>
                                     </tr>
