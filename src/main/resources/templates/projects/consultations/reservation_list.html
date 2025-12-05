@@ -78,13 +78,34 @@
                                     </tr>
                                     
                                     <!-- Empty State -->
-                                    <tr th:if="${#lists.isEmpty(reservations)}">
+                                    <tr th:if="${reservations.empty}">
                                         <td colspan="5" class="text-center text-muted py-4">
-                                            예약 신청이 없습니다.
+                                            <span th:if="${param.status != null and param.status[0] != ''}">데이터가 없습니다.</span>
+                                            <span th:unless="${param.status != null and param.status[0] != ''}">예약 신청이 없습니다.</span>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div class="card-footer border-0 py-3" th:if="${!reservations.empty}">
+                           <ul class="pagination justify-content-end mb-0" 
+                               th:with="start=${T(java.lang.Math).floor(reservations.number/10)*10 + 1},
+                                        last=(${start + 9 < reservations.totalPages ? start + 9 : reservations.totalPages})">
+                                <li class="page-item" th:classappend="${reservations.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/consultations/reservations(page=${reservations.number - 1}, status=${param.status})}" tabindex="-1">
+                                        <i class="ti ti-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:each="page: ${#numbers.sequence(start, last)}" th:classappend="${page == reservations.number + 1} ? 'active'">
+                                    <a class="page-link" th:text="${page}" th:href="@{/consultations/reservations(page=${page - 1}, status=${param.status})}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${reservations.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/consultations/reservations(page=${reservations.number + 1}, status=${param.status})}">
+                                        <i class="ti ti-chevron-right"></i>
+                                    </a>
+                                </li>
+                           </ul>
                         </div>
 
                     </div>

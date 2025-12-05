@@ -36,7 +36,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,20 +69,17 @@ public class ConsultationService {
         return ConsultationReservationResponse.from(saved);
     }
 
-    public List<ConsultationReservationResponse> getConsultationReservations(
-            ConsultationRequestStatus status) {
-        List<ConsultationReservation> reservations;
-        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+    public Page<ConsultationReservationResponse> getConsultationReservations(
+            ConsultationRequestStatus status, Pageable pageable) {
+        Page<ConsultationReservation> reservations;
 
         if (status != null) {
-            reservations = consultationReservationRepository.findByStatus(status, sort);
+            reservations = consultationReservationRepository.findByStatus(status, pageable);
         } else {
-            reservations = consultationReservationRepository.findAll(sort);
+            reservations = consultationReservationRepository.findAll(pageable);
         }
 
-        return reservations.stream()
-                .map(ConsultationReservationResponse::from)
-                .collect(Collectors.toList());
+        return reservations.map(ConsultationReservationResponse::from);
     }
 
     public ConsultationReservationResponse getConsultationRequest(Long id) {
@@ -163,17 +161,17 @@ public class ConsultationService {
         return ConsultationResponse.from(saved);
     }
 
-    public List<ConsultationResponse> getConsultations(ConsultationStatus status) {
-        List<Consultation> consultations;
-        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+    public Page<ConsultationResponse> getConsultations(
+            ConsultationStatus status, Pageable pageable) {
+        Page<Consultation> consultations;
 
         if (status != null) {
-            consultations = consultationRepository.findByStatus(status, sort);
+            consultations = consultationRepository.findByStatus(status, pageable);
         } else {
-            consultations = consultationRepository.findAll(sort);
+            consultations = consultationRepository.findAll(pageable);
         }
 
-        return consultations.stream().map(ConsultationResponse::from).collect(Collectors.toList());
+        return consultations.map(ConsultationResponse::from);
     }
 
     public ConsultationResponse getConsultation(Long id) {

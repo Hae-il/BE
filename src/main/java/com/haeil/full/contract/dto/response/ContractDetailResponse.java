@@ -28,6 +28,7 @@ public class ContractDetailResponse {
     private LocalDate dueDate;
     private ContractStatus status;
     private ExpenseInfoResponse expenseInfoResponse;
+    private java.time.LocalDateTime createdAt;
 
     private FeeType feeType;
 
@@ -52,7 +53,8 @@ public class ContractDetailResponse {
                         .attorneyName(contract.getCases().getAttorney().getName())
                         .dueDate(contract.getDueDate())
                         .status(contract.getStatus())
-                        .expenseInfoResponse(ExpenseInfoResponse.from(contract.getExpenseInfo()));
+                        .expenseInfoResponse(ExpenseInfoResponse.from(contract.getExpenseInfo()))
+                        .createdAt(contract.getCreatedDate());
 
         if (contract instanceof FixedFeeContract fixedContract) {
 

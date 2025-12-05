@@ -84,7 +84,7 @@
                                                th:href="@{/contracts/new(caseId=${contract.caseId}, caseNumber=${contract.caseNumber})}" 
                                                class="btn btn-sm btn-soft-primary">작성</a>
                                             <a th:unless="${contract.contractId == null}" 
-                                               th:href="@{/contracts/{id}(id=${contract.contractId})}" 
+                                               th:href="@{|/contracts/${contract.contractId}|}" 
                                                class="btn btn-sm btn-soft-info">보기</a>
                                         </td>
                                         <td th:text="${contract.dueDate}">-</td>
@@ -96,7 +96,7 @@
                             </table>
                         </div>
                         
-                        <div class="card-footer border-0 py-3">
+                        <div class="card-footer border-0 py-3" th:if="${!contracts.empty}">
                            <ul class="pagination justify-content-end mb-0" 
                                th:with="start=${T(java.lang.Math).floor(contracts.number/10)*10 + 1},
                                         last=(${start + 9 < contracts.totalPages ? start + 9 : contracts.totalPages})">

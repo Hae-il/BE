@@ -1,5 +1,6 @@
 package com.haeil.full.cases.controller;
 
+import com.haeil.full.cases.domain.type.CaseType;
 import com.haeil.full.cases.dto.request.AssignAttorneyRequest;
 import com.haeil.full.cases.dto.request.CaseDocumentRequest;
 import com.haeil.full.cases.dto.request.CaseEventRequest;
@@ -10,6 +11,9 @@ import com.haeil.full.cases.dto.request.UpdateCaseRequest;
 import com.haeil.full.cases.service.CasesService;
 import com.haeil.full.user.service.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,8 +28,11 @@ public class CasesController {
     private final CasesService casesService;
 
     @GetMapping("/unassigned")
-    public String getUnassignedCases(Model model) {
-        model.addAttribute("cases", casesService.getUnassignedCases());
+    public String getUnassignedCases(
+            @RequestParam(required = false) CaseType caseType,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            Model model) {
+        model.addAttribute("cases", casesService.getUnassignedCases(caseType, pageable));
         return "projects/cases/unassigned-list";
     }
 
@@ -51,8 +58,12 @@ public class CasesController {
 
     @GetMapping("/requested")
     public String getRequestedCases(
-            @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        model.addAttribute("cases", casesService.getRequestedCases(userDetails.getId()));
+            @RequestParam(required = false) CaseType caseType,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
+        model.addAttribute(
+                "cases", casesService.getRequestedCases(userDetails.getId(), caseType, pageable));
         return "projects/cases/requested-list";
     }
 
@@ -84,8 +95,12 @@ public class CasesController {
 
     @GetMapping("/ongoing")
     public String getOngoingCases(
-            @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        model.addAttribute("cases", casesService.getOngoingCases(userDetails.getId()));
+            @RequestParam(required = false) CaseType caseType,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
+        model.addAttribute(
+                "cases", casesService.getOngoingCases(userDetails.getId(), caseType, pageable));
         return "projects/cases/ongoing-list";
     }
 
@@ -190,8 +205,12 @@ public class CasesController {
 
     @GetMapping("/completed")
     public String getCompletedCases(
-            @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        model.addAttribute("cases", casesService.getCompletedCases(userDetails.getId()));
+            @RequestParam(required = false) CaseType caseType,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
+        model.addAttribute(
+                "cases", casesService.getCompletedCases(userDetails.getId(), caseType, pageable));
         return "projects/cases/completed-list";
     }
 

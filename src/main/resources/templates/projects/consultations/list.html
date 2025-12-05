@@ -71,13 +71,34 @@
                                     </tr>
                                     
                                     <!-- Empty State -->
-                                    <tr th:if="${#lists.isEmpty(consultations)}">
+                                    <tr th:if="${consultations.empty}">
                                         <td colspan="5" class="text-center text-muted py-4">
-                                            상담 데이터가 없습니다.
+                                            <span th:if="${param.status != null and param.status[0] != ''}">데이터가 없습니다.</span>
+                                            <span th:unless="${param.status != null and param.status[0] != ''}">상담 데이터가 없습니다.</span>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div class="card-footer border-0 py-3" th:if="${!consultations.empty}">
+                           <ul class="pagination justify-content-end mb-0" 
+                               th:with="start=${T(java.lang.Math).floor(consultations.number/10)*10 + 1},
+                                        last=(${start + 9 < consultations.totalPages ? start + 9 : consultations.totalPages})">
+                                <li class="page-item" th:classappend="${consultations.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/consultations(page=${consultations.number - 1}, status=${param.status})}" tabindex="-1">
+                                        <i class="ti ti-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:each="page: ${#numbers.sequence(start, last)}" th:classappend="${page == consultations.number + 1} ? 'active'">
+                                    <a class="page-link" th:text="${page}" th:href="@{/consultations(page=${page - 1}, status=${param.status})}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${consultations.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/consultations(page=${consultations.number + 1}, status=${param.status})}">
+                                        <i class="ti ti-chevron-right"></i>
+                                    </a>
+                                </li>
+                           </ul>
                         </div>
 
                     </div>

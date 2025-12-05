@@ -16,6 +16,10 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -63,9 +67,11 @@ public class ConsultationController {
 
     @GetMapping("/reservations")
     public String getConsultationReservations(
-            @RequestParam(required = false) ConsultationRequestStatus status, Model model) {
-        List<ConsultationReservationResponse> responses =
-                consultationService.getConsultationReservations(status);
+            @RequestParam(required = false) ConsultationRequestStatus status,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            Model model) {
+        Page<ConsultationReservationResponse> responses =
+                consultationService.getConsultationReservations(status, pageable);
         model.addAttribute("reservations", responses);
         return "projects/consultations/reservation_list";
     }
@@ -191,8 +197,11 @@ public class ConsultationController {
 
     @GetMapping
     public String getConsultations(
-            @RequestParam(required = false) ConsultationStatus status, Model model) {
-        List<ConsultationResponse> responses = consultationService.getConsultations(status);
+            @RequestParam(required = false) ConsultationStatus status,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            Model model) {
+        Page<ConsultationResponse> responses =
+                consultationService.getConsultations(status, pageable);
         model.addAttribute("consultations", responses);
         return "projects/consultations/list";
     }

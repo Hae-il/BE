@@ -87,10 +87,10 @@
                                                th:href="@{/settlements/new(caseId=${settlement.caseId}, caseNumber=${settlement.caseNumber})}" 
                                                class="btn btn-sm btn-soft-primary">작성</a>
                                             <a th:if="${settlement.settlementId != null and settlement.settlementStatus != null and settlement.settlementStatus.name() != 'FINAL'}" 
-                                               th:href="@{/settlements/{id}/edit(id=${settlement.settlementId})}" 
+                                               th:href="@{|/settlements/${settlement.settlementId}/edit|}" 
                                                class="btn btn-sm btn-soft-warning">작성</a>
                                             <a th:if="${settlement.settlementId != null and settlement.settlementStatus != null and settlement.settlementStatus.name() == 'FINAL'}" 
-                                               th:href="@{/settlements/{id}(id=${settlement.settlementId})}" 
+                                               th:href="@{|/settlements/${settlement.settlementId}|}" 
                                                class="btn btn-sm btn-soft-info">보기</a>
                                         </td>
                                         <td th:text="${settlement.paymentDueDate}">-</td>
@@ -102,7 +102,7 @@
                             </table>
                         </div>
                         
-                        <div class="card-footer border-0 py-3">
+                        <div class="card-footer border-0 py-3" th:if="${!settlements.empty}">
                            <ul class="pagination justify-content-end mb-0" 
                                th:with="start=${T(java.lang.Math).floor(settlements.number/10)*10 + 1},
                                         last=(${start + 9 < settlements.totalPages ? start + 9 : settlements.totalPages})">

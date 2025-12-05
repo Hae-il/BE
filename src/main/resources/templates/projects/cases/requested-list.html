@@ -11,40 +11,20 @@
                 <div class="col-12">
                     <div data-table data-table-rows-per-page="8" class="card">
                         <!-- Search, Filter, Sort ... -->
-                        <div class="card-header border-light justify-content-between">
-                            <div class="d-flex gap-2">
-                                <div class="app-search">
-                                    <input data-table-search type="search" class="form-control"
-                                        placeholder="사건명/의뢰인 검색...">
-                                    <i data-lucide="search" class="app-search-icon text-muted"></i>
-                                </div>
-                            </div>
-
+                        <div class="card-header border-0 justify-content-between pb-0">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="me-2 fw-semibold">Filter By:</span>
-
                                 <!-- Case Type Filter -->
-                                <div class="app-search">
-                                    <select data-table-filter="caseType"
-                                        class="form-select form-control my-1 my-md-0">
-                                        <option value="">전체 유형</option>
-                                        <option value="민사">민사</option>
-                                        <option value="형사">형사</option>
-                                        <option value="교통사고">교통사고</option>
-                                        <option value="기타">기타</option>
-                                    </select>
-                                    <i data-lucide="list-filter" class="app-search-icon text-muted"></i>
-                                </div>
-
-                                <!-- Records Per Page -->
-                                <div>
-                                    <select data-table-set-rows-per-page class="form-select form-control my-1 my-md-0">
-                                        <option value="5">5</option>
-                                        <option value="10">10</option>
-                                        <option value="15">15</option>
-                                        <option value="20">20</option>
-                                    </select>
-                                </div>
+                                <form action="/cases/requested" method="get">
+                                    <div class="app-search">
+                                        <select name="caseType" class="form-select form-control" onchange="this.form.submit()">
+                                            <option value="">전체 유형</option>
+                                            <option value="CIVIL" th:selected="${param.caseType != null and param.caseType[0] == 'CIVIL'}">민사</option>
+                                            <option value="CRIMINAL" th:selected="${param.caseType != null and param.caseType[0] == 'CRIMINAL'}">형사</option>
+                                            <option value="TRAFFIC_ACCIDENT" th:selected="${param.caseType != null and param.caseType[0] == 'TRAFFIC_ACCIDENT'}">교통사고</option>
+                                            <option value="OTHER" th:selected="${param.caseType != null and param.caseType[0] == 'OTHER'}">기타</option>
+                                        </select>
+                                    </div>
+                                </form>
                             </div>
                         </div>
 
@@ -62,8 +42,10 @@
                                         <th>발생일시</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr th:each="case : ${cases}">
+                                <tbody style="cursor: pointer;">
+                                    <tr th:each="case : ${cases}"
+                                        th:data-href="@{/cases/requested/{id}(id=${case.caseId})}"
+                                        onclick="if(!['A'].includes(event.target.tagName)) location.href=this.getAttribute('data-href')">
                                         <td>
                                                 <div>
                                                 <a th:href="@{/cases/requested/{id}(id=${case.caseId})}" class="fw-bold text-primary" th:text="'C' + ${case.caseId}"></a>
@@ -83,13 +65,34 @@
                                         </td>
                                         <td th:text="${case.occurredDate != null ? #temporals.format(case.occurredDate, 'yyyy-MM-dd HH:mm') : '-'}"></td>
                                     </tr>
-                                    <tr th:if="${#lists.isEmpty(cases)}">
+                                    <tr th:if="${cases.empty}">
                                         <td colspan="7" class="text-center text-muted py-4">
-                                            요청된 사건이 없습니다.
+                                            <span th:if="${param.caseType != null and param.caseType[0] != ''}">데이터가 없습니다.</span>
+                                            <span th:unless="${param.caseType != null and param.caseType[0] != ''}">요청된 사건이 없습니다.</span>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div class="card-footer border-0 py-3" th:if="${!cases.empty}">
+                           <ul class="pagination justify-content-end mb-0" 
+                               th:with="start=${T(java.lang.Math).floor(cases.number/10)*10 + 1},
+                                        last=(${start + 9 < cases.totalPages ? start + 9 : cases.totalPages})">
+                                <li class="page-item" th:classappend="${cases.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/cases/requested(page=${cases.number - 1}, caseType=${param.caseType})}" tabindex="-1">
+                                        <i class="ti ti-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:each="page: ${#numbers.sequence(start, last)}" th:classappend="${page == cases.number + 1} ? 'active'">
+                                    <a class="page-link" th:text="${page}" th:href="@{/cases/requested(page=${page - 1}, caseType=${param.caseType})}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${cases.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/cases/requested(page=${cases.number + 1}, caseType=${param.caseType})}" tabindex="-1">
+                                        <i class="ti ti-chevron-right"></i>
+                                    </a>
+                                </li>
+                           </ul>
                         </div>
                             </div>
                         </div>
