@@ -8,6 +8,8 @@ import com.haeil.full.consultation.domain.Consultation;
 import com.haeil.full.consultation.domain.ConsultationFile;
 import com.haeil.full.consultation.domain.ConsultationNote;
 import com.haeil.full.consultation.domain.ConsultationReservation;
+import com.haeil.full.consultation.domain.type.ConsultationRequestStatus;
+import com.haeil.full.consultation.domain.type.ConsultationStatus;
 import com.haeil.full.consultation.dto.request.ApproveConsultationReservation;
 import com.haeil.full.consultation.dto.request.ConsultationNoteRequest;
 import com.haeil.full.consultation.dto.request.CreateConsultationRequest;
@@ -34,6 +36,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -65,8 +68,18 @@ public class ConsultationService {
         return ConsultationReservationResponse.from(saved);
     }
 
-    public List<ConsultationReservationResponse> getConsultationReservations() {
-        return consultationReservationRepository.findAll().stream()
+    public List<ConsultationReservationResponse> getConsultationReservations(
+            ConsultationRequestStatus status) {
+        List<ConsultationReservation> reservations;
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+
+        if (status != null) {
+            reservations = consultationReservationRepository.findByStatus(status, sort);
+        } else {
+            reservations = consultationReservationRepository.findAll(sort);
+        }
+
+        return reservations.stream()
                 .map(ConsultationReservationResponse::from)
                 .collect(Collectors.toList());
     }
@@ -150,10 +163,17 @@ public class ConsultationService {
         return ConsultationResponse.from(saved);
     }
 
-    public List<ConsultationResponse> getConsultations() {
-        return consultationRepository.findAll().stream()
-                .map(ConsultationResponse::from)
-                .collect(Collectors.toList());
+    public List<ConsultationResponse> getConsultations(ConsultationStatus status) {
+        List<Consultation> consultations;
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+
+        if (status != null) {
+            consultations = consultationRepository.findByStatus(status, sort);
+        } else {
+            consultations = consultationRepository.findAll(sort);
+        }
+
+        return consultations.stream().map(ConsultationResponse::from).collect(Collectors.toList());
     }
 
     public ConsultationResponse getConsultation(Long id) {

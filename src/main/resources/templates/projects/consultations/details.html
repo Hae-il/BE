@@ -25,21 +25,12 @@
                         <div class="col-xl-9">
                             <div class="card card-h-100 rounded-0 rounded-start">
                                 <div class="card-header align-items-start p-4">
-                                    <div class="avatar-xxl me-3">
-                                        <span class="avatar-title text-bg-light rounded">
-                                            <i class="ti ti-user fs-xxl text-primary"></i>
-                                        </span>
-                                    </div>
                                     <div>
                                         <h3 class="mb-1 d-flex fs-xl align-items-center" th:text="'C' + ${consultation.id} + ' - ' + ${consultation.clientName}"></h3>
                                         <p class="text-muted mb-2 fs-xxs" th:text="'마지막 수정: ' + ${#temporals.format(consultation.updatedAt, 'MM월 dd일 HH:mm')}"></p>
                                         <span class="badge fs-xxs badge-label" 
                                               th:text="${consultation.status.label}"
                                               th:classappend="${consultation.status.name() == 'IN_PROGRESS' ? 'badge-soft-success' : 'badge-soft-primary'}"></span>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <a href="javascript: void(0);" class="btn btn-light"><i
-                                                class="ti ti-pencil me-1"></i> 수정</a>
                                     </div>
                                 </div>
                                 <div class="card-body px-4">
@@ -315,49 +306,6 @@
                                     </div>
 
                                     <div class="p-3 border-bottom border-dashed">
-                                        <div class="d-flex mb-3 justify-content-between align-items-center">
-                                            <h5 class="mb-0">Team Members:</h5>
-                                            <a href="javascript: void(0);"
-                                                class="btn btn-light btn-sm btn-icon rounded-circle"><i
-                                                    class="ti ti-plus"></i></a>
-                                        </div>
-
-                                        <!-- 동적 팀 멤버 목록 -->
-                                        <div th:each="member : ${teamMembers}" class="d-flex justify-content-between align-items-center pb-2">
-                                            <div class="d-flex align-items-center py-1 gap-2">
-                                                <div class="avatar avatar-sm">
-                                                    <img th:src="${member.avatar != null ? member.avatar : '/images/users/user-default.jpg'}" th:alt="'avatar-' + ${member.id}"
-                                                        class="img-fluid rounded-circle">
-                                                </div>
-                                                <div>
-                                                    <h5 class="text-nowrap mb-0 lh-base"><a href="/pages/profile"
-                                                            class="link-reset" th:text="${member.name}"></a></h5>
-                                                    <p class="text-muted fs-xxs mb-0" th:text="${member.role}"></p>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <a href="#" class="btn btn-sm btn-icon btn-default" title="Message"><i
-                                                        class="ti ti-message fs-lg"></i></a>
-                                            </div>
-                                        </div>
-
-                                        
-                                        <!-- 팀 멤버가 없을 때 -->
-                                        <div th:if="${#lists.isEmpty(teamMembers)}" class="text-center py-4">
-                                            <div class="avatar-lg mx-auto mb-3">
-                                                <div class="avatar-title bg-light text-muted rounded">
-                                                    <i class="ti ti-users fs-xl"></i>
-                                                </div>
-                                            </div>
-                                            <h6 class="fs-sm">아직 팀 멤버가 없습니다</h6>
-                                            <p class="text-muted fs-xs mb-0">팀 멤버를 추가해보세요!</p>
-                                        </div>
-
-
-                                        <!-- End -->
-                                    </div>
-
-                                    <div class="px-3 pt-3 border-bottom border-dashed">
                                         <div class="d-flex mb-3 justify-content-between align-items-center">
                                             <h5 class="mb-0">Files:</h5>
                                             <button type="button" class="btn btn-light btn-sm btn-icon rounded-circle" 

@@ -17,43 +17,19 @@
                 <div class="col-12">
                     <div data-table data-table-rows-per-page="8" class="card">
                         <!-- Search, Filter, Sort ... -->
-                        <div class="card-header border-light justify-content-between">
-
-                            <div class="d-flex gap-2">
-                                <div class="app-search">
-                                    <input data-table-search type="search" class="form-control"
-                                        placeholder="고객명 검색...">
-                                    <i data-lucide="search" class="app-search-icon text-muted"></i>
-                                </div>
-                                <button data-table-delete-selected class="btn btn-danger d-none">Delete</button>
-                            </div>
-
+                        <div class="card-header border-0 justify-content-between pb-0">
                             <div class="d-flex align-items-center gap-2">
-                                <span class="me-2 fw-semibold">Filter By:</span>
-
-                                <!-- Deadline Filter -->
-                                <div class="app-search">
-                                    <select data-table-range-filter="date"
-                                        class="form-select form-control my-1 my-md-0">
-                                        <option value="All">전체상태</option>
-                                        <option value="IN_PROGRESS">상담진행</option>
-                                        <option value="COMPLETED">상담완료</option>
-                                    </select>
-                                    <i data-lucide="calendar-clock" class="app-search-icon text-muted"></i>
-                                </div>
-
-                                <!-- Records Per Page -->
-                                <div>
-                                    <select data-table-set-rows-per-page class="form-select form-control my-1 my-md-0">
-                                        <option value="5">5</option>
-                                        <option value="10">10</option>
-                                        <option value="15">15</option>
-                                        <option value="20">20</option>
-                                    </select>
-                                </div>
-
+                                <!-- Status Filter -->
+                                <form action="/consultations" method="get" id="filterForm">
+                                    <div class="app-search">
+                                        <select name="status" class="form-select form-control" onchange="this.form.submit()">
+                                            <option value="">전체 상태</option>
+                                            <option value="IN_PROGRESS" th:selected="${param.status != null and param.status[0] == 'IN_PROGRESS'}">상담진행</option>
+                                            <option value="COMPLETED" th:selected="${param.status != null and param.status[0] == 'COMPLETED'}">상담완료</option>
+                                        </select>
+                                    </div>
+                                </form>
                             </div>
-
                         </div>
 
                         <!-- Contents -->
@@ -70,18 +46,15 @@
                                 </thead>
                                 <tbody>
                                     <!-- Dynamic Rows -->
-                                    <tr th:each="consultation : ${consultations}">
+                                    <tr th:each="consultation : ${consultations}"
+                                        style="cursor: pointer;"
+                                        th:onclick="|location.href='@{/consultations/{id}(id=${consultation.id})}'|">
                                         <td>
-                                            <div class="d-flex">
-                                                <div>
-                                                    <h5 class="mb-1 d-flex align-items-center">
-                                                        <a th:text="'C' + ${consultation.id}" 
-                                                           th:href="'/consultations/' + ${consultation.id}" 
-                                                           class="link-reset"></a>
-                                                    </h5>
-                                                    <p class="text-muted mb-0 fs-xxs" th:text="'등록: ' + ${#temporals.format(consultation.createdAt, 'yyyy-MM-dd')}"></p>
-                                                </div>
-                                            </div>
+                                            <a th:text="'C' + ${consultation.id}" 
+                                               th:href="'/consultations/' + ${consultation.id}" 
+                                               class="fw-bold text-primary"></a>
+                                            <br>
+                                            <small class="text-muted" th:text="'등록: ' + ${#temporals.format(consultation.createdAt, 'yyyy-MM-dd')}"></small>
                                         </td>
                                         <td>
                                             <h5 class="mb-1" th:text="${consultation.clientName}"></h5>

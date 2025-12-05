@@ -1,6 +1,8 @@
 package com.haeil.full.consultation.controller;
 
 import com.haeil.full.consultation.domain.ConsultationFile;
+import com.haeil.full.consultation.domain.type.ConsultationRequestStatus;
+import com.haeil.full.consultation.domain.type.ConsultationStatus;
 import com.haeil.full.consultation.dto.request.ApproveConsultationReservation;
 import com.haeil.full.consultation.dto.request.ConsultationNoteRequest;
 import com.haeil.full.consultation.dto.request.CreateConsultationRequest;
@@ -60,9 +62,10 @@ public class ConsultationController {
     }
 
     @GetMapping("/reservations")
-    public String getConsultationReservations(Model model) {
+    public String getConsultationReservations(
+            @RequestParam(required = false) ConsultationRequestStatus status, Model model) {
         List<ConsultationReservationResponse> responses =
-                consultationService.getConsultationReservations();
+                consultationService.getConsultationReservations(status);
         model.addAttribute("reservations", responses);
         return "projects/consultations/reservation_list";
     }
@@ -187,8 +190,9 @@ public class ConsultationController {
     }
 
     @GetMapping
-    public String getConsultations(Model model) {
-        List<ConsultationResponse> responses = consultationService.getConsultations();
+    public String getConsultations(
+            @RequestParam(required = false) ConsultationStatus status, Model model) {
+        List<ConsultationResponse> responses = consultationService.getConsultations(status);
         model.addAttribute("consultations", responses);
         return "projects/consultations/list";
     }

@@ -25,11 +25,6 @@
                         <div class="col-xl-9">
                             <div class="card card-h-100 rounded-0 rounded-start">
                                 <div class="card-header align-items-start p-4">
-                                    <div class="avatar-xxl me-3">
-                                        <span class="avatar-title text-bg-light rounded">
-                                            <i class="ti ti-calendar-event fs-xxl text-primary"></i>
-                                        </span>
-                                    </div>
                                     <div>
                                         <h3 class="mb-1 d-flex fs-xl align-items-center" th:text="'R' + ${reservation.id} + ' - ' + ${reservation.name}"></h3>
                                         <p class="text-muted mb-2 fs-xxs" th:text="'마지막 수정: ' + ${#temporals.format(reservation.updatedAt, 'MM월 dd일 HH:mm')}"></p>
