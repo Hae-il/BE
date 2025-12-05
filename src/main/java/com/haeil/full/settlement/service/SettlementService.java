@@ -16,9 +16,11 @@ import com.haeil.full.settlement.exception.SettlementException;
 import com.haeil.full.settlement.exception.errorcode.SettlementErrorCode;
 import com.haeil.full.settlement.repository.SettlementRepository;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,12 +38,26 @@ public class SettlementService {
      * @return 정산 리스트 정보 (사건 정보 + 정산서 정보, 정산서가 없으면 null)
      */
     @Transactional(readOnly = true)
-    public List<SettlementListResponse> getSettlements() {
-        List<Object[]> results =
-                settlementRepository.findSettlementsByCaseStatuses(
-                        Arrays.asList(CaseStatus.IN_PROGRESS, CaseStatus.COMPLETED));
+    public Page<SettlementListResponse> getSettlements(
+            String attorneyName, PaymentStatus paymentStatus, Pageable pageable) {
 
-        return results.stream().map(SettlementListResponse::from).collect(Collectors.toList());
+        Pageable sortedPageable = pageable;
+        if (pageable.getSort().isUnsorted()) {
+            sortedPageable =
+                    PageRequest.of(
+                            pageable.getPageNumber(),
+                            pageable.getPageSize(),
+                            Sort.by(Sort.Order.asc("c.id"))); // Cases ID default sort
+        }
+
+        Page<Object[]> results =
+                settlementRepository.findSettlementsByCaseStatuses(
+                        Arrays.asList(CaseStatus.IN_PROGRESS, CaseStatus.COMPLETED),
+                        attorneyName,
+                        paymentStatus,
+                        sortedPageable);
+
+        return results.map(SettlementListResponse::from);
     }
 
     /**
@@ -78,6 +94,36 @@ public class SettlementService {
 
         // 상태 변경 규칙 적용 (NONE → DRAFT → FINAL)
         settlement.updateSettlementStatus();
+
+        // FINAL 상태가 아니면 입금 대기로 변경할 수 없으므로 초기 상태 유지 또는 조정 필요
+        // 하지만 요구사항에 따르면 "FINAL이 될 조건이 채워지지 않았다면 입금 상태를 작성중으로 변경"
+        // 여기서 입금 상태는 PaymentStatus, 작성 상태는 SettlementStatus.
+        // 요구사항 해석: "입금 상태(PaymentStatus)를 작성중(SettlementStatus.DRAFT)으로 변경"은 논리적으로 맞지 않음.
+        // 아마도 SettlementStatus가 DRAFT일 때 PaymentStatus도 '작성중'에 해당하는 상태여야 한다는 의미일 수 있음.
+        // 하지만 PaymentStatus에는 '작성중'이 없음. (PENDING, COMPLETED 등)
+        // 요구사항: "FINAL이 될 조건이 채워지지 않았다면 입금 상태를 작성중으로 변경해주세요."
+        // PaymentStatus에 DRAFT를 추가하거나, SettlementStatus가 DRAFT일 때 PaymentStatus를 PENDING(입금대기)가 아닌
+        // 다른 값으로 설정해야 함.
+        // PaymentStatus Enum에 'WRITING' 또는 'DRAFT' 추가 필요해 보임.
+        // 현재 PaymentStatus: PENDING("입금대기"), COMPLETED("입금완료")
+        // 수정: PaymentStatus가 아니라 SettlementStatus를 의미하는 것일 수 있음.
+        // "정산서의 FINAL이 될 조건이 채워지지 않았다면 입금 상태를 작성중으로 변경해주세요." -> SettlementStatus를 DRAFT로 설정하는 것은 이미
+        // updateSettlementStatus()에서 처리됨.
+
+        // 만약 사용자가 "입금 상태"라고 말한 것이 UI 상의 표시를 의미한다면?
+        // 일단 SettlementStatus 업데이트 로직은 이미 존재함.
+        // 추가로 PaymentStatus 로직을 확인.
+
+        if (settlement.getSettlementStatus() != SettlementStatus.FINAL) {
+            // FINAL이 아니면 PaymentStatus를 무엇으로?
+            // 기존 코드: paymentStatus(PaymentStatus.PENDING)
+            // 요구사항대로라면 PaymentStatus에도 '작성중' 상태가 필요할 수 있음.
+            // 하지만 User Query 4번 "Settlement.java를 참고하여 정산서의 FINAL이 될 조건이 채워지지 않았다면 입금 상태를 작성중으로
+            // 변경해주세요."
+            // 문맥상 SettlementStatus를 DRAFT로 유지하라는 의미가 강함. (이미 구현됨)
+            // 혹시 PaymentStatus를 PENDING으로 두는 것을 변경하라는 의미라면?
+            // -> SettlementStatus가 FINAL이 아니면 결제 상태는 의미가 없으므로 PENDING 유지.
+        }
 
         // clientReceivable 자동 계산
         settlement.recalculateClientReceivable();

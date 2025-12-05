@@ -2,9 +2,12 @@ package com.haeil.full.settlement.repository;
 
 import com.haeil.full.cases.domain.type.CaseStatus;
 import com.haeil.full.settlement.domain.Settlement;
+import com.haeil.full.settlement.domain.type.PaymentStatus;
 import com.haeil.full.user.domain.User;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,10 +22,15 @@ public interface SettlementRepository extends JpaRepository<Settlement, Long> {
     @Query(
             "SELECT c, s FROM com.haeil.full.cases.domain.Cases c "
                     + "LEFT JOIN com.haeil.full.settlement.domain.Settlement s ON s.cases.id = c.id "
+                    + "LEFT JOIN c.attorney a "
                     + "WHERE c.caseStatus IN :caseStatuses "
-                    + "ORDER BY c.createdDate DESC")
-    List<Object[]> findSettlementsByCaseStatuses(
-            @Param("caseStatuses") List<CaseStatus> caseStatuses);
+                    + "AND (:attorneyName IS NULL OR a.name LIKE %:attorneyName%) "
+                    + "AND (:paymentStatus IS NULL OR s.paymentStatus = :paymentStatus)")
+    Page<Object[]> findSettlementsByCaseStatuses(
+            @Param("caseStatuses") List<CaseStatus> caseStatuses,
+            @Param("attorneyName") String attorneyName,
+            @Param("paymentStatus") PaymentStatus paymentStatus,
+            Pageable pageable);
 
     @Query(
             "SELECT s FROM Settlement s "

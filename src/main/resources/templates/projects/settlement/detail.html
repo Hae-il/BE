@@ -1,0 +1,114 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+<head>
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('정산서 상세')}" />
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="container-fluid">
+            <th:block th:replace="~{partials/page-title :: page-title('정산서 상세', '정산 관리')}" />
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0">정산서 상세</h4>
+                            <div>
+                                <span th:if="${settlement.paymentStatus.name() == 'PENDING'}" class="badge bg-light text-secondary fs-6">입금대기</span>
+                                <span th:if="${settlement.paymentStatus.name() == 'COMPLETED'}" class="badge bg-success-subtle text-success fs-6">입금완료</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            
+                            <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-file-text me-1"></i> 기본 정보</h5>
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">사건 번호</label>
+                                    <p class="fw-bold" th:text="${settlement.caseNumber}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">의뢰인</label>
+                                    <p class="fw-bold" th:text="${clientName}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">담당 변호사</label>
+                                    <p class="fw-bold" th:text="${attorneyName}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">사건 유형</label>
+                                    <p class="fw-bold" th:text="${caseType}"></p>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-coin me-1"></i> 정산 정보</h5>
+                            
+                            <!-- 정산 정보 요약 박스 -->
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="card border bg-light">
+                                        <div class="card-body">
+                                            <div class="row mb-2">
+                                                <div class="col-6 text-muted">합의금 총액</div>
+                                                <div class="col-6 text-end fw-bold" th:text="${#numbers.formatInteger(settlement.agreementAmount, 3, 'COMMA') + ' 원'}"></div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-6 text-muted">변호사 보수 (착수금)</div>
+                                                <div class="col-6 text-end text-danger" th:text="'- ' + ${#numbers.formatInteger(settlement.attorneyFee, 3, 'COMMA') + ' 원'}"></div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-6 text-muted">실비</div>
+                                                <div class="col-6 text-end text-danger" th:text="'- ' + ${#numbers.formatInteger(settlement.expenses, 3, 'COMMA') + ' 원'}"></div>
+                                            </div>
+                                            <div class="row mb-2" th:if="${settlement.isVatIncluded}">
+                                                <div class="col-6 text-muted">VAT (10%)</div>
+                                                <div class="col-6 text-end text-danger">
+                                                    <span th:with="vat=${(settlement.attorneyFee + settlement.expenses) * 0.1}" 
+                                                          th:text="'- ' + ${#numbers.formatInteger(vat, 3, 'COMMA') + ' 원'}"></span>
+                                                </div>
+                                            </div>
+                                            <hr class="my-2">
+                                            <div class="row">
+                                                <div class="col-6 fw-bold fs-5">의뢰인 최종 수령액</div>
+                                                <div class="col-6 text-end fw-bold fs-5 text-primary" th:text="${#numbers.formatInteger(settlement.clientReceivable, 3, 'COMMA') + ' 원'}"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 날짜 정보 (박스 아래 배치) -->
+                            <div class="row mb-4">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label text-muted">작성일</label>
+                                    <p class="fw-bold" th:text="${#temporals.format(settlement.createdDate, 'yyyy-MM-dd')}"></p>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label text-muted">합의 일자</label>
+                                    <p class="fw-bold" th:text="${settlement.settlementDate != null ? #temporals.format(settlement.settlementDate, 'yyyy-MM-dd') : '-'}"></p>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label text-muted">지급 기한</label>
+                                    <p class="fw-bold" th:text="${settlement.paymentDueDate != null ? #temporals.format(settlement.paymentDueDate, 'yyyy-MM-dd') : '-'}"></p>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-note me-1"></i> 비고</h5>
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <div class="p-3 bg-light rounded border">
+                                        <p class="mb-0" th:text="${settlement.note != null && !settlement.note.isEmpty() ? settlement.note : '내용 없음'}"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <a href="/settlements" class="btn btn-light">목록으로</a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>

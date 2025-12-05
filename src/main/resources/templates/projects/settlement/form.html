@@ -1,0 +1,129 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+<head>
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('정산서 작성')}" />
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="container-fluid">
+            <th:block th:replace="~{partials/page-title :: page-title('정산서 작성', '정산 관리')}" />
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">정산서 작성</h4>
+                        </div>
+                        <div class="card-body">
+                            <form class="needs-validation" th:action="@{/settlements}" method="post" th:object="${request}" novalidate>
+                                <input type="hidden" th:field="*{caseId}">
+                                
+                                <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-file-text me-1"></i> 기본 정보</h5>
+                                <div class="row mb-4">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="caseNumber" class="form-label">사건 번호</label>
+                                        <input type="text" class="form-control" id="caseNumber" th:value="${caseNumber}" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="clientName" class="form-label">의뢰인</label>
+                                        <input type="text" class="form-control" id="clientName" th:value="${clientName}" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="attorneyName" class="form-label">담당 변호사</label>
+                                        <input type="text" class="form-control" id="attorneyName" th:value="${attorneyName}" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="caseType" class="form-label">사건 유형</label>
+                                        <input type="text" class="form-control" id="caseType" th:value="${caseType}" readonly>
+                                    </div>
+                                </div>
+
+                                <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-coin me-1"></i> 정산 정보</h5>
+                                <div class="row mb-4">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="agreementAmount" class="form-label">합의금 총액</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="agreementAmount" th:field="*{agreementAmount}">
+                                            <span class="input-group-text">원</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="attorneyFee" class="form-label">변호사 보수</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="attorneyFee" th:field="*{attorneyFee}">
+                                            <span class="input-group-text">원</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="expenses" class="form-label">실비</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="expenses" th:field="*{expenses}">
+                                            <span class="input-group-text">원</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="isVatIncluded" th:field="*{isVatIncluded}">
+                                            <label class="form-check-label" for="isVatIncluded">
+                                                VAT 10% 포함
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="settlementDate" class="form-label">합의 일자</label>
+                                        <input type="date" class="form-control" id="settlementDate" th:field="*{settlementDate}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="paymentDueDate" class="form-label">지급 기한</label>
+                                        <input type="date" class="form-control" id="paymentDueDate" th:field="*{paymentDueDate}">
+                                    </div>
+                                </div>
+
+                                <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-note me-1"></i> 비고</h5>
+                                <div class="row mb-4">
+                                    <div class="col-md-12 mb-3">
+                                        <textarea class="form-control" id="note" th:field="*{note}" rows="3" placeholder="비고 사항을 입력하세요."></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <a href="/settlements" class="btn btn-light">취소</a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="ti ti-check me-1"></i> 정산서 작성 완료
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <th:block layout:fragment="javascripts">
+        <script>
+            // Bootstrap Validation Loop
+            (function () {
+                'use strict'
+                
+                var forms = document.querySelectorAll('.needs-validation')
+                
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+                            
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
+        </script>
+    </th:block>
+</body>
+</html>
+
