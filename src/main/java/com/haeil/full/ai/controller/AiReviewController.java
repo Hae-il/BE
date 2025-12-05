@@ -19,6 +19,6 @@ public class AiReviewController {
     public String reviewPetitionByCaseId(@PathVariable Long caseId, Model model) {
         String result = aiReviewService.reviewPetition(caseId);
         model.addAttribute("reviewResult", result);
-        return "case/review-result";
+        return "projects/cases/review-result";
     }
 }

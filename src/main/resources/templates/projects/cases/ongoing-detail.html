@@ -16,9 +16,6 @@
                                     <div class="card-header align-items-start p-4">
                                         <div class="d-flex align-items-center w-100">
                                             <div class="avatar-xxl me-3">
-                                                <span class="avatar-title text-bg-light rounded">
-                                                    <i class="ti ti-briefcase fs-36 text-primary"></i>
-                                                </span>
                                             </div>
                                             <div class="flex-grow-1">
                                                 <input type="text" class="form-control-plaintext fs-xl fw-bold mb-2 editable-input" name="title" th:value="${case.title}" placeholder="사건명" readonly>
@@ -181,11 +178,6 @@
                                                     <i class="ti ti-upload me-1"></i> 소송문서 업로드
                                                 </button>
 
-                                                <!-- 종결보고서 작성 -->
-                                                <button type="button" class="btn btn-outline-secondary">
-                                                    <i class="ti ti-check me-1"></i> 종결보고서 작성
-                                                </button>
-                                                
                                                 <a href="/cases/ongoing" class="btn btn-light mt-2">
                                                     <i class="ti ti-arrow-left me-1"></i> 목록으로
                                                 </a>
@@ -225,9 +217,12 @@
                     </div>
                     <form id="petitionForm" th:action="${case.petition != null} ? @{/cases/ongoing/{id}/petition/update(id=${case.caseId})} : @{/cases/ongoing/{id}/petition(id=${case.caseId})}" method="post">
                         <div class="modal-body">
-                            <div class="mb-3 text-end">
+                            <div class="mb-3 d-flex justify-content-end gap-2">
                                 <button type="button" class="btn btn-info btn-sm" id="btn-ai-draft">
                                     <i class="ti ti-robot me-1"></i> AI 초안 생성
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="submitAiReview()">
+                                    <i class="ti ti-gavel me-1"></i> AI 법률 검토
                                 </button>
                             </div>
                             
@@ -363,8 +358,23 @@
 
         <!-- 문서 삭제용 히든 폼 -->
         <form id="deleteDocumentForm" method="post"></form>
+        
+        <!-- AI 법률 검토용 히든 폼 -->
+        <form id="aiReviewForm" method="post"></form>
 
         <script th:inline="javascript">
+            function submitAiReview() {
+                const caseId = [[${case.caseId}]];
+                // 소장이 저장되어 있는지 확인 (간단히 check if petition exists in model, or simple alert)
+                // 여기서는 그냥 보냅니다. 서비스에서 없으면 에러가 날 것입니다.
+                // 사용자 경험을 위해 저장 여부를 묻는 것이 좋을 수 있습니다.
+                if (confirm('현재 저장된 소장 내용을 바탕으로 법률 검토를 진행합니다.\n소장 내용을 수정하셨다면 먼저 [저장] 버튼을 눌러주세요.\n계속 진행하시겠습니까?')) {
+                    const form = document.getElementById('aiReviewForm');
+                    form.action = '/ai/review/' + caseId;
+                    form.submit();
+                }
+            }
+
             function deleteDocument(caseId, docId) {
                 if (confirm('정말 삭제하시겠습니까?')) {
                     const form = document.getElementById('deleteDocumentForm');

@@ -1,0 +1,38 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/vertical}">
+<head>
+    <th:block layout:fragment="page-meta" th:replace="~{partials/page-meta :: page-meta('AI 소장 법률 검토 결과')}" />
+</head>
+<body>
+    <th:block layout:fragment="content">
+        <div class="container-fluid">
+            <th:block th:replace="~{partials/page-title :: page-title('AI 소장 법률 검토 결과', 'AI 서비스')}" />
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">법률 검토 리포트</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info" role="alert">
+                                <i class="ti ti-info-circle me-1"></i>
+                                이 결과는 AI에 의해 생성된 법률 검토 의견입니다. 실제 법적 판단과는 다를 수 있으므로 참고용으로만 활용하시기 바랍니다.
+                            </div>
+                            
+                            <div class="p-4 bg-light rounded border">
+                                <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit; font-size: 0.95rem; line-height: 1.6;" th:text="${reviewResult}"></pre>
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="button" class="btn btn-primary" onclick="history.back()">
+                                    <i class="ti ti-arrow-left me-1"></i> 돌아가기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </th:block>
+</body>
+</html>
