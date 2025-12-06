@@ -75,13 +75,13 @@
                                         <li class="nav-item">
                                             <a class="nav-link" data-bs-toggle="tab" href="#tasks" role="tab">
                                                 <i class="ti ti-list-check fs-lg me-md-1 align-middle"></i>
-                                                <span class="d-none d-md-inline-block align-middle">Task List</span>
+                                                <span class="d-none d-md-inline-block align-middle">처리 현황</span>
                                             </a>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link" data-bs-toggle="tab" href="#activity" role="tab">
                                                 <i class="ti ti-activity fs-lg me-md-1 align-middle"></i>
-                                                <span class="d-none d-md-inline-block align-middle">Activity</span>
+                                                <span class="d-none d-md-inline-block align-middle">처리 이력</span>
                                             </a>
                                         </li>
                                     </ul>
@@ -159,114 +159,69 @@
                                         </div>
 
                                         <div class="tab-pane fade" id="tasks" role="tabpanel">
-                                            <!-- 동적 작업 목록 -->
-                                            <div th:each="task : ${tasks}" class="card mb-1">
-                                                <div class="card-body p-2">
-                                                    <div class="row g-3 align-items-center justify-content-between">
-                                                        <div class="col-md-6">
-                                                            <div class="d-flex align-items-center gap-2">
-                                                                <input type="checkbox"
-                                                                    class="form-check-input rounded-circle mt-0 fs-xl"
-                                                                    th:id="'task' + ${task.id}"
-                                                                    th:checked="${task.completed}">
-                                                                <a href="#!" data-bs-toggle="offcanvas" role="button"
-                                                                    class="link-reset fw-medium" th:text="${task.title}"></a>
+                                            <!-- 처리 현황 -->
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <div class="card border-dashed">
+                                                        <div class="card-body p-3">
+                                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                <h6 class="fs-sm text-muted mb-0">처리 상태</h6>
+                                                                <span class="badge" 
+                                                                      th:text="${consultation.status.label}"
+                                                                      th:classappend="${consultation.status.name() == 'COMPLETED' ? 'badge-soft-success' : 'badge-soft-primary'}"></span>
                                                             </div>
+                                                            <div class="progress mb-2" style="height: 8px;">
+                                                                <div class="progress-bar" role="progressbar" 
+                                                                     th:style="'width: ' + ${consultation.status.name() == 'COMPLETED' ? '100' : '50'} + '%'"
+                                                                     th:classappend="${consultation.status.name() == 'COMPLETED' ? 'bg-success' : 'bg-primary'}"></div>
+                                                            </div>
+                                                            <small class="text-muted" th:text="'최종 업데이트: ' + ${#temporals.format(consultation.updatedAt, 'yyyy년 MM월 dd일 HH:mm')}"></small>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <div
-                                                                class="d-flex align-items-center gap-3 justify-content-md-end">
-                                                                <div class="d-flex align-items-center gap-1">
-                                                                    <div class="avatar avatar-xs">
-                                                                        <img th:src="${task.assigneeAvatar != null ? task.assigneeAvatar : '/images/users/user-default.jpg'}"
-                                                                            th:alt="'avatar-' + ${task.assigneeId}"
-                                                                            class="img-fluid rounded-circle">
-                                                                    </div>
-                                                                    <div>
-                                                                        <h5 class="text-nowrap mb-0 lh-base"><a
-                                                                                href="/pages/profile" class="link-reset" th:text="${task.assigneeName}"></a></h5>
-                                                                    </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-12">
+                                                    <div class="card border-dashed">
+                                                        <div class="card-body p-3">
+                                                            <h6 class="fs-sm text-muted mb-2">담당 변호사</h6>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="avatar avatar-sm me-2">
+                                                                    <span class="avatar-title bg-primary text-white rounded-circle">
+                                                                        <i class="ti ti-user"></i>
+                                                                    </span>
                                                                 </div>
-
-                                                                <div class="flex-shrink-0">
-                                                                    <span
-                                                                        th:class="'badge badge-label ' + ${task.statusClass}"
-                                                                        th:text="${task.statusText}"></span>
+                                                                <div>
+                                                                    <p class="mb-0 fw-medium" th:text="${consultation.counselorName}"></p>
+                                                                    <small class="text-muted">담당 변호사</small>
                                                                 </div>
-
-                                                                <ul
-                                                                    class="list-inline fs-base text-end flex-shrink-0 mb-0">
-                                                                    <li class="list-inline-item">
-                                                                        <i
-                                                                            class="ti ti-calendar text-muted fs-lg me-1 align-middle"></i>
-                                                                        <span class="fw-semibold" th:text="${#temporals.format(task.dueDate, 'MM월 dd일')}"></span>
-                                                                    </li>
-                                                                    <li class="list-inline-item ms-1">
-                                                                        <i
-                                                                            class="ti ti-list-details text-muted fs-lg me-1 align-middle"></i>
-                                                                        <span class="fw-medium" th:text="${task.completedCount} + '/' + ${task.totalCount}"></span>
-                                                                    </li>
-                                                                    <li class="list-inline-item ms-1">
-                                                                        <i
-                                                                            class="ti ti-message text-muted fs-lg me-1 align-middle"></i>
-                                                                        <span class="fw-medium" th:text="${task.commentCount}"></span>
-                                                                    </li>
-                                                                </ul>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            
-                                            <!-- 작업이 없을 때 -->
-                                            <div th:if="${#lists.isEmpty(tasks)}" class="text-center py-5">
-                                                <div class="avatar-xl mx-auto mb-4">
-                                                    <div class="avatar-title bg-light text-muted rounded">
-                                                        <i class="ti ti-list-check fs-2"></i>
-                                                    </div>
-                                                </div>
-                                                <h5 class="fs-md">아직 작업이 없습니다</h5>
-                                                <p class="text-muted">첫 번째 작업을 추가해보세요!</p>
-                                            </div>
-
-
                                         </div>
 
                                         <div class="tab-pane fade" id="activity" role="tabpanel">
 
-                                            <!-- 동적 활동 목록 -->
-                                            <div th:each="activity : ${activities}" class="d-flex gap-1 border-bottom border-dashed py-3">
-                                                <div class="me-2 flex-shrink-0">
-                                                    <img th:src="${activity.userAvatar != null ? activity.userAvatar : '/images/users/user-default.jpg'}"
-                                                        class="avatar-md rounded-circle" alt="">
-                                                </div>
-                                                <div class="flex-grow-1 text-muted">
-                                                    <span class="fw-medium text-body" th:text="${activity.userName}"></span>
-                                                    <span th:text="${activity.action}"></span>
-                                                    <p class="fs-xs mb-0 text-body-secondary" th:text="${#temporals.format(activity.createdDate, 'MM월 dd일 HH:mm')}"></p>
-                                                    
-                                                    <!-- 링크나 추가 내용이 있는 경우 -->
-                                                    <div th:if="${activity.content}" class="mt-2">
-                                                        <div th:if="${activity.activityType == 'MESSAGE'}" class="py-2 px-3 bg-light bg-opacity-50" th:text="${activity.content}">
-                                                        </div>
-                                                        <a th:if="${activity.activityType == 'LINK'}" href="#!" class="btn btn-default border px-1 py-0">
-                                                            <i class="ti ti-link me-1"></i> 보기
-                                                        </a>
+                                            <!-- 처리 이력 -->
+                                            <div class="timeline">
+                                                <div class="timeline-item">
+                                                    <div class="timeline-marker bg-primary"></div>
+                                                    <div class="timeline-content">
+                                                        <h6 class="timeline-title">상담 시작</h6>
+                                                        <p class="timeline-text" th:text="${consultation.clientName} + '님과의 상담이 시작되었습니다.'"></p>
+                                                        <small class="timeline-time text-muted" th:text="${#temporals.format(consultation.createdAt, 'yyyy년 MM월 dd일 HH:mm')}"></small>
                                                     </div>
                                                 </div>
-                                                <p class="fs-xs flex-shrink-0 text-body-secondary" th:text="${activity.timeAgo}"></p>
-                                            </div>
-
-                                            <!-- 활동이 없을 때 -->
-                                            <div th:if="${#lists.isEmpty(activities)}" class="text-center py-5">
-                                                <div class="avatar-xl mx-auto mb-4">
-                                                    <div class="avatar-title bg-light text-muted rounded">
-                                                        <i class="ti ti-activity fs-2"></i>
+                                                
+                                                <div th:if="${consultation.status.name() == 'COMPLETED'}" class="timeline-item">
+                                                    <div class="timeline-marker bg-success"></div>
+                                                    <div class="timeline-content">
+                                                        <h6 class="timeline-title">상담 완료</h6>
+                                                        <p class="timeline-text">상담이 성공적으로 완료되었습니다.</p>
+                                                        <small class="timeline-time text-muted" th:text="${#temporals.format(consultation.updatedAt, 'yyyy년 MM월 dd일 HH:mm')}"></small>
                                                     </div>
                                                 </div>
-                                                <h5 class="fs-md">아직 활동이 없습니다</h5>
-                                                <p class="text-muted">상담이 시작되면 활동 내역이 여기에 표시됩니다.</p>
                                             </div>
 
                                         </div>

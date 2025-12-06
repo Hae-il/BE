@@ -39,7 +39,7 @@ public class SettlementController {
 
             try {
                 CaseInfoResponse caseInfo = casesService.getCaseInfo(caseId);
-                model.addAttribute("clientName", "-"); // CaseInfoResponse에 clientName 없음
+                model.addAttribute("clientName", caseInfo.clientName());
                 model.addAttribute("attorneyName", caseInfo.attorneyName());
                 model.addAttribute("caseType", caseInfo.caseType());
             } catch (Exception e) {
@@ -92,7 +92,7 @@ public class SettlementController {
             if (response.getCaseId() != null) {
                 CaseInfoResponse caseInfo = casesService.getCaseInfo(response.getCaseId());
 
-                model.addAttribute("clientName", "-"); // CaseInfoResponse에 clientName 없음
+                model.addAttribute("clientName", caseInfo.clientName());
                 model.addAttribute("attorneyName", caseInfo.attorneyName());
                 model.addAttribute("caseType", caseInfo.caseType());
             } else {
@@ -144,7 +144,7 @@ public class SettlementController {
                 CaseInfoResponse caseInfo = casesService.getCaseInfo(caseId);
 
                 model.addAttribute("caseNumber", "C" + caseId);
-                model.addAttribute("clientName", "-"); // CaseInfoResponse에 clientName 없음
+                model.addAttribute("clientName", caseInfo.clientName());
                 model.addAttribute("attorneyName", caseInfo.attorneyName());
                 model.addAttribute("caseType", caseInfo.caseType());
             }

@@ -244,11 +244,18 @@
                                                   th:classappend="${reservation.status.name() == 'APPROVED' ? 'badge-soft-success' : 
                                                                   (reservation.status.name() == 'PENDING' ? 'badge-soft-warning' : 'badge-soft-secondary')}"></span>
                                                                   
-                                            <!-- 상담 시작 버튼 (예약 승인된 경우) -->
-                                            <a th:if="${reservation.status.name() == 'APPROVED'}" 
+                                            <!-- 상담 시작 버튼 (예약 승인된 경우, 아직 상담이 시작되지 않은 경우에만 표시) -->
+                                            <a th:if="${reservation.status.name() == 'APPROVED' and reservation.consultationId == null}" 
                                                th:href="@{/consultations/new(reservationId=${reservation.id})}" 
                                                class="btn btn-primary w-100">
                                                 <i class="ti ti-player-play me-1"></i> 상담 시작
+                                            </a>
+                                            
+                                            <!-- 상담 진행 중/완료 표시 (상담이 이미 시작된 경우) -->
+                                            <a th:if="${reservation.consultationId != null}" 
+                                               th:href="@{'/consultations/' + ${reservation.consultationId}}" 
+                                               class="btn btn-outline-primary w-100">
+                                                <i class="ti ti-arrow-right me-1"></i> 상담 상세 보기
                                             </a>
                                         </div>
                                     </div>

@@ -34,8 +34,10 @@ import com.haeil.full.user.repository.UserRepository;
 import com.haeil.full.user.service.UserService;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -91,7 +93,15 @@ public class ConsultationService {
                                         new ConsultationException(
                                                 ConsultationErrorCode
                                                         .CONSULTATION_RESERVATION_NOT_FOUND));
-        return ConsultationReservationResponse.from(consultationReservation);
+        ConsultationReservationResponse response =
+                ConsultationReservationResponse.from(consultationReservation);
+
+        // 해당 예약으로 생성된 상담이 있는지 확인
+        consultationRepository
+                .findByConsultationReservation_Id(id)
+                .ifPresent(consultation -> response.setConsultationId(consultation.getId()));
+
+        return response;
     }
 
     @Transactional
@@ -132,6 +142,20 @@ public class ConsultationService {
     // Consultation Management Methods
     @Transactional
     public ConsultationResponse createConsultation(CreateConsultationRequest request) {
+        Client client = clientService.getClient(request.getClient());
+        User counselor = userService.getUser(request.getCounselorId());
+
+        // 이미 해당 예약에 대한 상담이 존재하는지 확인 (1차 체크)
+        Optional<Consultation> existingConsultation =
+                consultationRepository.findByConsultationReservation_Id(request.getReservationId());
+
+        if (existingConsultation.isPresent()) {
+            Consultation existing = existingConsultation.get();
+            existing.update(client, counselor, request.getConsultationDate());
+            existing.startConsultation();
+            return ConsultationResponse.from(existing);
+        }
+
         ConsultationReservation reservation =
                 consultationReservationRepository
                         .findById(request.getReservationId())
@@ -146,9 +170,6 @@ public class ConsultationService {
                     ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_APPROVED);
         }
 
-        Client client = clientService.getClient(request.getClient());
-        User counselor = userService.getUser(request.getCounselorId());
-
         Consultation consultation =
                 Consultation.builder()
                         .consultationReservation(reservation)
@@ -157,8 +178,22 @@ public class ConsultationService {
                         .consultationDate(request.getConsultationDate())
                         .build();
 
-        Consultation saved = consultationRepository.save(consultation);
-        return ConsultationResponse.from(saved);
+        try {
+            Consultation saved = consultationRepository.save(consultation);
+            return ConsultationResponse.from(saved);
+        } catch (DataIntegrityViolationException e) {
+            // 동시 요청 등으로 인한 중복 발생 시, 기존 상담 조회하여 업데이트 후 반환
+            Consultation existing =
+                    consultationRepository
+                            .findByConsultationReservation_Id(request.getReservationId())
+                            .orElseThrow(
+                                    () ->
+                                            new ConsultationException(
+                                                    ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+            existing.update(client, counselor, request.getConsultationDate());
+            existing.startConsultation();
+            return ConsultationResponse.from(existing);
+        }
     }
 
     public Page<ConsultationResponse> getConsultations(

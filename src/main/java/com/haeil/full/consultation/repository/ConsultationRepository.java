@@ -16,4 +16,6 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
     Page<Consultation> findByStatus(ConsultationStatus status, Pageable pageable);
 
     Page<Consultation> findAll(Pageable pageable);
+
+    java.util.Optional<Consultation> findByConsultationReservation_Id(Long reservationId);
 }
