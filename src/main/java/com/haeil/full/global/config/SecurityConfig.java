@@ -58,8 +58,8 @@ public class SecurityConfig {
                                                 "/cases/ongoing/**",
                                                 "/cases/completed/**")
                                         .hasAnyRole("ATTORNEY", "ADMIN")
-                                        .requestMatchers("/consultations/**")
-                                        .hasAnyRole("SECRETARY", "ATTORNEY", "COUNSEL", "ADMIN")
+                                        .requestMatchers("/settlements/**")
+                                        .hasAnyRole("SECRETARY", "ACCOUNT", "ADMIN")
                                         .anyRequest()
                                         .authenticated())
                 .addFilterBefore(
