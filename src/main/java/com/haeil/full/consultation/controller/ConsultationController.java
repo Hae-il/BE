@@ -10,10 +10,18 @@ import com.haeil.full.consultation.dto.response.ConsultationNoteResponse;
 import com.haeil.full.consultation.dto.response.ConsultationReservationResponse;
 import com.haeil.full.consultation.dto.response.ConsultationResponse;
 import com.haeil.full.consultation.service.ConsultationService;
+import com.haeil.full.file.domain.FileEntity;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,6 +32,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
+import java.nio.charset.StandardCharsets;
 
 @RequestMapping("/consultations")
 @Controller
@@ -326,6 +336,36 @@ public class ConsultationController {
         } catch (Exception e) {
             model.addAttribute("error", "파일 목록 조회 중 오류가 발생했습니다: " + e.getMessage());
             return "projects/consultations/details";
+        }
+    }
+
+    @GetMapping("/files/{fileId}/download")
+    public ResponseEntity<Resource> downloadConsultationFile(@PathVariable Long fileId) {
+        try {
+            ConsultationFile consultationFile = consultationService.getConsultationFileById(fileId);
+            FileEntity file = consultationFile.getFile();
+            
+            Path filePath = Paths.get(file.getFileUrl());
+            Resource resource = new UrlResource(filePath.toUri());
+            
+            if (!resource.exists() || !resource.isReadable()) {
+                throw new RuntimeException("파일을 찾을 수 없거나 읽을 수 없습니다.");
+            }
+            
+            String contentType = file.getContentType();
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+            
+            String encodedFileName = UriUtils.encode(file.getOriginalFilename(), StandardCharsets.UTF_8);
+            
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, 
+                            "attachment; filename=\"" + encodedFileName + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            throw new RuntimeException("파일 다운로드 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
 

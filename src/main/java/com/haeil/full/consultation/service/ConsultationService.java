@@ -299,6 +299,12 @@ public class ConsultationService {
         return consultationFileRepository.findByConsultationId(consultationId);
     }
 
+    public ConsultationFile getConsultationFileById(Long fileId) {
+        return consultationFileRepository
+                .findById(fileId)
+                .orElseThrow(() -> new RuntimeException("파일을 찾을 수 없습니다."));
+    }
+
     @Transactional
     public ConsultationResponse updateCounselor(Long consultationId, Long newCounselorId) {
         Consultation consultation =
