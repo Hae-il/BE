@@ -167,6 +167,11 @@ public class ConsultationController {
                 request.setConsultationDate(reservation.getRequestedDate());
                 request.getClient().setName(reservation.getName());
                 request.getClient().setPhone(reservation.getPhone());
+
+                // Add display attributes
+                model.addAttribute("reservationNumber", "R" + reservationId);
+                model.addAttribute("counselorName", reservation.getAssignedLawyerName());
+
             } catch (Exception e) {
                 // 예약 정보를 찾을 수 없는 경우 무시하고 빈 폼 출력
             }
