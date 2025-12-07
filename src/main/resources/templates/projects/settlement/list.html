@@ -84,14 +84,22 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <a th:if="${settlement.settlementId == null}" 
-                                               th:href="@{/settlements/new(caseId=${settlement.caseId}, caseNumber=${settlement.caseNumber})}" 
-                                               class="btn btn-sm btn-soft-primary"
-                                               th:classappend="${!#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')') ? 'disabled' : ''}">작성</a>
-                                            <a th:if="${settlement.settlementId != null and settlement.settlementStatus != null and settlement.settlementStatus.name() != 'FINAL'}" 
-                                               th:href="@{|/settlements/${settlement.settlementId}/edit|}" 
-                                               class="btn btn-sm btn-soft-warning"
-                                               th:classappend="${!#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')') ? 'disabled' : ''}">작성</a>
+                                            <th:block th:if="${settlement.settlementId == null}">
+                                                <a th:if="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                   th:href="@{/settlements/new(caseId=${settlement.caseId}, caseNumber=${settlement.caseNumber})}" 
+                                                   class="btn btn-sm btn-soft-primary">작성</a>
+                                                <button th:unless="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                        type="button" class="btn btn-sm btn-light disabled" disabled>작성</button>
+                                            </th:block>
+
+                                            <th:block th:if="${settlement.settlementId != null and settlement.settlementStatus != null and settlement.settlementStatus.name() != 'FINAL'}">
+                                                <a th:if="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                   th:href="@{|/settlements/${settlement.settlementId}/edit|}" 
+                                                   class="btn btn-sm btn-soft-warning">작성</a>
+                                                <button th:unless="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                        type="button" class="btn btn-sm btn-light disabled" disabled>작성</button>
+                                            </th:block>
+
                                             <a th:if="${settlement.settlementId != null and settlement.settlementStatus != null and settlement.settlementStatus.name() == 'FINAL'}" 
                                                th:href="@{|/settlements/${settlement.settlementId}|}" 
                                                class="btn btn-sm btn-soft-info">보기</a>

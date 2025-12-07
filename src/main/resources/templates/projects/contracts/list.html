@@ -66,7 +66,7 @@
                                             <select class="form-select form-select-sm status-select"
                                                     style="width: 140px;"
                                                     th:data-id="${contract.contractId}"
-                                                    th:disabled="${contract.contractId == null}"
+                                                    th:disabled="${contract.contractId == null or !#authorization.expression('hasAnyRole(''ACCOUNT'', ''ADMIN'')')}"
                                                     th:classappend="${contract.status != null ? 
                                                         (contract.status.name() == 'AWAITING' ? 'status-awaiting' : 
                                                         (contract.status.name() == 'PENDING' ? 'status-pending' : 
@@ -80,9 +80,13 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <a th:if="${contract.contractId == null}" 
-                                               th:href="@{/contracts/new(caseId=${contract.caseId}, caseNumber=${contract.caseNumber})}" 
-                                               class="btn btn-sm btn-soft-primary">작성</a>
+                                            <th:block th:if="${contract.contractId == null}">
+                                                <a th:if="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                   th:href="@{/contracts/new(caseId=${contract.caseId}, caseNumber=${contract.caseNumber})}" 
+                                                   class="btn btn-sm btn-soft-primary">작성</a>
+                                                <button th:unless="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                        type="button" class="btn btn-sm btn-light disabled" disabled>작성</button>
+                                            </th:block>
                                             <a th:unless="${contract.contractId == null}" 
                                                th:href="@{|/contracts/${contract.contractId}|}" 
                                                class="btn btn-sm btn-soft-info">보기</a>
