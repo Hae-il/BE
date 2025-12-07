@@ -3,7 +3,9 @@ package com.haeil.full.user.service;
 import com.haeil.full.consultation.exception.ConsultationException;
 import com.haeil.full.consultation.exception.errorcode.ConsultationErrorCode;
 import com.haeil.full.user.domain.User;
+import com.haeil.full.user.domain.type.Role;
 import com.haeil.full.user.repository.UserRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,5 +27,9 @@ public class UserService {
         return userRepository
                 .findByEmail(email)
                 .orElseThrow(() -> new ConsultationException(ConsultationErrorCode.USER_NOT_FOUND));
+    }
+
+    public List<User> getUsersByRole(Role role) {
+        return userRepository.findAllByRole(role);
     }
 }

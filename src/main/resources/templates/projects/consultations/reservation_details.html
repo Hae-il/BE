@@ -35,7 +35,7 @@
                                     </div>
                                     <div class="ms-auto">
                                         <div th:if="${reservation.status.name() == 'PENDING'}" class="d-flex gap-2">
-                                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveModal">
+                                            <button type="button" class="btn btn-success" onclick="openApproveModal()">
                                                 <i class="ti ti-check me-1"></i> 승인
                                             </button>
                                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
@@ -314,11 +314,13 @@
                     </div>
                     <form th:action="@{'/consultations/reservations/' + ${reservation.id} + '/approve'}" method="post" th:object="${approveRequest}">
                         <div class="modal-body">
-                            <p>해당 상담 예약을 승인하시겠습니까?</p>
+                            <p>해당 상담 예약을 승인하고 담당 변호사를 배정하시겠습니까?</p>
                             <div class="mb-3">
-                                <label for="lawyerId" class="form-label">담당 변호사 ID</label>
-                                <input type="number" class="form-control" id="lawyerId" th:field="*{lawyerId}" required placeholder="변호사 ID 입력">
-                                <div class="form-text">임시: 변호사 ID를 직접 입력해주세요.</div>
+                                <label for="lawyerId" class="form-label">담당 변호사</label>
+                                <select class="form-select" id="lawyerId" th:field="*{lawyerId}" required>
+                                    <option value="">변호사를 선택하세요</option>
+                                    <!-- Options will be populated via AJAX -->
+                                </select>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -329,6 +331,34 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            function openApproveModal() {
+                const select = document.getElementById('lawyerId');
+                
+                // Only fetch if not already populated (or always fetch to be fresh)
+                if (select.options.length <= 1) {
+                    fetch('/api/users/counsels')
+                        .then(response => response.json())
+                        .then(data => {
+                            select.innerHTML = '<option value="">변호사를 선택하세요</option>';
+                            data.forEach(attorney => {
+                                const option = document.createElement('option');
+                                option.value = attorney.id;
+                                option.textContent = `${attorney.name} (ID: ${attorney.id})`;
+                                select.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching counsels:', error);
+                            alert('변호사 목록을 불러오는데 실패했습니다.');
+                        });
+                }
+                
+                const modal = new bootstrap.Modal(document.getElementById('approveModal'));
+                modal.show();
+            }
+        </script>
 
         <!-- Reject Reason Modal -->
         <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
