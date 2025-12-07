@@ -17,7 +17,7 @@
                                         <div class="d-flex align-items-center w-100">
                                             <div class="avatar-xxl me-3">
                                             </div>
-                                            <div class="flex-grow-1">
+                                            <div class="flex-grow-1" style="margin-left: -50px;">
                                                 <input type="text" class="form-control-plaintext fs-xl fw-bold mb-2 editable-input" name="title" th:value="${case.title}" placeholder="사건명" readonly>
                                                 <p class="text-muted mb-2 fs-xxs" th:text="'마지막 수정: ' + ${#temporals.format(case.modifiedDate, 'MM월 dd일 HH:mm')}"></p>
                                                 <div class="d-flex align-items-center gap-2">
@@ -221,7 +221,7 @@
                                 <button type="button" class="btn btn-info btn-sm" id="btn-ai-draft">
                                     <i class="ti ti-robot me-1"></i> AI 초안 생성
                                 </button>
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="submitAiReview()">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="submitAiReview(this)">
                                     <i class="ti ti-gavel me-1"></i> AI 법률 검토
                                 </button>
                             </div>
@@ -363,12 +363,34 @@
         <form id="aiReviewForm" method="post"></form>
 
         <script th:inline="javascript">
-            function submitAiReview() {
+            function submitAiReview(btn) {
                 const caseId = [[${case.caseId}]];
-                // 소장이 저장되어 있는지 확인 (간단히 check if petition exists in model, or simple alert)
-                // 여기서는 그냥 보냅니다. 서비스에서 없으면 에러가 날 것입니다.
-                // 사용자 경험을 위해 저장 여부를 묻는 것이 좋을 수 있습니다.
+                const hasPetition = [[${case.petition != null}]];
+                
+                if (!hasPetition) {
+                    alert('소장을 먼저 작성해주세요.');
+                    return;
+                }
+
                 if (confirm('현재 저장된 소장 내용을 바탕으로 법률 검토를 진행합니다.\n소장 내용을 수정하셨다면 먼저 [저장] 버튼을 눌러주세요.\n계속 진행하시겠습니까?')) {
+                    // Loading UI
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 검토 중...';
+                    }
+                    
+                    // Full screen loading overlay
+                    const overlay = document.createElement('div');
+                    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1060; display: flex; justify-content: center; align-items: center; flex-direction: column;';
+                    overlay.innerHTML = `
+                        <div class="spinner-border text-light mb-3" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <h4 class="text-white">AI 법률 검토 중입니다...</h4>
+                        <p class="text-white-50">잠시만 기다려주세요.</p>
+                    `;
+                    document.body.appendChild(overlay);
+
                     const form = document.getElementById('aiReviewForm');
                     form.action = '/ai/review/' + caseId;
                     form.submit();
