@@ -26,8 +26,14 @@ public class JwtAuthFilter extends GenericFilterBean {
 
         // 유효성 검사 후 SecurityContext에 저장
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            try {
+                Authentication authentication = jwtTokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (Exception e) {
+                // 토큰은 유효하나 사용자를 찾을 수 없는 경우 (DB 초기화 등)
+                // 인증 정보를 설정하지 않고 넘어감 -> 로그인 페이지로 리다이렉트 되거나 401 처리됨
+                SecurityContextHolder.clearContext();
+            }
         }
 
         // 다음 필터로 넘어가기

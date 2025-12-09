@@ -73,6 +73,7 @@
                                                             (settlement.paymentStatus.name() == 'PENDING' ? 'status-pending' : 
                                                             (settlement.paymentStatus.name() == 'COMPLETED' ? 'status-completed' : '')) 
                                                             : 'bg-light'}"
+                                                        th:disabled="${!#authorization.expression('hasAnyRole(''ACCOUNT'', ''ADMIN'')')}"
                                                         onchange="updateSettlementStatus(this)">
                                                     <option value="PENDING" th:selected="${settlement.paymentStatus != null and settlement.paymentStatus.name() == 'PENDING'}" class="bg-white text-dark">입금대기</option>
                                                     <option value="COMPLETED" th:selected="${settlement.paymentStatus != null and settlement.paymentStatus.name() == 'COMPLETED'}" class="bg-white text-dark">입금완료</option>
@@ -83,14 +84,24 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <a th:if="${settlement.settlementId == null}" 
-                                               th:href="@{/settlements/new(caseId=${settlement.caseId}, caseNumber=${settlement.caseNumber})}" 
-                                               class="btn btn-sm btn-soft-primary">작성</a>
-                                            <a th:if="${settlement.settlementId != null and settlement.settlementStatus != null and settlement.settlementStatus.name() != 'FINAL'}" 
-                                               th:href="@{/settlements/{id}/edit(id=${settlement.settlementId})}" 
-                                               class="btn btn-sm btn-soft-warning">작성</a>
+                                            <th:block th:if="${settlement.settlementId == null}">
+                                                <a th:if="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                   th:href="@{/settlements/new(caseId=${settlement.caseId}, caseNumber=${settlement.caseNumber})}" 
+                                                   class="btn btn-sm btn-soft-primary">작성</a>
+                                                <button th:unless="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                        type="button" class="btn btn-sm btn-light disabled" disabled>작성</button>
+                                            </th:block>
+
+                                            <th:block th:if="${settlement.settlementId != null and settlement.settlementStatus != null and settlement.settlementStatus.name() != 'FINAL'}">
+                                                <a th:if="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                   th:href="@{|/settlements/${settlement.settlementId}/edit|}" 
+                                                   class="btn btn-sm btn-soft-warning">작성</a>
+                                                <button th:unless="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                        type="button" class="btn btn-sm btn-light disabled" disabled>작성</button>
+                                            </th:block>
+
                                             <a th:if="${settlement.settlementId != null and settlement.settlementStatus != null and settlement.settlementStatus.name() == 'FINAL'}" 
-                                               th:href="@{/settlements/{id}(id=${settlement.settlementId})}" 
+                                               th:href="@{|/settlements/${settlement.settlementId}|}" 
                                                class="btn btn-sm btn-soft-info">보기</a>
                                         </td>
                                         <td th:text="${settlement.paymentDueDate}">-</td>
@@ -102,7 +113,7 @@
                             </table>
                         </div>
                         
-                        <div class="card-footer border-0 py-3">
+                        <div class="card-footer border-0 py-3" th:if="${!settlements.empty}">
                            <ul class="pagination justify-content-end mb-0" 
                                th:with="start=${T(java.lang.Math).floor(settlements.number/10)*10 + 1},
                                         last=(${start + 9 < settlements.totalPages ? start + 9 : settlements.totalPages})">

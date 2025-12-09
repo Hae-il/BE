@@ -23,27 +23,26 @@
                                 <h5 class="mb-3 text-uppercase bg-light p-2"><i class="ti ti-calendar-event me-1"></i> 기본 정보</h5>
                                 <div class="row mb-4">
                                     <div class="col-md-6 mb-3 position-relative">
-                                        <label for="reservationId" class="form-label">예약 번호 (ID) <span class="text-danger">*</span></label>
+                                        <label for="reservationDisplay" class="form-label">예약 번호 <span class="text-danger">*</span></label>
                                         <div class="input-group has-validation">
                                             <span class="input-group-text">#</span>
-                                            <input type="number" class="form-control" id="reservationId" th:field="*{reservationId}" required placeholder="예약 승인된 번호 입력">
-                                            <div class="invalid-tooltip">
-                                                유효한 예약 번호를 입력해주세요.
-                                            </div>
+                                            <!-- Display Input -->
+                                            <input type="text" class="form-control" id="reservationDisplay" 
+                                                   th:value="${reservationNumber}" readonly disabled>
+                                            <!-- Hidden ID Input -->
+                                            <input type="hidden" id="reservationId" th:field="*{reservationId}">
                                         </div>
-                                        <div class="form-text">승인된 예약 번호가 필요합니다.</div>
-                                        <div class="text-danger" th:if="${#fields.hasErrors('reservationId')}" th:errors="*{reservationId}"></div>
                                     </div>
                                     <div class="col-md-6 mb-3 position-relative">
-                                        <label for="counselorId" class="form-label">담당 변호사 ID <span class="text-danger">*</span></label>
+                                        <label for="counselorDisplay" class="form-label">담당 변호사 <span class="text-danger">*</span></label>
                                         <div class="input-group has-validation">
                                             <span class="input-group-text"><i class="ti ti-user-check"></i></span>
-                                            <input type="number" class="form-control" id="counselorId" th:field="*{counselorId}" required>
-                                            <div class="invalid-tooltip">
-                                                담당 변호사 ID를 입력해주세요.
-                                            </div>
+                                            <!-- Display Input -->
+                                            <input type="text" class="form-control" id="counselorDisplay" 
+                                                   th:value="${counselorName}" readonly disabled>
+                                            <!-- Hidden ID Input -->
+                                            <input type="hidden" id="counselorId" th:field="*{counselorId}">
                                         </div>
-                                        <div class="text-danger" th:if="${#fields.hasErrors('counselorId')}" th:errors="*{counselorId}"></div>
                                     </div>
                                     <div class="col-md-6 mb-3 position-relative">
                                         <label for="consultationDate" class="form-label">상담 일시</label>

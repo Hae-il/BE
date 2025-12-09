@@ -16,9 +16,6 @@
                                     <div class="card-header align-items-start p-4">
                                         <div class="d-flex align-items-start w-100">
                                             <div class="avatar-xxl me-3">
-                                                <span class="avatar-title text-bg-light rounded">
-                                                    <i class="ti ti-briefcase fs-36 text-primary"></i>
-                                                </span>
                                             </div>
                                             <div class="flex-grow-1">
                                                 <input type="text" class="form-control-plaintext fs-xl fw-bold mb-2 editable-input" name="title" th:value="${case.title}" placeholder="사건명" readonly>
@@ -94,7 +91,7 @@
                                         <div class="p-3 border-bottom border-dashed">
                                             <h5 class="mb-3">관리</h5>
                                             <div class="d-grid gap-2">
-                                                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#assignModal">
+                                                <button class="btn btn-primary" type="button" onclick="openAssignModal()">
                                                     <i class="ti ti-user-plus me-1"></i> 변호사 배정
                                                 </button>
                                                 <a href="/cases/unassigned" class="btn btn-light">
@@ -121,11 +118,13 @@
                     </div>
                     <form th:action="@{/cases/unassigned/{id}/assign(id=${case.caseId})}" method="post">
                         <div class="modal-body">
-                            <p>해당 사건에 변호사를 배정하시겠습니까?</p>
+                            <p>해당 사건에 배정할 담당 변호사를 선택해주세요.</p>
                             <div class="mb-3">
-                                <label for="attorneyId" class="form-label">담당 변호사 ID</label>
-                                <input type="number" class="form-control" id="attorneyId" name="attorneyId" required placeholder="변호사 ID 입력">
-                                <div class="form-text">임시: 변호사 ID를 직접 입력해주세요.</div>
+                                <label for="attorneyId" class="form-label">담당 변호사</label>
+                                <select class="form-select" id="attorneyId" name="attorneyId" required>
+                                    <option value="">변호사를 선택하세요</option>
+                                    <!-- Options will be populated via AJAX -->
+                                </select>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -138,6 +137,32 @@
         </div>
 
         <script>
+            function openAssignModal() {
+                const select = document.getElementById('attorneyId');
+                
+                // Only fetch if not already populated (or always fetch to be fresh)
+                if (select.options.length <= 1) {
+                    fetch('/api/users/attorneys')
+                        .then(response => response.json())
+                        .then(data => {
+                            select.innerHTML = '<option value="">변호사를 선택하세요</option>';
+                            data.forEach(attorney => {
+                                const option = document.createElement('option');
+                                option.value = attorney.id;
+                                option.textContent = `${attorney.name} (ID: ${attorney.id})`;
+                                select.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching attorneys:', error);
+                            alert('변호사 목록을 불러오는데 실패했습니다.');
+                        });
+                }
+                
+                const modal = new bootstrap.Modal(document.getElementById('assignModal'));
+                modal.show();
+            }
+
             function enableEditMode() {
                 // Text inputs and textareas
                 document.querySelectorAll('.editable-input').forEach(el => {

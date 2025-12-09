@@ -16,11 +16,8 @@
                                     <div class="card-header align-items-start p-4">
                                         <div class="d-flex align-items-center w-100">
                                             <div class="avatar-xxl me-3">
-                                                <span class="avatar-title text-bg-light rounded">
-                                                    <i class="ti ti-briefcase fs-36 text-primary"></i>
-                                                </span>
                                             </div>
-                                            <div class="flex-grow-1">
+                                            <div class="flex-grow-1" style="margin-left: -50px;">
                                                 <input type="text" class="form-control-plaintext fs-xl fw-bold mb-2 editable-input" name="title" th:value="${case.title}" placeholder="사건명" readonly>
                                                 <p class="text-muted mb-2 fs-xxs" th:text="'마지막 수정: ' + ${#temporals.format(case.modifiedDate, 'MM월 dd일 HH:mm')}"></p>
                                                 <div class="d-flex align-items-center gap-2">
@@ -181,11 +178,6 @@
                                                     <i class="ti ti-upload me-1"></i> 소송문서 업로드
                                                 </button>
 
-                                                <!-- 종결보고서 작성 -->
-                                                <button type="button" class="btn btn-outline-secondary">
-                                                    <i class="ti ti-check me-1"></i> 종결보고서 작성
-                                                </button>
-                                                
                                                 <a href="/cases/ongoing" class="btn btn-light mt-2">
                                                     <i class="ti ti-arrow-left me-1"></i> 목록으로
                                                 </a>
@@ -206,6 +198,17 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <div class="p-3">
+                                            <h5 class="mb-3">사건 완료</h5>
+                                            <button type="button" class="btn btn-soft-success w-100" onclick="completeCase()">
+                                                <i class="ti ti-check me-1"></i> 사건 완료 처리
+                                            </button>
+                                            <p class="text-muted fs-xs mt-2 mb-0">
+                                                * 모든 소송 절차가 종료되면 완료 처리하세요.<br>
+                                                * 완료된 사건은 '완료된 사건' 메뉴로 이동합니다.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -214,6 +217,9 @@
                 </div>
             </div>
         </div>
+        
+        <!-- 사건 완료 처리 폼 -->
+        <form id="completeCaseForm" method="post"></form>
         
         <!-- 소장 작성/수정 모달 -->
         <div class="modal fade" id="petitionModal" tabindex="-1" aria-labelledby="petitionModalLabel" aria-hidden="true">
@@ -225,9 +231,12 @@
                     </div>
                     <form id="petitionForm" th:action="${case.petition != null} ? @{/cases/ongoing/{id}/petition/update(id=${case.caseId})} : @{/cases/ongoing/{id}/petition(id=${case.caseId})}" method="post">
                         <div class="modal-body">
-                            <div class="mb-3 text-end">
+                            <div class="mb-3 d-flex justify-content-end gap-2">
                                 <button type="button" class="btn btn-info btn-sm" id="btn-ai-draft">
                                     <i class="ti ti-robot me-1"></i> AI 초안 생성
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="submitAiReview(this)">
+                                    <i class="ti ti-gavel me-1"></i> AI 법률 검토
                                 </button>
                             </div>
                             
@@ -363,8 +372,45 @@
 
         <!-- 문서 삭제용 히든 폼 -->
         <form id="deleteDocumentForm" method="post"></form>
+        
+        <!-- AI 법률 검토용 히든 폼 -->
+        <form id="aiReviewForm" method="post"></form>
 
         <script th:inline="javascript">
+            function submitAiReview(btn) {
+                const caseId = [[${case.caseId}]];
+                const hasPetition = [[${case.petition != null}]];
+                
+                if (!hasPetition) {
+                    alert('소장을 먼저 작성해주세요.');
+                    return;
+                }
+
+                if (confirm('현재 저장된 소장 내용을 바탕으로 법률 검토를 진행합니다.\n소장 내용을 수정하셨다면 먼저 [저장] 버튼을 눌러주세요.\n계속 진행하시겠습니까?')) {
+                    // Loading UI
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 검토 중...';
+                    }
+                    
+                    // Full screen loading overlay
+                    const overlay = document.createElement('div');
+                    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1060; display: flex; justify-content: center; align-items: center; flex-direction: column;';
+                    overlay.innerHTML = `
+                        <div class="spinner-border text-light mb-3" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <h4 class="text-white">AI 법률 검토 중입니다...</h4>
+                        <p class="text-white-50">잠시만 기다려주세요.</p>
+                    `;
+                    document.body.appendChild(overlay);
+
+                    const form = document.getElementById('aiReviewForm');
+                    form.action = '/ai/review/' + caseId;
+                    form.submit();
+                }
+            }
+
             function deleteDocument(caseId, docId) {
                 if (confirm('정말 삭제하시겠습니까?')) {
                     const form = document.getElementById('deleteDocumentForm');
@@ -441,6 +487,15 @@
 
             function submitForm() {
                 document.getElementById('caseForm').submit();
+            }
+
+            function completeCase() {
+                if (confirm('이 사건을 완료 처리하시겠습니까?\n완료된 사건은 수정이 불가능하며, 완료된 사건 목록으로 이동합니다.')) {
+                    const form = document.getElementById('completeCaseForm');
+                    const caseId = [[${case.caseId}]];
+                    form.action = '/cases/ongoing/' + caseId + '/complete';
+                    form.submit();
+                }
             }
         </script>
     </th:block>

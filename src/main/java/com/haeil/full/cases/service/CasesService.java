@@ -7,6 +7,7 @@ import com.haeil.full.cases.domain.CaseEvent;
 import com.haeil.full.cases.domain.Cases;
 import com.haeil.full.cases.domain.Petition;
 import com.haeil.full.cases.domain.type.CaseStatus;
+import com.haeil.full.cases.domain.type.CaseType;
 import com.haeil.full.cases.dto.request.AssignAttorneyRequest;
 import com.haeil.full.cases.dto.request.CaseDocumentRequest;
 import com.haeil.full.cases.dto.request.CaseEventRequest;
@@ -46,6 +47,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -89,10 +92,10 @@ public class CasesService {
 
     // 미배정 사건 목록조회
     @Transactional(readOnly = true)
-    public List<UnassignedCaseResponse> getUnassignedCases() {
-        return casesRepository.findByCaseStatus(CaseStatus.UNASSIGNED).stream()
-                .map(UnassignedCaseResponse::from)
-                .toList();
+    public Page<UnassignedCaseResponse> getUnassignedCases(CaseType caseType, Pageable pageable) {
+        return casesRepository
+                .findByCaseStatusAndCaseType(CaseStatus.UNASSIGNED, caseType, pageable)
+                .map(UnassignedCaseResponse::from);
     }
 
     // 미배정사건 상세보기
@@ -156,15 +159,17 @@ public class CasesService {
 
     // 요청된 사건 목록조회
     @Transactional(readOnly = true)
-    public List<RequestedCaseResponse> getRequestedCases(Long userId) {
+    public Page<RequestedCaseResponse> getRequestedCases(
+            Long userId, CaseType caseType, Pageable pageable) {
         User attorney =
                 userRepository
                         .findById(userId)
                         .orElseThrow(() -> new CasesException(CasesErrorCode.ATTORNEY_NOT_FOUND));
 
-        return casesRepository.findByCaseStatusAndAttorney(CaseStatus.PENDING, attorney).stream()
-                .map(RequestedCaseResponse::from)
-                .toList();
+        return casesRepository
+                .findByCaseStatusAndAttorneyAndCaseType(
+                        CaseStatus.PENDING, attorney, caseType, pageable)
+                .map(RequestedCaseResponse::from);
     }
 
     // 요청된 사건 상세보기
@@ -258,17 +263,17 @@ public class CasesService {
 
     // 진행중인 사건 목록조회
     @Transactional(readOnly = true)
-    public List<OngoingCaseResponse> getOngoingCases(Long userId) {
+    public Page<OngoingCaseResponse> getOngoingCases(
+            Long userId, CaseType caseType, Pageable pageable) {
         User attorney =
                 userRepository
                         .findById(userId)
                         .orElseThrow(() -> new CasesException(CasesErrorCode.ATTORNEY_NOT_FOUND));
 
         return casesRepository
-                .findByCaseStatusAndAttorney(CaseStatus.IN_PROGRESS, attorney)
-                .stream()
-                .map(OngoingCaseResponse::from)
-                .toList();
+                .findByCaseStatusAndAttorneyAndCaseType(
+                        CaseStatus.IN_PROGRESS, attorney, caseType, pageable)
+                .map(OngoingCaseResponse::from);
     }
 
     // 진행중인 사건 상세보기
@@ -564,15 +569,17 @@ public class CasesService {
 
     // 완료된 사건 목록조회
     @Transactional(readOnly = true)
-    public List<CompletedCaseResponse> getCompletedCases(Long userId) {
+    public Page<CompletedCaseResponse> getCompletedCases(
+            Long userId, CaseType caseType, Pageable pageable) {
         User attorney =
                 userRepository
                         .findById(userId)
                         .orElseThrow(() -> new CasesException(CasesErrorCode.ATTORNEY_NOT_FOUND));
 
-        return casesRepository.findByCaseStatusAndAttorney(CaseStatus.COMPLETED, attorney).stream()
-                .map(CompletedCaseResponse::from)
-                .toList();
+        return casesRepository
+                .findByCaseStatusAndAttorneyAndCaseType(
+                        CaseStatus.COMPLETED, attorney, caseType, pageable)
+                .map(CompletedCaseResponse::from);
     }
 
     // 완료된 사건 상세보기

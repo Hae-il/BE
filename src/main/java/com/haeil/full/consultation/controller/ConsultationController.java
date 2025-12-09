@@ -1,6 +1,8 @@
 package com.haeil.full.consultation.controller;
 
 import com.haeil.full.consultation.domain.ConsultationFile;
+import com.haeil.full.consultation.domain.type.ConsultationRequestStatus;
+import com.haeil.full.consultation.domain.type.ConsultationStatus;
 import com.haeil.full.consultation.dto.request.ApproveConsultationReservation;
 import com.haeil.full.consultation.dto.request.ConsultationNoteRequest;
 import com.haeil.full.consultation.dto.request.CreateConsultationRequest;
@@ -17,6 +19,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -70,9 +76,12 @@ public class ConsultationController {
     }
 
     @GetMapping("/reservations")
-    public String getConsultationReservations(Model model) {
-        List<ConsultationReservationResponse> responses =
-                consultationService.getConsultationReservations();
+    public String getConsultationReservations(
+            @RequestParam(required = false) ConsultationRequestStatus status,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            Model model) {
+        Page<ConsultationReservationResponse> responses =
+                consultationService.getConsultationReservations(status, pageable);
         model.addAttribute("reservations", responses);
         return "projects/consultations/reservation_list";
     }
@@ -168,6 +177,11 @@ public class ConsultationController {
                 request.setConsultationDate(reservation.getRequestedDate());
                 request.getClient().setName(reservation.getName());
                 request.getClient().setPhone(reservation.getPhone());
+
+                // Add display attributes
+                model.addAttribute("reservationNumber", "R" + reservationId);
+                model.addAttribute("counselorName", reservation.getAssignedLawyerName());
+
             } catch (Exception e) {
                 // 예약 정보를 찾을 수 없는 경우 무시하고 빈 폼 출력
             }
@@ -197,8 +211,12 @@ public class ConsultationController {
     }
 
     @GetMapping
-    public String getConsultations(Model model) {
-        List<ConsultationResponse> responses = consultationService.getConsultations();
+    public String getConsultations(
+            @RequestParam(required = false) ConsultationStatus status,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            Model model) {
+        Page<ConsultationResponse> responses =
+                consultationService.getConsultations(status, pageable);
         model.addAttribute("consultations", responses);
         return "projects/consultations/list";
     }
@@ -344,24 +362,24 @@ public class ConsultationController {
         try {
             ConsultationFile consultationFile = consultationService.getConsultationFileById(fileId);
             FileEntity file = consultationFile.getFile();
-            
+
             Path filePath = Paths.get(file.getFileUrl());
             Resource resource = new UrlResource(filePath.toUri());
-            
+
             if (!resource.exists() || !resource.isReadable()) {
                 throw new RuntimeException("파일을 찾을 수 없거나 읽을 수 없습니다.");
             }
-            
+
             String contentType = file.getContentType();
             if (contentType == null) {
                 contentType = "application/octet-stream";
             }
-            
+
             String encodedFileName = UriUtils.encode(file.getOriginalFilename(), StandardCharsets.UTF_8);
-            
+
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, 
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
                             "attachment; filename=\"" + encodedFileName + "\"")
                     .body(resource);
         } catch (Exception e) {

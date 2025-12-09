@@ -47,7 +47,7 @@ public class SettlementService {
                     PageRequest.of(
                             pageable.getPageNumber(),
                             pageable.getPageSize(),
-                            Sort.by(Sort.Order.asc("c.id"))); // Cases ID default sort
+                            Sort.by(Sort.Order.desc("c.id"))); // Cases ID default sort
         }
 
         Page<Object[]> results =
