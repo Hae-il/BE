@@ -81,10 +81,10 @@
                                         </td>
                                         <td>
                                             <th:block th:if="${contract.contractId == null}">
-                                                <a th:if="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                <a th:if="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'', ''ACCOUNT'')')}"
                                                    th:href="@{/contracts/new(caseId=${contract.caseId}, caseNumber=${contract.caseNumber})}" 
                                                    class="btn btn-sm btn-soft-primary">작성</a>
-                                                <button th:unless="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'')')}"
+                                                <button th:unless="${#authorization.expression('hasAnyRole(''SECRETARY'', ''ADMIN'', ''ACCOUNT'')')}"
                                                         type="button" class="btn btn-sm btn-light disabled" disabled>작성</button>
                                             </th:block>
                                             <a th:unless="${contract.contractId == null}" 
