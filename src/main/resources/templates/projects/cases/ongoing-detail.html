@@ -198,6 +198,17 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <div class="p-3">
+                                            <h5 class="mb-3">사건 완료</h5>
+                                            <button type="button" class="btn btn-soft-success w-100" onclick="completeCase()">
+                                                <i class="ti ti-check me-1"></i> 사건 완료 처리
+                                            </button>
+                                            <p class="text-muted fs-xs mt-2 mb-0">
+                                                * 모든 소송 절차가 종료되면 완료 처리하세요.<br>
+                                                * 완료된 사건은 '완료된 사건' 메뉴로 이동합니다.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -206,6 +217,9 @@
                 </div>
             </div>
         </div>
+        
+        <!-- 사건 완료 처리 폼 -->
+        <form id="completeCaseForm" method="post"></form>
         
         <!-- 소장 작성/수정 모달 -->
         <div class="modal fade" id="petitionModal" tabindex="-1" aria-labelledby="petitionModalLabel" aria-hidden="true">
@@ -473,6 +487,15 @@
 
             function submitForm() {
                 document.getElementById('caseForm').submit();
+            }
+
+            function completeCase() {
+                if (confirm('이 사건을 완료 처리하시겠습니까?\n완료된 사건은 수정이 불가능하며, 완료된 사건 목록으로 이동합니다.')) {
+                    const form = document.getElementById('completeCaseForm');
+                    const caseId = [[${case.caseId}]];
+                    form.action = '/cases/ongoing/' + caseId + '/complete';
+                    form.submit();
+                }
             }
         </script>
     </th:block>
