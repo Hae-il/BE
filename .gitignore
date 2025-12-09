@@ -1,3 +1,5 @@
+uploads/*
+
 # Environment files
 .env
 .env.local

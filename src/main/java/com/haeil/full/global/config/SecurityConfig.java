@@ -47,6 +47,7 @@ public class SecurityConfig {
                                                 "/css/**",
                                                 "/js/**",
                                                 "/images/**",
+                                                "/plugins/**",
                                                 "/webjars/**",
                                                 // Public MVC pages
                                                 "/",

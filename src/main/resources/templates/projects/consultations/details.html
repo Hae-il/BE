@@ -493,66 +493,84 @@
 
     </th:block>
 
-    <!-- Dropzone Plugin Js -->
-    <script src="/plugins/dropzone/dropzone-min.js"></script>
-    
-    <script>
-        // Bootstrap Validation Loop
-        (function () {
-            'use strict'
-            var forms = document.querySelectorAll('.needs-validation')
-            Array.prototype.slice.call(forms).forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })()
-
-        // Dropzone 설정
-        Dropzone.autoDiscover = false;
+    <th:block layout:fragment="javascripts">
+        <!-- Dropzone Plugin Js -->
+        <script src="/plugins/dropzone/dropzone-min.js"></script>
         
-        let myDropzone;
-        document.addEventListener('DOMContentLoaded', function() {
-            const fileUploadForm = document.getElementById('fileUploadForm');
-            if (fileUploadForm) {
-                myDropzone = new Dropzone("#fileUploadForm", {
-                    // url 속성은 form의 action 속성 사용
-                    paramName: "file",
-                    maxFilesize: 10, // MB
-                    maxFiles: 10,
-                    acceptedFiles: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.txt",
-                    dictDefaultMessage: "파일을 여기에 드롭하거나 클릭하여 업로드하세요.",
-                    dictRemoveFile: "삭제",
-                    dictCancelUpload: "취소",
-                    addRemoveLinks: true,
-                    success: function(file, response) {
-                        console.log("업로드 성공");
-                        // 파일 업로드 성공 시 페이지 새로고침하여 목록 갱신
-                        location.reload();
-                    },
-                    error: function(file, errorMessage) {
-                        console.error("업로드 실패:", errorMessage);
-                        alert("파일 업로드 중 오류가 발생했습니다: " + errorMessage);
-                    }
-                });
-            }
-            
-            // 모달이 닫힐 때 Dropzone 초기화
-            const fileUploadModal = document.getElementById('fileUploadModal');
-            if (fileUploadModal) {
-                fileUploadModal.addEventListener('hidden.bs.modal', function() {
-                    if (myDropzone) {
-                        myDropzone.removeAllFiles(true);
-                    }
-                });
-            }
-        });
-    </script>
+        <script>
+            // Bootstrap Validation Loop
+            (function () {
+                'use strict'
+                var forms = document.querySelectorAll('.needs-validation')
+                Array.prototype.slice.call(forms).forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+            })()
 
+            // Dropzone 설정
+            Dropzone.autoDiscover = false;
+            
+            let myDropzone;
+            document.addEventListener('DOMContentLoaded', function() {
+                const fileUploadForm = document.getElementById('fileUploadForm');
+                if (fileUploadForm) {
+                    myDropzone = new Dropzone("#fileUploadForm", {
+                        // url 속성은 form의 action 속성 사용
+                        paramName: "file",
+                        maxFilesize: 10, // MB
+                        maxFiles: 10,
+                        acceptedFiles: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.txt",
+                        dictDefaultMessage: "파일을 여기에 드롭하거나 클릭하여 업로드하세요.",
+                        dictRemoveFile: "삭제",
+                        dictCancelUpload: "취소",
+                        addRemoveLinks: true,
+                        autoProcessQueue: true, // 자동으로 파일을 업로드
+                        uploadMultiple: false, // 파일을 하나씩 업로드
+                        parallelUploads: 1,
+                        success: function(file, response) {
+                            console.log("업로드 성공:", response);
+                            // 파일 업로드 성공 시 페이지 새로고침하여 목록 갱신
+                            setTimeout(function() {
+                                location.reload();
+                            }, 500);
+                        },
+                        error: function(file, errorMessage, xhr) {
+                            console.error("업로드 실패:", errorMessage);
+                            let message = "파일 업로드 중 오류가 발생했습니다";
+                            if (typeof errorMessage === 'string') {
+                                message += ": " + errorMessage;
+                            } else if (errorMessage.message) {
+                                message += ": " + errorMessage.message;
+                            }
+                            alert(message);
+                            myDropzone.removeFile(file);
+                        },
+                        init: function() {
+                            this.on("sending", function(file, xhr, formData) {
+                                console.log("파일 전송 시작:", file.name);
+                            });
+                        }
+                    });
+                }
+                
+                // 모달이 닫힐 때 Dropzone 초기화
+                const fileUploadModal = document.getElementById('fileUploadModal');
+                if (fileUploadModal) {
+                    fileUploadModal.addEventListener('hidden.bs.modal', function() {
+                        if (myDropzone) {
+                            myDropzone.removeAllFiles(true);
+                        }
+                    });
+                }
+            });
+        </script>
+    </th:block>
 
 </body>
 
