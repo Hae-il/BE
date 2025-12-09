@@ -88,4 +88,10 @@ public class Consultation extends BaseEntity {
         }
         this.counselor = newCounselor;
     }
+
+    public void update(Client client, User counselor, LocalDateTime consultationDate) {
+        this.client = client;
+        this.counselor = counselor;
+        this.consultationDate = consultationDate;
+    }
 }

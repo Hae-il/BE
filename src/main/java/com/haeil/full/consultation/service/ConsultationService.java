@@ -8,6 +8,8 @@ import com.haeil.full.consultation.domain.Consultation;
 import com.haeil.full.consultation.domain.ConsultationFile;
 import com.haeil.full.consultation.domain.ConsultationNote;
 import com.haeil.full.consultation.domain.ConsultationReservation;
+import com.haeil.full.consultation.domain.type.ConsultationRequestStatus;
+import com.haeil.full.consultation.domain.type.ConsultationStatus;
 import com.haeil.full.consultation.dto.request.ApproveConsultationReservation;
 import com.haeil.full.consultation.dto.request.ConsultationNoteRequest;
 import com.haeil.full.consultation.dto.request.CreateConsultationRequest;
@@ -32,8 +34,12 @@ import com.haeil.full.user.repository.UserRepository;
 import com.haeil.full.user.service.UserService;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -65,10 +71,17 @@ public class ConsultationService {
         return ConsultationReservationResponse.from(saved);
     }
 
-    public List<ConsultationReservationResponse> getConsultationReservations() {
-        return consultationReservationRepository.findAll().stream()
-                .map(ConsultationReservationResponse::from)
-                .collect(Collectors.toList());
+    public Page<ConsultationReservationResponse> getConsultationReservations(
+            ConsultationRequestStatus status, Pageable pageable) {
+        Page<ConsultationReservation> reservations;
+
+        if (status != null) {
+            reservations = consultationReservationRepository.findByStatus(status, pageable);
+        } else {
+            reservations = consultationReservationRepository.findAll(pageable);
+        }
+
+        return reservations.map(ConsultationReservationResponse::from);
     }
 
     public ConsultationReservationResponse getConsultationRequest(Long id) {
@@ -80,7 +93,15 @@ public class ConsultationService {
                                         new ConsultationException(
                                                 ConsultationErrorCode
                                                         .CONSULTATION_RESERVATION_NOT_FOUND));
-        return ConsultationReservationResponse.from(consultationReservation);
+        ConsultationReservationResponse response =
+                ConsultationReservationResponse.from(consultationReservation);
+
+        // 해당 예약으로 생성된 상담이 있는지 확인
+        consultationRepository
+                .findByConsultationReservation_Id(id)
+                .ifPresent(consultation -> response.setConsultationId(consultation.getId()));
+
+        return response;
     }
 
     @Transactional
@@ -121,6 +142,20 @@ public class ConsultationService {
     // Consultation Management Methods
     @Transactional
     public ConsultationResponse createConsultation(CreateConsultationRequest request) {
+        Client client = clientService.getClient(request.getClient());
+        User counselor = userService.getUser(request.getCounselorId());
+
+        // 이미 해당 예약에 대한 상담이 존재하는지 확인 (1차 체크)
+        Optional<Consultation> existingConsultation =
+                consultationRepository.findByConsultationReservation_Id(request.getReservationId());
+
+        if (existingConsultation.isPresent()) {
+            Consultation existing = existingConsultation.get();
+            existing.update(client, counselor, request.getConsultationDate());
+            existing.startConsultation();
+            return ConsultationResponse.from(existing);
+        }
+
         ConsultationReservation reservation =
                 consultationReservationRepository
                         .findById(request.getReservationId())
@@ -135,9 +170,6 @@ public class ConsultationService {
                     ConsultationErrorCode.CONSULTATION_RESERVATION_NOT_APPROVED);
         }
 
-        Client client = clientService.getClient(request.getClient());
-        User counselor = userService.getUser(request.getCounselorId());
-
         Consultation consultation =
                 Consultation.builder()
                         .consultationReservation(reservation)
@@ -146,14 +178,35 @@ public class ConsultationService {
                         .consultationDate(request.getConsultationDate())
                         .build();
 
-        Consultation saved = consultationRepository.save(consultation);
-        return ConsultationResponse.from(saved);
+        try {
+            Consultation saved = consultationRepository.save(consultation);
+            return ConsultationResponse.from(saved);
+        } catch (DataIntegrityViolationException e) {
+            // 동시 요청 등으로 인한 중복 발생 시, 기존 상담 조회하여 업데이트 후 반환
+            Consultation existing =
+                    consultationRepository
+                            .findByConsultationReservation_Id(request.getReservationId())
+                            .orElseThrow(
+                                    () ->
+                                            new ConsultationException(
+                                                    ConsultationErrorCode.CONSULTATION_NOT_FOUND));
+            existing.update(client, counselor, request.getConsultationDate());
+            existing.startConsultation();
+            return ConsultationResponse.from(existing);
+        }
     }
 
-    public List<ConsultationResponse> getConsultations() {
-        return consultationRepository.findAll().stream()
-                .map(ConsultationResponse::from)
-                .collect(Collectors.toList());
+    public Page<ConsultationResponse> getConsultations(
+            ConsultationStatus status, Pageable pageable) {
+        Page<Consultation> consultations;
+
+        if (status != null) {
+            consultations = consultationRepository.findByStatus(status, pageable);
+        } else {
+            consultations = consultationRepository.findAll(pageable);
+        }
+
+        return consultations.map(ConsultationResponse::from);
     }
 
     public ConsultationResponse getConsultation(Long id) {

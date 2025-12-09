@@ -19,6 +19,18 @@ public class ClientService {
         if (request.getResidentNumber() != null) {
             return clientRepository
                     .findByResidentNumber(request.getResidentNumber())
+                    .map(
+                            client -> {
+                                client.update(
+                                        request.getName(),
+                                        request.getEmail(),
+                                        request.getPhone(),
+                                        request.getAddress(),
+                                        request.getBirthDate(),
+                                        request.getGender(),
+                                        request.getJobTitle());
+                                return client;
+                            })
                     .orElseGet(() -> createNewClient(request));
         }
         return createNewClient(request);

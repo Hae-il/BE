@@ -42,7 +42,7 @@ public class AuthService {
                         .build());
 
         if (role == Role.ROLE_CLIENT) {
-            clientRepository.save(Client.clientSignupBuilder().name(name).email(email).build());
+            clientRepository.save(Client.builder().name(name).email(email).build());
         }
     }
 

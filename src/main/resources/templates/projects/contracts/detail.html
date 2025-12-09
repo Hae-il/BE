@@ -11,7 +11,10 @@
                 <div class="col-lg-10">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="card-title mb-0">수임계약서 상세</h4>
+                            <div>
+                                <h4 class="card-title mb-0">수임계약서 상세</h4>
+                                <small class="text-muted" th:text="'작성일: ' + ${#temporals.format(contract.createdAt, 'yyyy-MM-dd')}"></small>
+                            </div>
                             <div>
                                 <span th:if="${contract.status.name() == 'AWAITING'}" class="badge bg-warning-subtle text-warning fs-6">수임대기</span>
                                 <span th:if="${contract.status.name() == 'PENDING'}" class="badge bg-light text-secondary fs-6">입금대기</span>

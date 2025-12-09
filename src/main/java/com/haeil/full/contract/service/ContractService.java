@@ -63,7 +63,7 @@ public class ContractService {
                             pageable.getPageNumber(),
                             pageable.getPageSize(),
                             org.springframework.data.domain.Sort.by(
-                                    org.springframework.data.domain.Sort.Order.asc("id")));
+                                    org.springframework.data.domain.Sort.Order.desc("id")));
         }
 
         Page<Cases> casesPage = casesRepository.findByContractStatus(status, sortedPageable);

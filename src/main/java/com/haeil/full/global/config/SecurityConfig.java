@@ -2,6 +2,7 @@ package com.haeil.full.global.config;
 
 import com.haeil.full.auth.filter.JwtAuthFilter;
 import com.haeil.full.auth.util.JwtTokenProvider;
+import com.haeil.full.global.exception.handler.CustomAccessDeniedHandler;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(
@@ -34,6 +36,9 @@ public class SecurityConfig {
                         session ->
                                 session.sessionCreationPolicy(
                                         SessionCreationPolicy.STATELESS)) // JWT이므로 STATELESS 유지
+                .exceptionHandling(
+                        exceptionHandling ->
+                                exceptionHandling.accessDeniedHandler(customAccessDeniedHandler))
                 .authorizeHttpRequests(
                         authorize ->
                                 authorize
@@ -60,6 +65,10 @@ public class SecurityConfig {
                                         .hasAnyRole("ATTORNEY", "ADMIN")
                                         .requestMatchers("/consultations/**")
                                         .hasAnyRole("SECRETARY", "ATTORNEY", "COUNSEL", "ADMIN")
+                                        .requestMatchers("/settlements/**")
+                                        .hasAnyRole("SECRETARY", "ACCOUNT", "ADMIN")
+                                        .requestMatchers("/contracts/**")
+                                        .hasAnyRole("SECRETARY", "ACCOUNT", "ADMIN")
                                         .anyRequest()
                                         .authenticated())
                 .addFilterBefore(

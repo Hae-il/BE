@@ -1,9 +1,7 @@
 package com.haeil.full.settlement.controller;
 
-import com.haeil.full.cases.domain.Cases;
-import com.haeil.full.cases.exception.CasesException;
-import com.haeil.full.cases.exception.errorcode.CasesErrorCode;
-import com.haeil.full.cases.repository.CasesRepository;
+import com.haeil.full.cases.dto.response.CaseInfoResponse;
+import com.haeil.full.cases.service.CasesService;
 import com.haeil.full.settlement.domain.type.PaymentStatus;
 import com.haeil.full.settlement.domain.type.SettlementStatus;
 import com.haeil.full.settlement.dto.request.CreateSettlementRequest;
@@ -20,6 +18,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @RequestMapping("/settlements")
 @Controller
@@ -27,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class SettlementController {
 
     private final SettlementService settlementService;
-    private final CasesRepository casesRepository;
+    private final CasesService casesService;
 
     @GetMapping("/new")
     public String settlementForm(
@@ -38,18 +37,17 @@ public class SettlementController {
         if (caseId != null) {
             request.setCaseId(caseId);
 
-            Cases cases =
-                    casesRepository
-                            .findById(caseId)
-                            .orElseThrow(() -> new CasesException(CasesErrorCode.CASE_NOT_FOUND));
-
-            model.addAttribute(
-                    "clientName", cases.getClient() != null ? cases.getClient().getName() : "-");
-            model.addAttribute(
-                    "attorneyName",
-                    cases.getAttorney() != null ? cases.getAttorney().getName() : "-");
-            model.addAttribute(
-                    "caseType", cases.getCaseType() != null ? cases.getCaseType().getLabel() : "-");
+            try {
+                CaseInfoResponse caseInfo = casesService.getCaseInfo(caseId);
+                model.addAttribute("clientName", caseInfo.clientName());
+                model.addAttribute("attorneyName", caseInfo.attorneyName());
+                model.addAttribute("caseType", caseInfo.caseType());
+            } catch (Exception e) {
+                // Case not found or other error
+                model.addAttribute("clientName", "-");
+                model.addAttribute("attorneyName", "-");
+                model.addAttribute("caseType", "-");
+            }
         }
         model.addAttribute("request", request);
         model.addAttribute("caseId", caseId);
@@ -85,27 +83,18 @@ public class SettlementController {
     }
 
     @GetMapping("/{id}")
-    public String getSettlement(@PathVariable Long id, Model model) {
+    public String getSettlement(
+            @PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {
             SettlementResponse response = settlementService.getSettlement(id);
             model.addAttribute("settlement", response);
 
             if (response.getCaseId() != null) {
-                Cases cases =
-                        casesRepository
-                                .findById(response.getCaseId())
-                                .orElseThrow(
-                                        () -> new CasesException(CasesErrorCode.CASE_NOT_FOUND));
+                CaseInfoResponse caseInfo = casesService.getCaseInfo(response.getCaseId());
 
-                model.addAttribute(
-                        "clientName",
-                        cases.getClient() != null ? cases.getClient().getName() : "-");
-                model.addAttribute(
-                        "attorneyName",
-                        cases.getAttorney() != null ? cases.getAttorney().getName() : "-");
-                model.addAttribute(
-                        "caseType",
-                        cases.getCaseType() != null ? cases.getCaseType().getLabel() : "-");
+                model.addAttribute("clientName", caseInfo.clientName());
+                model.addAttribute("attorneyName", caseInfo.attorneyName());
+                model.addAttribute("caseType", caseInfo.caseType());
             } else {
                 model.addAttribute("clientName", "-");
                 model.addAttribute("attorneyName", "-");
@@ -116,13 +105,14 @@ public class SettlementController {
             model.addAttribute("paymentStatusRequest", new UpdatePaymentStatusRequest(null));
             return "projects/settlement/detail";
         } catch (Exception e) {
-            model.addAttribute("error", "정산 조회 중 오류가 발생했습니다: " + e.getMessage());
-            return "projects/settlement/list";
+            redirectAttributes.addFlashAttribute("error", "정산 조회 중 오류가 발생했습니다: " + e.getMessage());
+            return "redirect:/settlements";
         }
     }
 
     @GetMapping("/{id}/edit")
-    public String editSettlementForm(@PathVariable Long id, Model model) {
+    public String editSettlementForm(
+            @PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {
             SettlementResponse settlement = settlementService.getSettlement(id);
 
@@ -151,28 +141,12 @@ public class SettlementController {
             request.setCaseId(caseId);
 
             if (caseId != null) {
-                Cases cases =
-                        casesRepository
-                                .findById(caseId)
-                                .orElseThrow(
-                                        () -> new CasesException(CasesErrorCode.CASE_NOT_FOUND));
+                CaseInfoResponse caseInfo = casesService.getCaseInfo(caseId);
 
-                model.addAttribute(
-                        "caseNumber",
-                        cases.getCaseNumber()); // 주의: Cases의 caseNumber 필드 사용 (또는 C+ID)
-                // 하지만 기존 form.html은 caseNumber를 모델 attribute로 받음.
-                // Cases 엔티티의 caseNumber 필드는 null일 수 있으므로 C+ID로 통일하는 것이 좋음.
-                model.addAttribute("caseNumber", "C" + cases.getId());
-
-                model.addAttribute(
-                        "clientName",
-                        cases.getClient() != null ? cases.getClient().getName() : "-");
-                model.addAttribute(
-                        "attorneyName",
-                        cases.getAttorney() != null ? cases.getAttorney().getName() : "-");
-                model.addAttribute(
-                        "caseType",
-                        cases.getCaseType() != null ? cases.getCaseType().getLabel() : "-");
+                model.addAttribute("caseNumber", "C" + caseId);
+                model.addAttribute("clientName", caseInfo.clientName());
+                model.addAttribute("attorneyName", caseInfo.attorneyName());
+                model.addAttribute("caseType", caseInfo.caseType());
             }
 
             model.addAttribute("request", request);
@@ -180,8 +154,8 @@ public class SettlementController {
 
             return "projects/settlement/edit";
         } catch (Exception e) {
-            model.addAttribute("error", "정산 조회 중 오류가 발생했습니다: " + e.getMessage());
-            return "projects/settlement/list";
+            redirectAttributes.addFlashAttribute("error", "정산 조회 중 오류가 발생했습니다: " + e.getMessage());
+            return "redirect:/settlements";
         }
     }
 
@@ -195,7 +169,7 @@ public class SettlementController {
             if (response.getSettlementStatus() != SettlementStatus.FINAL) {
                 return "redirect:/settlements";
             }
-            return "redirect:/settlements/" + id + "?updated";
+            return "redirect:/settlements/" + id;
         } catch (Exception e) {
             model.addAttribute("error", "정산 수정 중 오류가 발생했습니다: " + e.getMessage());
             return "projects/settlement/edit";

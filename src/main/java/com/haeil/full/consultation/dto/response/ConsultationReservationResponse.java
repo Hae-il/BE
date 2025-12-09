@@ -23,6 +23,7 @@ public class ConsultationReservationResponse {
     private String rejectReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long consultationId;
 
     public static ConsultationReservationResponse from(
             ConsultationReservation consultationReservation) {
@@ -46,5 +47,9 @@ public class ConsultationReservationResponse {
                 .createdAt(consultationReservation.getCreatedDate())
                 .updatedAt(consultationReservation.getModifiedDate())
                 .build();
+    }
+
+    public void setConsultationId(Long consultationId) {
+        this.consultationId = consultationId;
     }
 }
